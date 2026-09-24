@@ -1,0 +1,6 @@
+[
+  { "id": "btc",  "coin": "Bitcoin",  "ticker": "BTC",  "network": "Bitcoin",        "address": "1KsLBMV4Yp9EdMxqPE3UM8Jx8DNCMq9d8A" },
+  { "id": "usdt", "coin": "Tether",   "ticker": "USDT", "network": "TRON (TRC20)",   "address": "TV1XE2FipMbG5JPdS9BSRkQnBqHv6ndv2a" },
+  { "id": "usdc", "coin": "USD Coin", "ticker": "USDC", "network": "Ethereum (ERC20)", "address": "0x8d420925562d04b0f0dd318e4cbf661b213c1d4a" },
+  { "id": "ltc",  "coin": "Litecoin", "ticker": "LTC",  "network": "Litecoin",       "address": "LbMF1rvm9n2idxTzZzJFv4aXKcXUnF1fjR" }
+]

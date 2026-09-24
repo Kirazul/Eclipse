@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Eclipse - A free wardrobe for World of Warcraft</title>
+  <meta name="description" content="Eclipse is a free overlay for the World of Warcraft 3.3.5a client. Every appearance, mount, spell and title in the game, on your own character.">
+  <meta name="theme-color" content="#141413">
+  <meta name="color-scheme" content="dark">
+  <link rel="canonical" href="https://kirazul.github.io/Eclipse/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Eclipse">
+  <meta property="og:title" content="Eclipse - A free wardrobe for World of Warcraft">
+  <meta property="og:description" content="Every appearance, mount, spell and title in the game, on your own character. Free, for the 3.3.5a client.">
+  <meta property="og:url" content="https://kirazul.github.io/Eclipse/">
+  <meta property="og:image" content="https://kirazul.github.io/Eclipse/assets/img/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://kirazul.github.io/Eclipse/assets/img/og-image.jpg">
+
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/icon-32.png">
+  <link rel="apple-touch-icon" href="assets/img/icon-180.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/newsreader-display.woff2" as="font" type="font/woff2" crossorigin>
+  <!--
+    The hero art is preloaded with the same srcset and sizes as its <picture>,
+    so it is one download. The art covers the first screen, so its rendered
+    width is max(100vw, 100vh x aspect); sizes is that times the 1.1 the art is
+    drawn at, so its slow zoom has room to move.
+    Aspect: 16:9 for the art, 0.61991 for the portrait crop.
+  -->
+  <link rel="preload" as="image" type="image/avif" fetchpriority="high" media="(min-aspect-ratio: 4/5)"
+        imagesrcset="assets/img/bg-wide-960.avif 960w, assets/img/bg-wide-1440.avif 1440w, assets/img/bg-wide-1920.avif 1920w, assets/img/bg-wide-2560.avif 2560w, assets/img/bg-wide-3200.avif 3200w, assets/img/bg-wide-3840.avif 3840w"
+        imagesizes="max(106vw, 188.44vh)">
+  <link rel="preload" as="image" type="image/avif" fetchpriority="high" media="(max-aspect-ratio: 4/5)"
+        imagesrcset="assets/img/bg-tall-640.avif 640w, assets/img/bg-tall-960.avif 960w, assets/img/bg-tall-1339.avif 1339w"
+        imagesizes="max(106vw, 65.71vh)">
+
+  <style>
+    /* Critical: the blurred placeholder paints with the HTML. */
+    html { background: #141413; }
+    /* @lqip */
+    .hero__plate { background: #1c2a30 url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAwICQsJCAwLCgsODQwOEh4UEhEREiUbHBYeLCcuLisnKyoxN0Y7MTRCNCorPVM+QkhKTk9OLztWXFVMW0ZNTkv/2wBDAQ0ODhIQEiQUFCRLMisyS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0v/wAARCAASACADASIAAhEBAxEB/8QAGgAAAgIDAAAAAAAAAAAAAAAAAAQBBQIDBv/EACIQAAEDBAIDAQEAAAAAAAAAAAEAAgMEBREhEkEyM1ExYf/EABcBAAMBAAAAAAAAAAAAAAAAAAABBAX/xAAdEQACAQUBAQAAAAAAAAAAAAABAgADERMhMTIE/9oADAMBAAIRAxEAPwBWjt0dSwEAYP4ttRQstVPLNkh7vF3HOAqKlrpHAsEhjI1nOMq3juTXwMpZXCRgJa8Z2Vnsrg91NnIHXUdo6eO729jZXEyReLuONfP6k57W2ElpUTXFsFGafkI29b23Pxc/UXSq5GB0mGjeTtCI7E2NhDIKYs0UpfW49p62+2Q9/UIVb8Mjo+hMbvtzc/FVVZPJu+kITp8EX0ezP//Z") center / 100% 100% no-repeat; }
+    @media (max-aspect-ratio: 4/5) {
+      .hero__plate { background-image: url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAwICQsJCAwLCgsODQwOEh4UEhEREiUbHBYeLCcuLisnKyoxN0Y7MTRCNCorPVM+QkhKTk9OLztWXFVMW0ZNTkv/2wBDAQ0ODhIQEiQUFCRLMisyS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0v/wAARCAAaABADASIAAhEBAxEB/8QAGAAAAgMAAAAAAAAAAAAAAAAAAgUAAwT/xAAmEAACAQUAAAQHAAAAAAAAAAABAhEAAwQFIQYSInETFDEyQWGh/8QAFgEBAQEAAAAAAAAAAAAAAAAABQID/8QAGxEAAgIDAQAAAAAAAAAAAAAAARIAAhETQSH/2gAMAwEAAhEDEQA/AKBiNrMAOiBrrzPqhgI4a2a5G2evfGvqIVJtuWlm79fag8RYqZKutgu15eqF/A/dDosVbFtrjO/zKA+gn7gYMD+0WbA0bsXOW8izG2fxMhLlpmkqQ596O7liyFD3DAEeaeiluvEY4jnamxANrva3QNiULHW/Z//Z"); }
+    }
+    /* /@lqip */
+  </style>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>document.documentElement.classList.add("js")</script>
+  <script defer src="assets/js/main.js"></script>
+</head>
+<body>
+<!-- @sprite --><svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol><symbol id="i-shirt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></symbol><symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol><symbol id="i-wind" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></symbol><symbol id="i-ghost" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/></symbol><symbol id="i-sword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/></symbol><symbol id="i-paw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></symbol><symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.14 1.58a.5.5 0 0 1 0 .96l-6.14 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></symbol><symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol><symbol id="i-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11.56 3.27a.5.5 0 0 1 .88 0l2.95 5.6a1 1 0 0 0 1.52.3l4.27-3.67a.5.5 0 0 1 .8.52l-2.83 10.25a1 1 0 0 1-.96.73H5.81a1 1 0 0 1-.96-.73L2.02 6.02a.5.5 0 0 1 .8-.52l4.27 3.67a1 1 0 0 0 1.52-.3z"/><path d="M5 21h14"/></symbol><symbol id="i-feather" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.67 19a2 2 0 0 0 1.42-.59l6.15-6.17a6 6 0 0 0-8.49-8.49L5.59 9.91A2 2 0 0 0 5 11.33V18a1 1 0 0 0 1 1z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/></symbol><symbol id="i-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></symbol><symbol id="i-mountain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></symbol><symbol id="i-type" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></symbol><symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol><symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol><symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol><symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol><symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol><symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></symbol><symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="currentColor"><path d="M11.52 2.3a.53.53 0 0 1 .95 0l2.31 4.68a2.12 2.12 0 0 0 1.6 1.16l5.16.76a.53.53 0 0 1 .3.9l-3.74 3.64a2.12 2.12 0 0 0-.61 1.88l.88 5.14a.53.53 0 0 1-.77.56l-4.62-2.43a2.12 2.12 0 0 0-1.97 0L6.4 21.01a.53.53 0 0 1-.77-.56l.88-5.14a2.12 2.12 0 0 0-.61-1.88L2.16 9.8a.53.53 0 0 1 .3-.9l5.16-.76a2.12 2.12 0 0 0 1.6-1.16z"/></symbol><symbol id="i-discord" viewBox="0 0 24 24"><path fill="currentColor" d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></symbol><symbol id="i-kofi" viewBox="0 0 24 24"><path fill="currentColor" d="M11.351 2.715c-2.7 0-4.986.025-6.83.26C2.078 3.285 0 5.154 0 8.61c0 3.506.182 6.13 1.585 8.493 1.584 2.701 4.233 4.182 7.662 4.182h.83c4.209 0 6.494-2.234 7.637-4a9.5 9.5 0 0 0 1.091-2.338C21.792 14.688 24 12.22 24 9.208v-.415c0-3.247-2.13-5.507-5.792-5.87-1.558-.156-2.65-.208-6.857-.208m0 1.947c4.208 0 5.09.052 6.571.182 2.624.311 4.13 1.584 4.13 4v.39c0 2.156-1.792 3.844-3.87 3.844h-.935l-.156.649c-.208 1.013-.597 1.818-1.039 2.546-.909 1.428-2.545 3.064-5.922 3.064h-.805c-2.571 0-4.831-.883-6.078-3.195-1.09-2-1.298-4.155-1.298-7.506 0-2.181.857-3.402 3.012-3.714 1.533-.233 3.559-.26 6.39-.26m6.547 2.287c-.416 0-.65.234-.65.546v2.935c0 .311.234.545.65.545 1.324 0 2.051-.754 2.051-2s-.727-2.026-2.052-2.026m-10.39.182c-1.818 0-3.013 1.48-3.013 3.142 0 1.533.858 2.857 1.949 3.897.727.701 1.87 1.429 2.649 1.896a1.47 1.47 0 0 0 1.507 0c.78-.467 1.922-1.195 2.623-1.896 1.117-1.039 1.974-2.364 1.974-3.897 0-1.662-1.247-3.142-3.039-3.142-1.065 0-1.792.545-2.338 1.298-.493-.753-1.246-1.298-2.312-1.298"/></symbol><symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol><symbol id="i-drive" viewBox="0 0 24 24"><path fill="currentColor" d="M12.01 1.485c-2.082 0-3.754.02-3.743.047.01.02 1.708 3.001 3.774 6.62l3.76 6.574h3.76c2.081 0 3.753-.02 3.742-.047-.005-.02-1.708-3.001-3.775-6.62l-3.76-6.574zm-4.76 1.73a789.828 789.861 0 0 0-3.63 6.319L0 15.868l1.89 3.298 1.885 3.297 3.62-6.335 3.618-6.33-1.88-3.287C8.1 4.704 7.255 3.22 7.25 3.214zm2.259 12.653-.203.348c-.114.198-.96 1.672-1.88 3.287a423.93 423.948 0 0 1-1.698 2.97c-.01.026 3.24.042 7.222.042h7.244l1.796-3.157c.992-1.734 1.85-3.23 1.906-3.323l.104-.167h-7.249z"/></symbol><symbol id="c-btc" viewBox="0 0 32 32"><g fill="none" fill-rule="evenodd"><circle cx="16" cy="16" r="16" fill="#F7931A"/><path fill="#FFF" fill-rule="nonzero" d="M23.189 14.02c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6l-.708 2.839c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.183-.045-1.13 4.532c-.086.212-.303.531-.793.41.018.025-1.256-.313-1.256-.313l-.858 1.978 2.25.561c.418.105.828.215 1.231.318l-.715 2.872 1.727.43.708-2.84c.472.127.93.245 1.378.357l-.706 2.828 1.728.43.715-2.866c2.948.558 5.164.333 6.097-2.333.752-2.146-.037-3.385-1.588-4.192 1.13-.26 1.98-1.003 2.207-2.538zm-3.95 5.538c-.533 2.147-4.148.986-5.32.695l.95-3.805c1.172.293 4.929.872 4.37 3.11zm.535-5.569c-.487 1.953-3.495.96-4.47.717l.86-3.45c.975.243 4.118.696 3.61 2.733z"/></g></symbol><symbol id="c-ltc" viewBox="0 0 32 32"><g fill="none" fill-rule="evenodd"><circle cx="16" cy="16" r="16" fill="#345D9D"/><path fill="#FFF" d="M10.427 19.214L9 19.768l.688-2.759 1.444-.58L13.213 8h5.129l-1.519 6.196 1.41-.571-.68 2.75-1.427.571-.848 3.483H23L22.127 24H9.252z"/></g></symbol><symbol id="c-usdt" viewBox="0 0 32 32"><g fill="none" fill-rule="evenodd"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path fill="#FFF" d="M17.922 17.383v-.002c-.11.008-.677.042-1.942.042-1.01 0-1.721-.03-1.971-.042v.003c-3.888-.171-6.79-.848-6.79-1.658 0-.809 2.902-1.486 6.79-1.66v2.644c.254.018.982.061 1.988.061 1.207 0 1.812-.05 1.925-.06v-2.643c3.88.173 6.775.85 6.775 1.658 0 .81-2.895 1.485-6.775 1.657m0-3.59v-2.366h5.414V7.819H8.595v3.608h5.414v2.365c-4.4.202-7.709 1.074-7.709 2.118 0 1.044 3.309 1.915 7.709 2.118v7.582h3.913v-7.584c4.393-.202 7.694-1.073 7.694-2.116 0-1.043-3.301-1.914-7.694-2.117"/></g></symbol><symbol id="c-usdc" viewBox="0 0 32 32"><g fill="none"><circle fill="#3E73C4" cx="16" cy="16" r="16"/><g fill="#FFF"><path d="M20.022 18.124c0-2.124-1.28-2.852-3.84-3.156-1.828-.243-2.193-.728-2.193-1.578 0-.85.61-1.396 1.828-1.396 1.097 0 1.707.364 2.011 1.275a.458.458 0 00.427.303h.975a.416.416 0 00.427-.425v-.06a3.04 3.04 0 00-2.743-2.489V9.142c0-.243-.183-.425-.487-.486h-.915c-.243 0-.426.182-.487.486v1.396c-1.829.242-2.986 1.456-2.986 2.974 0 2.002 1.218 2.791 3.778 3.095 1.707.303 2.255.668 2.255 1.639 0 .97-.853 1.638-2.011 1.638-1.585 0-2.133-.667-2.316-1.578-.06-.242-.244-.364-.427-.364h-1.036a.416.416 0 00-.426.425v.06c.243 1.518 1.219 2.61 3.23 2.914v1.457c0 .242.183.425.487.485h.915c.243 0 .426-.182.487-.485V21.34c1.829-.303 3.047-1.578 3.047-3.217z"/><path d="M12.892 24.497c-4.754-1.7-7.192-6.98-5.424-11.653.914-2.55 2.925-4.491 5.424-5.402.244-.121.365-.303.365-.607v-.85c0-.242-.121-.424-.365-.485-.061 0-.183 0-.244.06a10.895 10.895 0 00-7.13 13.717c1.096 3.4 3.717 6.01 7.13 7.102.244.121.488 0 .548-.243.061-.06.061-.122.061-.243v-.85c0-.182-.182-.424-.365-.546zm6.46-18.936c-.244-.122-.488 0-.548.242-.061.061-.061.122-.061.243v.85c0 .243.182.485.365.607 4.754 1.7 7.192 6.98 5.424 11.653-.914 2.55-2.925 4.491-5.424 5.402-.244.121-.365.303-.365.607v.85c0 .242.121.424.365.485.061 0 .183 0 .244-.06a10.895 10.895 0 007.13-13.717c-1.096-3.46-3.778-6.07-7.13-7.162z"/></g></g></symbol></svg><!-- /@sprite -->
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar" data-bar>
+  <div class="bar__inner">
+    <a class="brand" href="#top" aria-label="Eclipse home">
+      <img src="assets/img/logo-320.webp" width="28" height="28" alt="">
+      <span>Eclipse</span>
+    </a>
+    <nav class="bar__nav" aria-label="Primary">
+      <a href="#features">Features</a>
+      <a href="#download">Download</a>
+      <a href="#support">Support</a>
+    </nav>
+    <div class="bar__actions">
+      <a class="icon-btn" href="https://github.com/Kirazul/Eclipse" target="_blank" rel="noopener" aria-label="Eclipse on GitHub">
+        <svg><use href="#i-github"/></svg>
+      </a>
+      <a class="btn btn--primary btn--sm" href="https://discord.gg/RvY5VjHgTA" target="_blank" rel="noopener">
+        <svg><use href="#i-discord"/></svg><span>Join Discord</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- The first screen: the world behind, title, actions, and the whole video. -->
+  <section class="hero" id="top">
+    <div class="hero__bg" aria-hidden="true">
+      <div class="hero__plate">
+        <picture>
+          <source media="(max-aspect-ratio: 4/5)" type="image/avif" sizes="max(106vw, 65.71vh)"
+                  srcset="assets/img/bg-tall-640.avif 640w, assets/img/bg-tall-960.avif 960w, assets/img/bg-tall-1339.avif 1339w">
+          <source media="(max-aspect-ratio: 4/5)" type="image/webp" sizes="max(106vw, 65.71vh)"
+                  srcset="assets/img/bg-tall-640.webp 640w, assets/img/bg-tall-960.webp 960w, assets/img/bg-tall-1339.webp 1339w">
+          <source type="image/avif" sizes="max(106vw, 188.44vh)"
+                  srcset="assets/img/bg-wide-960.avif 960w, assets/img/bg-wide-1440.avif 1440w, assets/img/bg-wide-1920.avif 1920w, assets/img/bg-wide-2560.avif 2560w, assets/img/bg-wide-3200.avif 3200w, assets/img/bg-wide-3840.avif 3840w">
+          <source type="image/webp" sizes="max(106vw, 188.44vh)"
+                  srcset="assets/img/bg-wide-960.webp 960w, assets/img/bg-wide-1440.webp 1440w, assets/img/bg-wide-1920.webp 1920w, assets/img/bg-wide-2560.webp 2560w, assets/img/bg-wide-3200.webp 3200w, assets/img/bg-wide-3840.webp 3840w">
+          <img class="hero__art" src="assets/img/bg-wide-1920.webp" width="1920" height="1080" alt="" fetchpriority="high" decoding="async">
+        </picture>
+      </div>
+      <canvas class="hero__snow"></canvas>
+    </div>
+
+    <div class="wrap hero__text">
+      <h1>A wardrobe for <span class="flow-text">World of Warcraft</span></h1>
+      <p><span class="flow-text flow-text--strong">Eclipse</span> is a free overlay for the 3.3.5a client. Every appearance, mount, spell and title in the game, on your own character.</p>
+      <div class="cta">
+        <a class="btn btn--primary" href="#download">Download</a>
+        <a class="btn btn--ghost" href="#features">Explore features</a>
+      </div>
+    </div>
+
+    <div class="wrap hero__stage" id="showcase">
+      <div class="player" data-player data-youtube-id="">
+        <div class="player__poster">
+          <span class="player__mark"><svg><use href="#i-play"/></svg></span>
+          <p>Showcase video coming soon</p>
+        </div>
+        <button class="player__play" type="button" aria-label="Play the showcase video" hidden>
+          <svg><use href="#i-play"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="wrap">
+      <header class="section__head">
+        <h2>Everything in one overlay</h2>
+        <p>Press <kbd>F2</kbd> in game to open it. The key can be changed in Settings.</p>
+      </header>
+      <div class="features">
+        <article><h3>Wardrobe</h3><p>Every item appearance and set in the game, previewed on your character before you wear it.</p></article>
+        <article><h3>Customization</h3><p>Race, sex, skin, hair and face, with custom colours for skin, hair and eyes.</p></article>
+        <article><h3>Mounts</h3><p>Every mount, shown at full size. Browse the list or let the randomizer choose.</p></article>
+        <article><h3>Creature morph</h3><p>Take the form of any creature the client can render.</p></article>
+        <article><h3>Enchants</h3><p>Any enchant effect on either weapon, and a colour of your choice for each weapon slot.</p></article>
+        <article><h3>Incarnations</h3><p>Druid forms, warlock demons, hunter pets, ammunition and hearthstones.</p></article>
+        <article><h3>Spell visuals</h3><p>Give any of your spells or auras the visuals of another, and recolour them.</p></article>
+        <article><h3>Procs</h3><p>Change how an aura looks, or how a spell looks while an aura is active.</p></article>
+        <article><h3>Optimize</h3><p>Hide other players&rsquo; spell effects in raids for a higher frame rate. Boss mechanics are always shown.</p></article>
+        <article><h3>Titles</h3><p>Any title on your name, or text of your own, in the colours you choose.</p></article>
+        <article><h3>Effects</h3><p>3D models such as wings and capes, attached to your character and animated.</p></article>
+        <article><h3>Colour</h3><p>Recolour units and the world around you, and outline units by type.</p></article>
+        <article><h3>World</h3><p>Time of day, weather, sky, fog, draw distance and field of view.</p></article>
+        <article><h3>Font</h3><p>Sharp text at any resolution, and restyled floating combat text.</p></article>
+        <article><h3>Loadouts</h3><p>Save complete looks, share them as a code, and assign one to each specialization.</p></article>
+        <article><h3>Multiplayer</h3><p>Other Eclipse users see your look, and you see theirs. You choose what is shared.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="download">
+    <div class="wrap">
+      <div class="panel download">
+        <div class="download__intro">
+          <h2>Download Eclipse</h2>
+          <p>Includes the retail asset pack: items, mounts, fonts, effects and spells.</p>
+          <a class="btn btn--primary" href="https://drive.google.com/file/d/1UuOb9tl43sohg41_gV2z82WAgIKBLhXF/view?usp=sharing" target="_blank" rel="noopener">
+            <svg><use href="#i-download"/></svg><span>Download Eclipse.zip</span>
+          </a>
+          <p class="fine">Google Drive &middot; Windows &middot; World of Warcraft 3.3.5a (12340)</p>
+        </div>
+        <ol class="steps">
+          <li><h3>Extract</h3><p>Unzip <code>Eclipse.zip</code> anywhere.</p></li>
+          <li><h3>Copy</h3><p>Place <code>dinput8.dll</code> and the <code>Eclipse</code> folder next to <code>Wow.exe</code>.</p></li>
+          <li><h3>Play</h3><p>Start the game, enter the world and press <kbd>F2</kbd>.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="support">
+    <div class="wrap">
+      <header class="section__head section__head--center">
+        <h2>Eclipse is free</h2>
+        <p>There is no price and there never will be. If it has earned a place in your game, you can help keep it going.</p>
+      </header>
+      <div class="support">
+        <a class="slink" href="https://ko-fi.com/eclipsewow" target="_blank" rel="noopener">
+          <span class="slink__icon slink__icon--kofi"><svg><use href="#i-kofi"/></svg></span>
+          <span class="slink__text"><strong>Ko-fi</strong><span>Support development</span></span>
+          <svg class="slink__arrow"><use href="#i-arrow"/></svg>
+        </a>
+        <a class="slink" href="https://github.com/Kirazul/Eclipse" target="_blank" rel="noopener">
+          <span class="slink__icon slink__icon--star"><svg><use href="#i-star"/></svg></span>
+          <span class="slink__text"><strong>Star on GitHub</strong><span>Free, and it helps others find Eclipse</span></span>
+          <svg class="slink__arrow"><use href="#i-arrow"/></svg>
+        </a>
+        <a class="slink" href="https://discord.gg/RvY5VjHgTA" target="_blank" rel="noopener">
+          <span class="slink__icon slink__icon--discord"><svg><use href="#i-discord"/></svg></span>
+          <span class="slink__text"><strong>Discord</strong><span>Updates, help and showcases</span></span>
+          <svg class="slink__arrow"><use href="#i-arrow"/></svg>
+        </a>
+      </div>
+      <div class="wallets" data-wallets></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__inner">
+    <a class="brand" href="#top">
+      <img src="assets/img/logo-320.webp" width="24" height="24" alt="">
+      <span>Eclipse</span>
+    </a>
+    <nav aria-label="Footer">
+      <a href="https://github.com/Kirazul/Eclipse" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://discord.gg/RvY5VjHgTA" target="_blank" rel="noopener">Discord</a>
+      <a href="https://ko-fi.com/eclipsewow" target="_blank" rel="noopener">Ko-fi</a>
+      <button type="button" class="linklike" data-open-support>Donate</button>
+    </nav>
+  </div>
+  <p class="wrap foot__legal">Eclipse is a free fan project and is not affiliated with Blizzard Entertainment. World of Warcraft and the artwork shown are property of Blizzard Entertainment, Inc.</p>
+</footer>
+
+<!-- SUPPORT DIALOG: opens on every visit. -->
+<dialog class="modal" id="support-modal" aria-labelledby="modal-title" tabindex="-1">
+  <div class="modal__head">
+    <img src="assets/img/logo-320.webp" width="56" height="56" alt="">
+    <h2 id="modal-title">Eclipse is free</h2>
+    <p>It has no price and it never will. If it has earned a place in your game, you can help keep it going.</p>
+  </div>
+  <div class="modal__links">
+    <a class="slink" href="https://discord.gg/RvY5VjHgTA" target="_blank" rel="noopener">
+      <span class="slink__icon slink__icon--discord"><svg><use href="#i-discord"/></svg></span>
+      <span class="slink__text"><strong>Join the Discord</strong><span>Updates, help and showcases</span></span>
+      <svg class="slink__arrow"><use href="#i-arrow"/></svg>
+    </a>
+    <a class="slink" href="https://ko-fi.com/eclipsewow" target="_blank" rel="noopener">
+      <span class="slink__icon slink__icon--kofi"><svg><use href="#i-kofi"/></svg></span>
+      <span class="slink__text"><strong>Support on Ko-fi</strong><span>Keep the project going</span></span>
+      <svg class="slink__arrow"><use href="#i-arrow"/></svg>
+    </a>
+    <a class="slink" href="https://github.com/Kirazul/Eclipse" target="_blank" rel="noopener">
+      <span class="slink__icon slink__icon--star"><svg><use href="#i-star"/></svg></span>
+      <span class="slink__text"><strong>Star the repository</strong><span>Free, and it helps others find Eclipse</span></span>
+      <svg class="slink__arrow"><use href="#i-arrow"/></svg>
+    </a>
+  </div>
+  <div class="modal__crypto" data-wallets data-compact></div>
+  <form method="dialog" class="modal__foot">
+    <button class="btn btn--primary btn--block" value="continue">Continue to Eclipse</button>
+  </form>
+</dialog>
+
+<div class="toast" role="status" aria-live="polite" data-toast></div>
+
+<!-- Wallets: one source for the page and the dialog. Mirrors assets/wallets.json. -->
+<script type="application/json" id="wallets">[{"id":"btc","coin":"Bitcoin","ticker":"BTC","network":"Bitcoin","address":"1KsLBMV4Yp9EdMxqPE3UM8Jx8DNCMq9d8A"},{"id":"usdt","coin":"Tether","ticker":"USDT","network":"TRON (TRC20)","address":"TV1XE2FipMbG5JPdS9BSRkQnBqHv6ndv2a"},{"id":"usdc","coin":"USD Coin","ticker":"USDC","network":"Ethereum (ERC20)","address":"0x8d420925562d04b0f0dd318e4cbf661b213c1d4a"},{"id":"ltc","coin":"Litecoin","ticker":"LTC","network":"Litecoin","address":"LbMF1rvm9n2idxTzZzJFv4aXKcXUnF1fjR"}]</script>
+</body>
+</html>

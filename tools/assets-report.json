@@ -1,0 +1,57 @@
+{
+  "keyart": {
+    "width": 3840,
+    "height": 2160,
+    "aspect": 1.77778
+  },
+  "wide": {
+    "960": {
+      "avif": 40119,
+      "webp": 55304
+    },
+    "1440": {
+      "avif": 70051,
+      "webp": 93374
+    },
+    "1920": {
+      "avif": 101168,
+      "webp": 133720
+    },
+    "2560": {
+      "avif": 141287,
+      "webp": 185640
+    },
+    "3200": {
+      "avif": 181781,
+      "webp": 245090
+    },
+    "3840": {
+      "avif": 222918,
+      "webp": 303894
+    }
+  },
+  "tall": {
+    "640": {
+      "avif": 46296,
+      "webp": 67248
+    },
+    "960": {
+      "avif": 75354,
+      "webp": 104766
+    },
+    "1339": {
+      "avif": 109928,
+      "webp": 154860
+    }
+  },
+  "lqip_wide": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAwICQsJCAwLCgsODQwOEh4UEhEREiUbHBYeLCcuLisnKyoxN0Y7MTRCNCorPVM+QkhKTk9OLztWXFVMW0ZNTkv/2wBDAQ0ODhIQEiQUFCRLMisyS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0v/wAARCAASACADASIAAhEBAxEB/8QAGgAAAgIDAAAAAAAAAAAAAAAAAAQBBQIDBv/EACIQAAEDBAIDAQEAAAAAAAAAAAEAAgMEBREhEkEyM1ExYf/EABcBAAMBAAAAAAAAAAAAAAAAAAABBAX/xAAdEQACAQUBAQAAAAAAAAAAAAABAgADERMhMTIE/9oADAMBAAIRAxEAPwBWjt0dSwEAYP4ttRQstVPLNkh7vF3HOAqKlrpHAsEhjI1nOMq3juTXwMpZXCRgJa8Z2Vnsrg91NnIHXUdo6eO729jZXEyReLuONfP6k57W2ElpUTXFsFGafkI29b23Pxc/UXSq5GB0mGjeTtCI7E2NhDIKYs0UpfW49p62+2Q9/UIVb8Mjo+hMbvtzc/FVVZPJu+kITp8EX0ezP//Z",
+  "lqip_tall": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAwICQsJCAwLCgsODQwOEh4UEhEREiUbHBYeLCcuLisnKyoxN0Y7MTRCNCorPVM+QkhKTk9OLztWXFVMW0ZNTkv/2wBDAQ0ODhIQEiQUFCRLMisyS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0v/wAARCAAaABADASIAAhEBAxEB/8QAGAAAAgMAAAAAAAAAAAAAAAAAAgUAAwT/xAAmEAACAQUAAAQHAAAAAAAAAAABAhEAAwQFIQYSInETFDEyQWGh/8QAFgEBAQEAAAAAAAAAAAAAAAAABQID/8QAGxEAAgIDAQAAAAAAAAAAAAAAARIAAhETQSH/2gAMAwEAAhEDEQA/AKBiNrMAOiBrrzPqhgI4a2a5G2evfGvqIVJtuWlm79fag8RYqZKutgu15eqF/A/dDosVbFtrjO/zKA+gn7gYMD+0WbA0bsXOW8izG2fxMhLlpmkqQ596O7liyFD3DAEeaeiluvEY4jnamxANrva3QNiULHW/Z//Z",
+  "tall_aspect": 0.61991,
+  "logo_side": 1055,
+  "qr": [
+    "btc",
+    "usdt",
+    "usdc",
+    "ltc"
+  ]
+}

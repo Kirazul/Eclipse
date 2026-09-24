@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kirazul.github.io/Eclipse/sitemap.xml

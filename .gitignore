@@ -1,0 +1,11 @@
+# Build inputs too large or licensed to redistribute here; see README.
+source/*
+!source/logo.png
+
+# Local previews
+site/_*.html
+
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
