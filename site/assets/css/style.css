@@ -240,8 +240,13 @@ svg:not(.sprite) { width: 1.1em; height: 1.1em; flex: none; fill: currentColor; 
 }
 
 /* The art plate is drawn at exactly what `cover` would render over the hero,
-   times 1.06, and its slow zoom runs from 0.95 to 1.0 - at its smallest it
-   still covers the hero, and at its largest it is 6% over cover. */
+   times 1.06, and set at 0.97 - 1.4% over cover on each side. At rest it
+   only sways, left and right like the figure hovering, with a hint of tilt:
+   the 0.8% swing (of the plate) plus the tilt's corner swing stays inside
+   that 1.4%. The plate hangs --drop lower than centre so the face, which
+   sits in the top tenth of the art, clears the header; the strip that opens
+   above it is covered by the plate's own soft top edge fading into the
+   backdrop. */
 .hero__bg {
   position: absolute;
   inset: 0;
@@ -254,16 +259,19 @@ svg:not(.sprite) { width: 1.1em; height: 1.1em; flex: none; fill: currentColor; 
   --ch: max(56.25vw, var(--hh));
   --pw: calc(var(--cw) * 1.06);
   --ph: calc(var(--ch) * 1.06);
+  --drop: calc(var(--hh) * 0.06);
   position: absolute;
   left: 50%;
   top: 50%;
   width: var(--pw);
   height: var(--ph);
   margin-left: calc(var(--pw) / -2);
-  margin-top: calc(var(--ph) / -2);
-  transform: scale(0.95);
-  animation: drift 50s ease-in-out infinite alternate;
-  will-change: transform;
+  margin-top: calc(var(--ph) / -2 + var(--drop));
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 3.5%);
+  mask-image: linear-gradient(180deg, transparent, #000 3.5%);
+  scale: 0.97;
+  animation: sway 11s ease-in-out -5.5s infinite alternate;
+  will-change: transform, translate, rotate;
 }
 @media (max-aspect-ratio: 4/5) {
   .hero__plate {
@@ -275,11 +283,109 @@ svg:not(.sprite) { width: 1.1em; height: 1.1em; flex: none; fill: currentColor; 
 .hero__art { position: absolute; inset: 0; width: 100%; height: 100%; }
 .hero__art { object-fit: cover; opacity: 0; transition: opacity 1.2s var(--ease); }
 .hero__art.is-loaded { opacity: 1; }
-@keyframes drift {
-  from { transform: scale(0.95); }
-  to   { transform: scale(1); }
+@keyframes sway {
+  from { translate: -0.8% 0; rotate: -0.12deg; }
+  to   { translate: 0.8% 0;  rotate: 0.12deg; }
 }
-.hero__snow { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* Lightning, in two beats the script drives. .is-charging: the world slowly
+   pushes in, brightens and starts to tremble, harder towards the end. Then
+   .is-strike: it jolts left and right, blurs and flares twice, and eases
+   back to rest. Both ride on `transform`, on top of the sway, and hold the
+   plate near 1.03x, which buys 3% of overhang per side - the swings plus
+   the sway stay well inside it. Charge ends exactly where strike begins.
+   The veil thins with them so the light reaches the eye. */
+.hero__bg.is-charging .hero__plate {
+  animation:
+    sway 11s ease-in-out -5.5s infinite alternate,
+    charge 2.4s ease-in forwards;
+}
+.hero__bg.is-strike .hero__plate {
+  animation:
+    sway 11s ease-in-out -5.5s infinite alternate,
+    strike 1.1s ease-out;
+}
+.hero__bg.is-charging::after { animation: veil-charge 2.4s ease-in forwards; }
+.hero__bg.is-strike::after { animation: veil-flash 1.1s ease-out; }
+@keyframes charge {
+  0%   { transform: scale(1) translateX(0);          filter: blur(0) brightness(1) saturate(1); }
+  60%  { transform: scale(1.018) translateX(0);      filter: blur(0) brightness(1.06) saturate(1.06); }
+  68%  { transform: scale(1.021) translateX(0.08%);  filter: blur(0) brightness(1.07) saturate(1.07); }
+  74%  { transform: scale(1.023) translateX(-0.1%);  filter: blur(0) brightness(1.08) saturate(1.08); }
+  80%  { transform: scale(1.025) translateX(0.14%);  filter: blur(0.3px) brightness(1.1) saturate(1.1); }
+  85%  { transform: scale(1.026) translateX(-0.18%); filter: blur(0.4px) brightness(1.11) saturate(1.1); }
+  90%  { transform: scale(1.028) translateX(0.22%);  filter: blur(0.6px) brightness(1.13) saturate(1.12); }
+  95%  { transform: scale(1.029) translateX(-0.26%); filter: blur(0.8px) brightness(1.14) saturate(1.12); }
+  100% { transform: scale(1.03) translateX(0);       filter: blur(1px) brightness(1.15) saturate(1.15); }
+}
+@keyframes strike {
+  0%   { transform: scale(1.03) translateX(0);       filter: blur(1px) brightness(1.15) saturate(1.15); }
+  5%   { transform: scale(1.03) translateX(-1%);     filter: blur(4px) brightness(1.75) saturate(1.3); }
+  12%  { transform: scale(1.03) translateX(0.8%);    filter: blur(2px) brightness(1.15) saturate(1.1); }
+  19%  { transform: scale(1.03) translateX(-0.6%);   filter: blur(3.5px) brightness(1.6) saturate(1.25); }
+  30%  { transform: scale(1.03) translateX(0.35%);   filter: blur(1.5px) brightness(1.12) saturate(1.08); }
+  50%  { transform: scale(1.02) translateX(-0.1%);   filter: blur(0.5px) brightness(1.04) saturate(1.02); }
+  100% { transform: scale(1) translateX(0);          filter: blur(0) brightness(1) saturate(1); }
+}
+@keyframes veil-charge {
+  from { opacity: 1; }
+  to   { opacity: 0.85; }
+}
+@keyframes veil-flash {
+  0%       { opacity: 0.85; }
+  5%       { opacity: 0.45; }
+  12%      { opacity: 0.85; }
+  19%      { opacity: 0.55; }
+  35%      { opacity: 0.92; }
+  100%     { opacity: 1; }
+}
+
+/* Light from the halo behind the figure: a warm bloom that swells and
+   settles, and faint rays that sway a few degrees either way. Both ride on
+   the plate, so they stay pinned to the art as it moves. */
+.hero__glow,
+.hero__rays { position: absolute; pointer-events: none; mix-blend-mode: screen; }
+.hero__glow {
+  inset: 0;
+  background:
+    radial-gradient(ellipse 26% 22% at 50.5% 14%, rgba(255, 186, 92, 0.55), rgba(255, 128, 42, 0.16) 50%, transparent 72%),
+    radial-gradient(ellipse 60% 45% at 50.5% 19%, rgba(255, 120, 40, 0.14), transparent 70%);
+  opacity: 0.35;
+  transform-origin: 50.5% 14%;
+  animation: bloom 7s ease-in-out infinite alternate;
+  transition: filter 0.9s ease-out;
+}
+.hero__bg.is-charging .hero__glow { filter: brightness(1.9); transition: filter 2.4s ease-in; }
+@keyframes bloom {
+  from { opacity: 0.3; transform: scale(0.96); }
+  to   { opacity: 0.8; transform: scale(1.05); }
+}
+.hero__rays {
+  left: 50.5%;
+  top: 14%;
+  width: 220%;
+  aspect-ratio: 1;
+  background:
+    repeating-conic-gradient(from 3deg, transparent 0deg, rgba(255, 196, 120, 0.09) 2.5deg, transparent 5deg 11deg),
+    repeating-conic-gradient(from 0deg, transparent 0deg, rgba(255, 150, 70, 0.07) 3.5deg, transparent 7deg 17deg);
+  -webkit-mask-image: radial-gradient(circle closest-side, transparent 2%, #000 9%, rgba(0, 0, 0, 0.55) 26%, transparent 52%);
+  mask-image: radial-gradient(circle closest-side, transparent 2%, #000 9%, rgba(0, 0, 0, 0.55) 26%, transparent 52%);
+  transform: translate(-50%, -50%) rotate(-3deg);
+  animation: ray-sway 23s ease-in-out infinite alternate, shimmer 9s ease-in-out infinite alternate;
+}
+@keyframes ray-sway {
+  from { transform: translate(-50%, -50%) rotate(-3deg); }
+  to   { transform: translate(-50%, -50%) rotate(3deg); }
+}
+@keyframes shimmer {
+  from { opacity: 0.45; }
+  to   { opacity: 1; }
+}
+
+.hero__ash,
+.hero__fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* Embers and glints sit above the dimming veil so they read as light. */
+.hero__fx { z-index: 1; }
 /* Dim enough for type to sit on the art, and meeting the page colour at the
    bottom edge so the hero ends without a seam. */
 .hero__bg::after {
@@ -288,8 +394,8 @@ svg:not(.sprite) { width: 1.1em; height: 1.1em; flex: none; fill: currentColor; 
   inset: 0;
   background:
     linear-gradient(180deg,
-      rgba(20, 20, 19, 0.78) 0%,
-      rgba(20, 20, 19, 0.52) 30%,
+      rgba(20, 20, 19, 0.7) 0%,
+      rgba(20, 20, 19, 0.5) 30%,
       rgba(20, 20, 19, 0.46) 60%,
       rgba(20, 20, 19, 0.78) 88%,
       var(--bg) 100%);
@@ -597,7 +703,7 @@ svg:not(.sprite) { width: 1.1em; height: 1.1em; flex: none; fill: currentColor; 
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .hero__snow { display: none; }
+  .hero__ash, .hero__fx { display: none; }
 }
 
 /* ==========================================================================

@@ -25,37 +25,94 @@
   }
 
   /* ------------------------------------------------------------------------
-     Snow over the hero art. One pre-rendered soft sprite, three depths,
-     density by area. It only runs while the hero is on screen.
+     Life over the hero art, from one frame loop. Under the veil, ash: dark
+     shards and a few warm motes caught in the vortex the art paints around
+     the eclipse, circling it and slowly flung outwards. Above the veil,
+     embers that rise and flicker out, and the odd glint that flares on the
+     art. It only runs while the hero is on screen.
      ------------------------------------------------------------------------ */
-  const canvas = $(".hero__snow");
+  const canvas = $(".hero__ash");
+  const fxCanvas = $(".hero__fx");
   if (canvas && !reduceMotion) {
     const ctx = canvas.getContext("2d");
-    const sprite = document.createElement("canvas");
-    const S = 48;
-    sprite.width = sprite.height = S;
-    const sctx = sprite.getContext("2d");
-    const g = sctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
-    g.addColorStop(0, "rgba(255,255,255,1)");
-    g.addColorStop(0.4, "rgba(240,248,255,0.6)");
-    g.addColorStop(1, "rgba(240,248,255,0)");
-    sctx.fillStyle = g;
-    sctx.fillRect(0, 0, S, S);
+    const fx = fxCanvas ? fxCanvas.getContext("2d") : null;
 
-    let W = 0, H = 0, dpr = 1, flakes = [], last = 0, visible = true, raf = 0;
+    const makeSprite = (S, paint) => {
+      const c = document.createElement("canvas");
+      c.width = c.height = S;
+      paint(c.getContext("2d"), S);
+      return c;
+    };
+    const radial = (c, S, stops) => {
+      const g = c.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+      stops.forEach(([o, col]) => g.addColorStop(o, col));
+      c.fillStyle = g;
+      c.fillRect(0, 0, S, S);
+    };
+    // Ash: a soft oval, drawn stretched along its path so it reads as a
+    // streak of debris like the ones in the painting.
+    const shardSprite = makeSprite(32, (c, S) => radial(c, S, [
+      [0, "rgba(22,9,5,1)"], [0.55, "rgba(30,12,6,0.75)"], [1, "rgba(30,12,6,0)"]]));
+    const moteSprite = makeSprite(32, (c, S) => radial(c, S, [
+      [0, "rgba(255,196,120,0.9)"], [0.35, "rgba(255,140,60,0.4)"], [1, "rgba(255,120,40,0)"]]));
+    const emberSprite = makeSprite(48, (c, S) => radial(c, S, [
+      [0, "rgba(255,246,214,1)"], [0.14, "rgba(255,200,98,0.95)"], [0.4, "rgba(255,122,34,0.35)"], [1, "rgba(255,90,20,0)"]]));
+    // A four-point star: a round core and two long, thin streaks.
+    const glintSprite = makeSprite(96, (c, S) => {
+      radial(c, S, [[0, "rgba(255,250,232,1)"], [0.08, "rgba(255,226,160,0.8)"], [0.22, "rgba(255,170,80,0.12)"], [0.5, "rgba(255,170,80,0)"]]);
+      for (const flat of [[1, 0.045], [0.045, 1]]) {
+        c.save();
+        c.translate(S / 2, S / 2);
+        c.scale(flat[0], flat[1]);
+        c.translate(-S / 2, -S / 2);
+        radial(c, S, [[0, "rgba(255,248,225,0.95)"], [0.35, "rgba(255,214,140,0.35)"], [1, "rgba(255,190,110,0)"]]);
+        c.restore();
+      }
+    });
 
-    const spawn = (anywhere) => {
+    // `boost` eases up while the world charges and peaks on the strike;
+    // the ash spins and the embers climb faster with it.
+    const bg = canvas.parentElement;
+    let boost = 1;
+    let W = 0, H = 0, dpr = 1, cx = 0, cy = 0, reach = 1, ash = [], embers = [], glints = [], nextGlint = 0, last = 0, visible = true, raf = 0;
+    const rand = (a, b) => a + Math.random() * (b - a);
+
+    // Ash lives in polar coordinates around the eclipse (cx, cy). New pieces
+    // start part way out and fade in; they leave past `reach`.
+    const spawnAsh = (anywhere) => {
+      const z = Math.random();
+      const dark = Math.random() < 0.72;
+      return {
+        a0: Math.random() * Math.PI * 2,
+        d: (anywhere ? rand(0.12, 1) : rand(0.12, 0.45)) * reach,
+        z,
+        dark,
+        r: (dark ? 1.2 + 3.2 * z * z : 0.8 + 1.6 * z) * dpr,
+        out: (8 + 26 * z) * dpr,
+        spin: (0.05 + 0.09 * z) * (0.8 + Math.random() * 0.4),
+        jitter: rand(-0.5, 0.5),
+        wob: rand(0, Math.PI * 2),
+        a: dark ? 0.35 + 0.5 * z : 0.25 + 0.4 * z,
+        age: anywhere ? 9 : 0,
+      };
+    };
+
+    // Embers rise from the lower part of the hero and burn out somewhere on
+    // the way up; `top` is the height where each one is gone.
+    const spawnEmber = (anywhere) => {
       const z = Math.random();
       return {
         x: Math.random() * W,
-        y: anywhere ? Math.random() * H : -12 * dpr,
+        y: anywhere ? rand(0.3, 1) * H : H + 8 * dpr,
         z,
-        r: (0.6 + 2.2 * z * z) * dpr,
-        vy: (12 + 44 * z) * dpr,
-        sway: (4 + 16 * z) * dpr,
+        r: (1.4 + 3.4 * z * z) * dpr,
+        vy: (16 + 38 * z) * dpr,
+        sway: (6 + 18 * z) * dpr,
         phase: Math.random() * Math.PI * 2,
-        freq: 0.2 + Math.random() * 0.5,
-        a: 0.15 + 0.45 * z,
+        freq: 0.25 + Math.random() * 0.6,
+        flick: rand(3, 9),
+        top: rand(0.05, 0.55) * H,
+        a: 0.35 + 0.55 * z,
       };
     };
 
@@ -63,9 +120,85 @@
       dpr = Math.min(2, window.devicePixelRatio || 1);
       W = canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
       H = canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      const want = Math.min(150, Math.round((canvas.clientWidth * canvas.clientHeight) / 7000));
-      while (flakes.length < want) flakes.push(spawn(true));
-      flakes.length = want;
+      if (fxCanvas) { fxCanvas.width = W; fxCanvas.height = H; }
+      const area = canvas.clientWidth * canvas.clientHeight;
+      // The vortex centre is the halo in the art: 50.5% across, 14% down
+      // the plate, wherever the plate currently sits.
+      const plate = $(".hero__plate"), box = canvas.getBoundingClientRect();
+      const pr = plate ? plate.getBoundingClientRect() : box;
+      cx = (pr.left - box.left + pr.width * 0.505) * dpr;
+      cy = (pr.top - box.top + pr.height * 0.14) * dpr;
+      reach = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) + 20 * dpr;
+      const want = Math.min(140, Math.round(area / 8000));
+      while (ash.length < want) ash.push(spawnAsh(true));
+      ash.length = want;
+      const wantEmbers = fx ? Math.min(42, Math.round(area / 30000)) : 0;
+      while (embers.length < wantEmbers) embers.push(spawnEmber(true));
+      embers.length = wantEmbers;
+    };
+
+    const drawAsh = (t, dt) => {
+      ctx.clearRect(0, 0, W, H);
+      const s = t / 1000;
+      for (const p of ash) {
+        // Closer in turns faster, and everything drifts outwards.
+        const k = Math.pow(0.25 * reach / Math.max(p.d, 0.25 * reach), 0.6);
+        p.a0 += p.spin * k * boost * dt;
+        p.d += p.out * (0.5 + p.d / reach) * boost * dt;
+        p.age += dt;
+        if (p.d > reach) { Object.assign(p, spawnAsh(false)); continue; }
+        const d = p.d + Math.sin(s * 0.7 + p.wob) * 6 * dpr;
+        const x = cx + Math.cos(p.a0) * d;
+        const y = cy + Math.sin(p.a0) * d * 0.82;
+        if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue;
+        ctx.globalAlpha = p.a * Math.min(1, p.age / 1.5);
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(p.a0 + Math.PI / 2 + p.jitter);
+        const len = p.r * (p.dark ? 3.2 : 2.2) * (1 + 0.6 * p.z);
+        ctx.drawImage(p.dark ? shardSprite : moteSprite, -len, -p.r, len * 2, p.r * 2);
+        ctx.restore();
+      }
+    };
+
+    const drawFx = (t, dt, wind) => {
+      fx.clearRect(0, 0, W, H);
+      fx.globalCompositeOperation = "lighter";
+      const s = t / 1000;
+
+      for (const e of embers) {
+        e.y -= e.vy * boost * dt;
+        e.x += wind * 0.5 * (0.4 + e.z) * dt;
+        const x = e.x + Math.sin(s * e.freq + e.phase) * e.sway;
+        // Fade in off the bottom edge, burn out towards `top`.
+        const life = Math.min(1, (H - e.y) / (0.12 * H) + 0.2, (e.y - e.top) / (0.18 * H));
+        if (life <= 0 || x - e.r > W + 30 * dpr) { Object.assign(e, spawnEmber(false)); continue; }
+        const flicker = 0.7 + 0.3 * Math.sin(s * e.flick + e.phase * 3);
+        fx.globalAlpha = Math.max(0, e.a * life * flicker);
+        const r = e.r * (0.85 + 0.15 * flicker);
+        fx.drawImage(emberSprite, x - r * 2, e.y - r * 2, r * 4, r * 4);
+      }
+
+      // Glints: a few at a time, on the upper art where the light is.
+      if (t >= nextGlint || (boost > 2 && t >= nextGlint - 1500)) {
+        if (glints.length < 4) {
+          glints.push({ x: rand(0.18, 0.82) * W, y: rand(0.06, 0.62) * H, size: rand(14, 34) * dpr, born: t, life: rand(1100, 2100), rot: rand(-0.3, 0.3) });
+        }
+        nextGlint = t + rand(700, 2600);
+      }
+      glints = glints.filter((g) => t - g.born < g.life);
+      for (const g of glints) {
+        const p = (t - g.born) / g.life;
+        const k = Math.sin(p * Math.PI);
+        const size = g.size * (0.35 + 0.65 * k);
+        fx.globalAlpha = k * k * 0.85;
+        fx.save();
+        fx.translate(g.x, g.y);
+        fx.rotate(g.rot + p * 0.5);
+        fx.drawImage(glintSprite, -size, -size, size * 2, size * 2);
+        fx.restore();
+      }
+      fx.globalCompositeOperation = "source-over";
     };
 
     const frame = (t) => {
@@ -74,15 +207,10 @@
       const dt = Math.min(0.05, (t - (last || t)) / 1000);
       last = t;
       const wind = (8 + 10 * Math.sin(t / 9000)) * dpr;
-      ctx.clearRect(0, 0, W, H);
-      for (const f of flakes) {
-        f.y += f.vy * dt;
-        f.x += wind * (0.4 + f.z) * dt;
-        const x = f.x + Math.sin((t / 1000) * f.freq + f.phase) * f.sway;
-        if (f.y - f.r > H || x - f.r > W + 30 * dpr) Object.assign(f, spawn(false), { x: Math.random() * W - 30 * dpr });
-        ctx.globalAlpha = f.a;
-        ctx.drawImage(sprite, x - f.r, f.y - f.r, f.r * 2, f.r * 2);
-      }
+      const want = bg.classList.contains("is-strike") ? 3.2 : bg.classList.contains("is-charging") ? 2.4 : 1;
+      boost += (want - boost) * Math.min(1, dt * (want > boost ? 1.2 : 0.8));
+      drawAsh(t, dt);
+      if (fx) drawFx(t, dt, wind);
       raf = requestAnimationFrame(frame);
     };
     const start = () => { if (!raf && visible && !document.hidden) { last = 0; raf = requestAnimationFrame(frame); } };
@@ -95,6 +223,27 @@
     }
     document.addEventListener("visibilitychange", start);
     start();
+  }
+
+  /* ------------------------------------------------------------------------
+     Lightning: every 6 to 11 seconds, while the hero is in view, the world
+     charges up, then strikes - it jolts, blurs and flares, and settles
+     (see .is-charging and .is-strike in the CSS).
+     ------------------------------------------------------------------------ */
+  const heroBg = $(".hero__bg");
+  if (heroBg && !reduceMotion) {
+    const cycle = () => {
+      if (!document.hidden && heroBg.getBoundingClientRect().bottom > 0) heroBg.classList.add("is-charging");
+      else setTimeout(cycle, 3000);
+    };
+    heroBg.addEventListener("animationend", (e) => {
+      if (e.animationName === "charge") heroBg.classList.replace("is-charging", "is-strike");
+      else if (e.animationName === "strike") {
+        heroBg.classList.remove("is-strike");
+        setTimeout(cycle, 6000 + Math.random() * 5000);
+      }
+    });
+    setTimeout(cycle, 3000);
   }
 
   /* ------------------------------------------------------------------------
