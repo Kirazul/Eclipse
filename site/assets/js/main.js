@@ -363,32 +363,14 @@
     img.src = `assets/img/qr-${w.id}.svg`;
     img.alt = `QR code for the ${w.coin} address`;
     img.decoding = "async";
+    img.loading = "lazy";
     return img;
   };
 
-  $$("[data-wallets]").forEach((host) => {
-    if (!wallets.length) return;
-
-    if (!("compact" in host.dataset)) {
-      for (const w of wallets) {
-        const card = el("article", "wcard");
-        const qr = el("div", "wcard__qr");
-        const img = qrImage(w);
-        img.loading = "lazy";
-        qr.appendChild(img);
-        card.append(
-          el("div", "wcard__head",
-            `<svg class="wcard__coin" aria-hidden="true"><use href="#c-${w.id}"/></svg>` +
-            `<span class="wcard__name"><strong>${w.coin}</strong><span>${w.ticker} &middot; ${w.network}</span></span>`),
-          qr,
-          el("code", "wcard__addr", splitAddr(w.address)),
-          copyButton(w, "Copy address"));
-        host.appendChild(card);
-      }
-      return;
-    }
-
-    host.appendChild(el("p", "modal__crypto-title", "Or send crypto"));
+  // The tabbed picker: one wallet at a time. The dialog always uses it; the
+  // page uses it on phones, where four QR cards would be a long scroll.
+  const renderTabs = (host, title) => {
+    host.appendChild(el("p", "wpick__title", title));
     const tabs = el("div", "wtabs");
     tabs.setAttribute("role", "tablist");
     const panel = el("div", "wpanel");
@@ -425,6 +407,30 @@
     });
     host.append(tabs, panel);
     select(0);
+  };
+
+  $$("[data-wallets]").forEach((host) => {
+    if (!wallets.length) return;
+
+    if ("compact" in host.dataset) { renderTabs(host, "Or send crypto"); return; }
+
+    const cards = el("div", "wallets__cards");
+    for (const w of wallets) {
+      const card = el("article", "wcard");
+      const qr = el("div", "wcard__qr");
+      qr.appendChild(qrImage(w));
+      card.append(
+        el("div", "wcard__head",
+          `<svg class="wcard__coin" aria-hidden="true"><use href="#c-${w.id}"/></svg>` +
+          `<span class="wcard__name"><strong>${w.coin}</strong><span>${w.ticker} &middot; ${w.network}</span></span>`),
+        qr,
+        el("code", "wcard__addr", splitAddr(w.address)),
+        copyButton(w, "Copy address"));
+      cards.appendChild(card);
+    }
+    const pick = el("div", "wallets__pick panel");
+    renderTabs(pick, "Send crypto");
+    host.append(cards, pick);
   });
 
   /* ------------------------------------------------------------------------
