@@ -267,33 +267,40 @@
   }
 
   /* ------------------------------------------------------------------------
-     Showcase. Set data-youtube-id on [data-player] to the video's 11
-     character id; the poster becomes its thumbnail, and the YouTube frame is
-     only created on click.
+     Showcase. The poster is the video's thumbnail; clicking it plays the
+     video right here, embedded. The YouTube frame is only created on click,
+     and warmed up on the first hover.
      ------------------------------------------------------------------------ */
   const player = $("[data-player]");
-  if (player) {
-    const id = (player.dataset.youtubeId || "").trim();
-    if (/^[\w-]{11}$/.test(id)) {
-      const poster = $(".player__poster", player);
-      const play = $(".player__play", player);
-      const thumb = new Image();
-      thumb.className = "player__thumb";
-      thumb.alt = "";
-      thumb.decoding = "async";
-      thumb.src = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
-      thumb.onerror = () => { thumb.onerror = null; thumb.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`; };
-      poster.replaceChildren(thumb);
-      play.hidden = false;
-      play.addEventListener("click", () => {
-        const f = document.createElement("iframe");
-        f.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-        f.title = "Eclipse showcase";
-        f.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-        f.allowFullscreen = true;
-        player.replaceChildren(f);
-      }, { once: true });
-    }
+  const id = player ? (player.dataset.youtubeId || "").trim() : "";
+  if (/^[\w-]{11}$/.test(id)) {
+    const poster = $(".player__poster", player);
+    const warm = () => {
+      for (const href of ["https://www.youtube-nocookie.com", "https://www.google.com"]) {
+        const l = document.createElement("link");
+        l.rel = "preconnect";
+        l.href = href;
+        document.head.append(l);
+      }
+    };
+    poster.addEventListener("pointerenter", warm, { once: true });
+    poster.addEventListener("click", () => {
+      // YouTube refuses to embed without an origin (error 153), so a page
+      // opened straight from disk hands the video to YouTube instead.
+      if (location.protocol === "file:") {
+        window.open(`https://www.youtube.com/watch?v=${id}`, "_blank", "noopener");
+        return;
+      }
+      const f = document.createElement("iframe");
+      f.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+      f.title = "Eclipse features showcase";
+      f.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+      f.referrerPolicy = "strict-origin-when-cross-origin";
+      f.allowFullscreen = true;
+      player.classList.add("is-playing");
+      player.replaceChildren(f);
+      f.focus();
+    });
   }
 
   /* ------------------------------------------------------------------------

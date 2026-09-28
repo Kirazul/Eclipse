@@ -445,46 +445,110 @@ svg:not(.sprite) { width: 1.1em; height: 1.1em; flex: none; fill: currentColor; 
   .player { width: 100%; }
 }
 .player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* The poster is the video's own thumbnail; a click swaps in the embedded
+   player. The thumbnail's title sits dead centre, so the play cue lives in
+   the lower left, over a soft scrim, instead of on top of it. */
 .player__poster {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 0.9rem;
-  font-size: 0.92rem;
-  color: #c9c6bd;
-}
-.player__mark {
-  display: grid;
-  place-items: center;
-  width: 3.75rem;
-  height: 3.75rem;
-  border-radius: 50%;
-  background: rgba(250, 249, 245, 0.12);
-  color: var(--text);
-}
-.player__mark svg { width: 1.35rem; height: 1.35rem; margin-left: 0.15rem; }
-.player__thumb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.player__play {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 4.25rem;
-  height: 4.25rem;
-  margin: -2.125rem 0 0 -2.125rem;
-  display: grid;
-  place-items: center;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
   border: 0;
-  border-radius: 50%;
+  background: none;
+  font: inherit;
+  color: var(--text);
+  border-radius: inherit;
   cursor: pointer;
-  color: var(--bg);
-  background: var(--text);
-  box-shadow: 0 0.75rem 2rem -0.5rem rgba(0, 0, 0, 0.6);
-  transition: transform 0.25s var(--ease), background-color 0.25s var(--ease);
 }
-.player__play svg { width: 1.5rem; height: 1.5rem; margin-left: 0.2rem; }
-.player__play:hover { transform: scale(1.05); background: #fff; }
+.player__poster:focus-visible { outline-offset: -3px; }
+.player__poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(10, 8, 6, 0.78), rgba(10, 8, 6, 0.3) 28%, transparent 50%),
+    radial-gradient(130% 100% at 50% 40%, transparent 55%, rgba(10, 8, 6, 0.4));
+  transition: opacity 0.5s var(--ease);
+  pointer-events: none;
+}
+.player__thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease), filter 1.2s var(--ease);
+}
+.player__cue {
+  position: absolute;
+  z-index: 1;
+  left: clamp(0.9rem, 3cqw, 2rem);
+  bottom: clamp(0.9rem, 3cqw, 2rem);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 1.6rem 0.55rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(18, 16, 14, 0.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  box-shadow:
+    inset 0 1px 0 rgba(250, 249, 245, 0.1),
+    0 0 0 1px rgba(250, 249, 245, 0.14),
+    0 1rem 2.5rem -1rem rgba(0, 0, 0, 0.8);
+  transition: transform 0.4s var(--ease), background-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.player__play {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  color: #1f1206;
+  background: linear-gradient(140deg, #ffd66b, var(--e1) 40%, var(--e2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 0.4rem 1.4rem -0.3rem rgba(255, 138, 42, 0.7);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.player__play svg { width: 1.3rem; height: 1.3rem; margin-left: -0.06rem; }  /* the glyph's path sits right of its box; this centres it by eye */
+.player__label {
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.player__label small {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #d9d4c7;
+  letter-spacing: 0.01em;
+}
+.player__poster:hover .player__thumb,
+.player__poster:focus-visible .player__thumb { transform: scale(1.025); filter: brightness(1.08); }
+.player__poster:hover::after { opacity: 0.8; }
+.player__poster:hover .player__cue,
+.player__poster:focus-visible .player__cue {
+  transform: translateY(-2px);
+  background: rgba(18, 16, 14, 0.66);
+  box-shadow:
+    inset 0 1px 0 rgba(250, 249, 245, 0.12),
+    0 0 0 1px rgba(247, 195, 74, 0.5),
+    0 1.25rem 2.75rem -1rem rgba(0, 0, 0, 0.85);
+}
+.player__poster:hover .player__play,
+.player__poster:focus-visible .player__play {
+  transform: scale(1.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0.5rem 1.9rem -0.25rem rgba(255, 138, 42, 0.9);
+}
+.player.is-playing { background: #000; }
 
 /* ==========================================================================
    Sections
@@ -714,8 +778,11 @@ svg:not(.sprite) { width: 1.1em; height: 1.1em; flex: none; fill: currentColor; 
   .hero { padding-bottom: 2rem; }
   .hero__stage { flex: none; min-height: 0; container-type: normal; margin-top: 2rem; }
   .player { width: 100%; border-radius: var(--r-md); }
-  .player__mark { width: 3rem; height: 3rem; }
-  .player__poster { gap: 0.7rem; font-size: 0.85rem; }
+  /* The frame is small here: the cue shrinks to its play button alone. */
+  .player__cue { left: 0.75rem; bottom: 0.75rem; padding: 0.3rem; }
+  .player__play { width: 2.6rem; height: 2.6rem; }
+  .player__play svg { width: 1.05rem; height: 1.05rem; margin-left: -0.05rem; }
+  .player__label { display: none; }
   .cta { gap: 0.6rem; margin-top: 1.5rem; }
   .cta .btn { flex: 1; padding: 0 1rem; }
   .bar .btn--sm span { display: none; }
