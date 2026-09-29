@@ -602,7 +602,7 @@ svg:not(.sprite) { width: 1.1em; height: 1.1em; flex: none; fill: currentColor; 
   padding: clamp(2rem, 4vw, 3.5rem);
 }
 .download__intro p { margin-top: 0.9rem; color: var(--muted); max-width: 26rem; }
-.download__intro .btn { margin-top: 1.9rem; }
+.download__btns { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.9rem; }
 .download__intro .fine { margin-top: 1rem; font-size: 0.8rem; color: var(--faint); }
 .steps { counter-reset: step; align-self: center; }
 .steps li {
@@ -795,7 +795,8 @@ svg:not(.sprite) { width: 1.1em; height: 1.1em; flex: none; fill: currentColor; 
   .features p { font-size: 0.85rem; line-height: 1.5; }
 
   .download { padding: 1.6rem 1.25rem 1.25rem; gap: 1.5rem; border-radius: var(--r-md); }
-  .download__intro .btn { width: 100%; margin-top: 1.5rem; }
+  .download__btns { flex-direction: column; margin-top: 1.5rem; }
+  .download__btns .btn { width: 100%; }
   .download__intro .fine { text-align: center; }
   .steps li { padding: 0.95rem 0 0.95rem 2.6rem; }
   .steps li::before { top: 0.95rem; }
