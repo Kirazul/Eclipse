@@ -44,8 +44,6 @@
 - [How it works](#how-it-works)
 - [Troubleshooting](#troubleshooting)
 - [Support](#support)
-- [This repository](#this-repository)
-- [Disclaimer](#disclaimer)
 
 ---
 
