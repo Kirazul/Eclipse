@@ -5,7 +5,7 @@ import { siteUrl } from "@/lib/site";
 
 // Called by Vercel's scheduler (vercel.json crons) every Monday. It posts the look of
 // the week to the community Discord through DISCORD_WEBHOOK_URL, moves the Look of the
-// Week role to its player, and hands Wardrobe Creator to everyone with a look. A quiet
+// Week role to its player, and hands Gallery Creator to everyone with a look. A quiet
 // week posts nothing and takes the role back: the site only shows what was recorded.
 
 /** Roles never stop the weekly post. */

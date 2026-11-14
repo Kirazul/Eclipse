@@ -42,7 +42,7 @@ export async function inspectCode(text: string): Promise<InspectResult> {
 
 export async function publishOutfit(
   input: SubmitOutfit,
-): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+): Promise<{ ok: true; id: string } | { ok: false; error: string; existing?: string }> {
   const parsed = submitOutfitSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
   const r = await repository.createOutfit({ ...parsed.data, tags: withCodeTags(parsed.data) });
@@ -98,7 +98,7 @@ export async function deleteLook(id: string) {
 
 /**
  * The author's own look out of the Community Gallery, or back in. It keeps its date and
- * votes, so a look shown again stands where it stood, not on top. Wardrobe Creator
+ * votes, so a look shown again stands where it stood, not on top. Gallery Creator
  * follows: a player whose looks are all private has none that others can see.
  */
 export async function setLookPrivate(id: string, isPrivate: boolean) {

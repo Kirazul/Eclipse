@@ -1,15 +1,12 @@
-import { BadgeCheck, ChevronDown, Code, EyeOff, Shirt } from "lucide-react";
+import { BadgeCheck, ChevronDown, Code, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { BookmarkButton } from "@/components/bookmark-button";
 import { CopyButton } from "@/components/copy-button";
-import { DeleteLook } from "@/components/delete-look";
 import { LookComments } from "@/components/look-comments";
 import { LookPieces } from "@/components/look-pieces";
-import { LookVisibility } from "@/components/look-visibility";
+import { LookMenu } from "@/components/look-menu";
 import { ModeratorReports } from "@/components/moderator-reports";
 import { hasLoadoutFacts, LoadoutFacts } from "@/components/outfit-breakdown";
-import { ReportLook } from "@/components/report-look";
 import { SendToGame } from "@/components/send-to-game";
 import { LookModel } from "@/components/studio/look-model";
 import { UpvoteButton } from "@/components/upvote-button";
@@ -133,20 +130,19 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
           <div className="flex flex-wrap items-center gap-2 border-b border-line pb-5" aria-label="Use this look" role="group">
             <CopyButton code={post.code} className="h-[2.9rem] px-6 text-[0.95rem]" />
             {repository.live && <SendToGame id={post.id} />}
-            {post.upvotes !== null && <UpvoteButton id={post.id} count={post.upvotes} />}
-            {social && <BookmarkButton id={post.id} saved={saved} />}
-            <span className="flex flex-wrap items-center gap-2 sm:ml-auto">
-              {resolved && hasArmor(resolved) && (
-                <Link href={`/dressing-room?look=${encodeURIComponent(post.id)}`} className="pill">
-                  <Shirt className="size-4" strokeWidth={1.5} aria-hidden />Open in Dressing room
-                </Link>
-              )}
-              {community && <ReportLook id={post.id} authorId={post.authorId} />}
-              {post.authorId && <LookVisibility id={post.id} authorId={post.authorId} isPrivate={post.isPrivate ?? false} />}
-              {community && (
-                <DeleteLook id={post.id} authorId={post.authorId} triggerClassName="pill hover:border-bad/50 hover:text-bad" />
-              )}
-            </span>
+            {post.upvotes !== null && (
+              <UpvoteButton id={post.id} count={post.upvotes} className="h-[2.9rem] rounded-full px-4" />
+            )}
+            <LookMenu
+              id={post.id}
+              authorId={post.authorId}
+              community={community}
+              isPrivate={post.isPrivate ?? false}
+              saved={social ? saved : undefined}
+              dressingRoom={resolved && hasArmor(resolved) ? `/dressing-room?look=${encodeURIComponent(post.id)}` : undefined}
+              afterDelete="/community-gallery"
+              className="size-[2.9rem] sm:ml-auto"
+            />
           </div>
 
           {resolved && <LookPieces resolved={resolved} />}

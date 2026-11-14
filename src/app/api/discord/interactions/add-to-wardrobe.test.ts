@@ -68,7 +68,7 @@ const click = (message: ShowcaseMessage, asker = PLAYER, permissions = "0", chan
   token: "tok-1",
   channel_id: channel,
   member: { user: { id: asker }, permissions },
-  data: { name: "Add to Wardrobe", type: 3, target_id: message.id, resolved: { messages: { [message.id]: message } } },
+  data: { name: "Add to Community Gallery", type: 3, target_id: message.id, resolved: { messages: { [message.id]: message } } },
 });
 
 beforeEach(() => {
@@ -80,7 +80,7 @@ beforeEach(() => {
   for (const list of [stored, removed, imported, granted, announced]) list.length = 0;
 });
 
-describe("Add to Wardrobe", () => {
+describe("Add to Community Gallery", () => {
   it("adds the post, its screenshots and caption, credits its player and announces it", async () => {
     const reply = await addToWardrobe(click(post()));
     expect(imported).toHaveLength(1);

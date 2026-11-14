@@ -108,7 +108,10 @@ const option = (data: CommandData, name: string) => {
 const target = (data: CommandData) => (data.target_id ? data.resolved?.messages?.[data.target_id] : undefined);
 
 const DECODE_MESSAGE = "Decode Eclipse code";
-const ADD_TO_WARDROBE = "Add to Wardrobe";
+// The Wardrobe became the Community Gallery. Discord keeps showing a renamed command
+// under its old name until each client refreshes, so both names still answer.
+const ADD_TO_GALLERY = ["Add to Community Gallery", "Add to Wardrobe"];
+const SEARCH = ["gallery", "wardrobe"];
 
 /** A right-click answers the asker alone, so it never fills a channel. */
 export const isQuiet = (data: CommandData) => data.type === MESSAGE_COMMAND;
@@ -127,15 +130,15 @@ export function quickReply(interaction: Interaction): Reply | null {
     const code = codeIn(target(data)?.content ?? "");
     return code ? decodeReply(code, { quiet: true }) : say("That message holds no Eclipse code.");
   }
-  if (!["look", "wardrobe", ADD_TO_WARDROBE].includes(data.name)) return say("That command is not part of Eclipse anymore.");
+  if (!["look", ...SEARCH, ...ADD_TO_GALLERY].includes(data.name)) return say("That command is not part of Eclipse anymore.");
   return null;
 }
 
 /** The full answer, for a command quickReply let through. */
 export async function answer(interaction: Interaction): Promise<Reply> {
   const data = interaction.data!;
-  if (data.name === ADD_TO_WARDROBE) return addToWardrobe(interaction);
-  if (data.name === "wardrobe") return searchReply(option(data, "search"));
+  if (ADD_TO_GALLERY.includes(data.name)) return addToWardrobe(interaction);
+  if (SEARCH.includes(data.name)) return searchReply(option(data, "search"));
   const id = lookId(option(data, "look"));
   const post = id ? await repository.getOutfit(id) : null;
   return post ? lookReply(post) : say("No look in the Community Gallery has that link.");
@@ -143,7 +146,7 @@ export async function answer(interaction: Interaction): Promise<Reply> {
 
 let index: { at: number; entries: SearchEntry[] } | null = null;
 
-/** The Wardrobe's search list, reused for a minute: suggestions come at every keystroke. */
+/** The Community Gallery's search list, reused for a minute: suggestions come at every keystroke. */
 async function searchList(): Promise<SearchEntry[]> {
   if (!index || Date.now() - index.at >= timing.indexMs) {
     index = { at: Date.now(), entries: await repository.searchIndex() };

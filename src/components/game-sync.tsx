@@ -1,6 +1,7 @@
 "use client";
 
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, MoreHorizontal, Trash2, Upload } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -8,12 +9,18 @@ import { createGameLinkCode, removeGameSet, unlinkGame } from "@/app/actions";
 import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 /** Issues a code for the game to trade for its token. The code is shown once. */
@@ -84,6 +91,51 @@ export function UnlinkGame({ id }: { id: string }) {
 
 export function RemoveGameSet({ id, name, after }: { id: string; name: string; after?: string }) {
   const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button type="button" variant="ghost" size="icon" aria-label={`Remove ${name}`} onClick={() => setOpen(true)}>
+        <Trash2 aria-hidden="true" />
+      </Button>
+      <RemoveGameSetDialog id={id} name={name} after={after} open={open} onOpenChange={setOpen} />
+    </>
+  );
+}
+
+/** A saved loadout's ⋯ menu on the Loadouts page: Publish it, or remove it. */
+export function GameSetMenu({ id, name }: { id: string; name: string }) {
+  const [removing, setRemoving] = useState(false);
+  return (
+    <>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger
+          aria-label={`More options for ${name}`}
+          title="More options"
+          className="grid size-8 shrink-0 place-items-center rounded-full border border-line text-ink-dim transition-colors hover:border-line-strong hover:text-ink data-[state=open]:border-line-strong data-[state=open]:bg-surface-raised data-[state=open]:text-ink"
+        >
+          <MoreHorizontal className="size-4" aria-hidden />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-44">
+          <DropdownMenuItem asChild>
+            <Link href={`/sets/${id}`}><Upload aria-hidden />Publish</Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => setRemoving(true)} className="text-bad focus:text-bad">
+            <Trash2 aria-hidden />Remove
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <RemoveGameSetDialog id={id} name={name} open={removing} onOpenChange={setRemoving} />
+    </>
+  );
+}
+
+function RemoveGameSetDialog({ id, name, after, open, onOpenChange }: {
+  id: string;
+  name: string;
+  after?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [removing, startRemoving] = useTransition();
   const router = useRouter();
 
@@ -94,7 +146,7 @@ export function RemoveGameSet({ id, name, after }: { id: string; name: string; a
         toast.error(r.error);
         return;
       }
-      setOpen(false);
+      onOpenChange(false);
       toast.success("Set removed");
       if (after) router.push(after);
       else router.refresh();
@@ -102,19 +154,14 @@ export function RemoveGameSet({ id, name, after }: { id: string; name: string; a
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" aria-label={`Remove ${name}`}>
-          <Trash2 aria-hidden="true" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-5 border-line bg-surface p-6">
         <DialogHeader>
           <DialogTitle>Remove {name}?</DialogTitle>
           <DialogDescription>It is also deleted from every linked game at its next sync.</DialogDescription>
         </DialogHeader>
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Keep it</Button>
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Keep it</Button>
           <Button type="button" variant="destructive" disabled={removing} onClick={remove}>
             {removing && <Loader2 className="animate-spin" aria-hidden="true" />}
             Remove

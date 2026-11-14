@@ -4,7 +4,7 @@ import { decodeOutfit } from "@/lib/codec/outfit";
 import { RACE_LABEL } from "@/lib/domain";
 
 // How a post in the Discord showcase becomes a Wardrobe look. Shared by the bulk
-// import (tools/import-discord-showcase.mts) and the bot's "Add to Wardrobe" right-click,
+// import (tools/import-discord-showcase.mts) and the bot's "Add to Community Gallery" right-click,
 // so both read a post the same way.
 
 /** The community server's #showcase channel. */

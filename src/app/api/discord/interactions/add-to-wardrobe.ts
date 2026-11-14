@@ -13,7 +13,7 @@ import { SHOWCASE_CHANNEL, codeIn, images, showcaseLook } from "@/lib/showcase-p
 import { siteUrl } from "@/lib/site";
 import { say, type Interaction, type Reply } from "./reply";
 
-// "Add to Wardrobe" on a #showcase post's right-click menu: what
+// "Add to Community Gallery" on a #showcase post's right-click menu: what
 // tools/import-discord-showcase.mts does for the whole channel, for one post, at once.
 // Its player, or a moderator, can add it; the look is credited to the player either way.
 
@@ -29,7 +29,9 @@ function moderates(permissions: string | undefined): boolean {
   }
 }
 
-const already = (look: string) => say(`This post is already in the Community Gallery: ${siteUrl}/community-gallery/${look}`);
+// The post itself, or the same code published on the site or from another post: the
+// database answers one public look per code with the look already there.
+const already = (look: string) => say(`This look is already in the Community Gallery: ${siteUrl}/community-gallery/${look}`);
 
 export async function addToWardrobe(interaction: Interaction): Promise<Reply> {
   if (!adminConfigured() || !botConfigured()) return say("Adding looks from Discord is not switched on yet.");

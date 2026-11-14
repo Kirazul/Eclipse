@@ -74,7 +74,7 @@ describe("the Look of the Week role", () => {
   });
 });
 
-describe("the Wardrobe Creator role", () => {
+describe("the Gallery Creator role", () => {
   it("goes to everyone with a look", async () => {
     creators = [WINNER, BEFORE];
     expect(await roles.syncCreators()).toBe(2);

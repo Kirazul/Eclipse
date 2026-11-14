@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 
 // A look its author set private: seen by its author alone, left out of Look of the Week
-// and of the Wardrobe Creator role, and set public again only by its author. Proved on a
+// and of the Gallery Creator role, and set public again only by its author. Proved on a
 // real Postgres, with Supabase's roles, grants, auth.uid() and auth.identities stubbed and
 // the outfits table cut to the columns these rules read.
 const MIGRATION = readFileSync(join(process.cwd(), "supabase/migrations/20261114230000_private_looks.sql"), "utf8");
@@ -112,7 +112,7 @@ describe("a private look", () => {
   });
 });
 
-describe("Look of the Week and Wardrobe Creator", () => {
+describe("Look of the Week and Gallery Creator", () => {
   async function upvote(n: number, count: number) {
     for (let v = 1; v <= count; v++) {
       await db.query("insert into public.outfit_votes (outfit_id, user_id) values ($1, $2)", [look(n), voter(v)]);

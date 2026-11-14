@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { ItemRing } from "@/components/item-icon";
+import { LookMenu } from "@/components/look-menu";
 import { UpvoteButton } from "@/components/upvote-button";
 import { resolveOutfit, type ResolvedOutfit } from "@/lib/catalog";
 import { decodeOutfit } from "@/lib/codec/outfit";
@@ -31,10 +32,11 @@ const STRIP = 8;
 
 /**
  * The Wardrobe's view: the look, who made it, what it wears, its tags and its code.
+ * With `manage`, on its author's own list, a ⋯ menu adds Dressing room, private and Delete.
  * Follows the Eclipse design system: radius-md, a line hairline and no shadow,
  * surface-raised and the corona rim on hover, 120ms, one primary action.
  */
-export function OutfitCard({ post }: { post: OutfitPost }) {
+export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?: boolean }) {
   const resolved = resolve(post);
   const worn = pieces(resolved);
   const crest = crestArt(post, resolved);
@@ -104,6 +106,16 @@ export function OutfitCard({ post }: { post: OutfitPost }) {
       <div className="flex items-center gap-2 px-4 pb-4">
         {post.upvotes !== null && <UpvoteButton id={post.id} count={post.upvotes} />}
         <CopyButton code={post.code} className="ml-auto" />
+        {manage && (
+          <LookMenu
+            id={post.id}
+            authorId={post.authorId}
+            community={Boolean(post.authorId) || Boolean(post.sharedOnDiscord)}
+            isPrivate={post.isPrivate ?? false}
+            dressingRoom={worn.length > 0 ? `/dressing-room?look=${encodeURIComponent(post.id)}` : undefined}
+            className="size-8"
+          />
+        )}
       </div>
     </article>
   );

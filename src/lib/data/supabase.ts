@@ -136,6 +136,8 @@ const safeTerm = (q: string) => q.replace(/[^\p{L}\p{N} '-]/gu, " ").trim();
 // Postgres answers a malformed uuid with an error, so an id from a URL is checked
 // first. A bad link should be a 404, not a 500.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** The look id a refusal carries in its detail, if it is one. */
+const lookId = (detail: string | null | undefined) => (detail && UUID.test(detail) ? detail : undefined);
 
 // What PostgREST answers when the requested page starts past the last row.
 const RANGE_NOT_SATISFIABLE = "PGRST103";
@@ -147,6 +149,9 @@ const REFUSED_BY_POLICY = "42501";
 const PUBLISHING_LIMIT = "EC001";
 // The errcode limit_commenting raises (the look_comments migration).
 const COMMENTING_LIMIT = "EC002";
+// The errcode one_public_look_per_code raises, with the look already there in its detail.
+const ALREADY_PUBLIC = "EC003";
+const ALREADY_PUBLISHED = "This look is already in the Community Gallery.";
 const UNIQUE_VIOLATION = "23505";
 // A comment on a look deleted while it was being written.
 const FOREIGN_KEY_VIOLATION = "23503";
@@ -294,6 +299,7 @@ export const supabaseRepository: Repository = {
       .single();
     if (error?.code === REFUSED_BY_POLICY) return { ok: false, error: "Choose a public name first, from the account button." };
     if (error?.code === PUBLISHING_LIMIT) return { ok: false, error: "That is 20 looks this hour. Try again later." };
+    if (error?.code === ALREADY_PUBLIC) return { ok: false, error: ALREADY_PUBLISHED, existing: lookId(error.details) };
     if (error) return { ok: false, error: "That outfit could not be saved. Try again." };
     return { ok: true, value: toPost(data as unknown as OutfitRow) };
   },
@@ -482,6 +488,9 @@ export const supabaseRepository: Repository = {
     const { data: auth } = await db.auth.getUser();
     if (!auth.user) return { ok: false, error: "Sign in to change your look." };
     const { data, error } = await db.from("outfits").update({ is_private: isPrivate }).eq("id", id).select("id");
+    if (error?.code === ALREADY_PUBLIC) {
+      return { ok: false, error: "Another public look has the same code, so this one stays private.", existing: lookId(error.details) };
+    }
     if (error) return { ok: false, error: "That look could not be changed. Try again." };
     // RLS answers an update it refuses with no rows, not with an error.
     if (!data.length) return { ok: false, error: "You can only change your own looks." };

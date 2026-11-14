@@ -1,6 +1,6 @@
 // Registers the bot's commands (src/lib/discord-commands.json) for everywhere the app is
 // installed: the Eclipse server, and players who add it to their own account, so /look
-// and /decode work in their DMs and other servers. "Add to Wardrobe" stays server-only.
+// and /decode work in their DMs and other servers. "Add to Community Gallery" stays server-only.
 // Run it after changing that file:
 //
 //   node --env-file=.env.local tools/register-discord-commands.mjs
