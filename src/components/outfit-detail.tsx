@@ -1,4 +1,4 @@
-import { BadgeCheck, ChevronDown, Code, Shirt } from "lucide-react";
+import { BadgeCheck, ChevronDown, Code, EyeOff, Shirt } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { BookmarkButton } from "@/components/bookmark-button";
@@ -6,6 +6,7 @@ import { CopyButton } from "@/components/copy-button";
 import { DeleteLook } from "@/components/delete-look";
 import { LookComments } from "@/components/look-comments";
 import { LookPieces } from "@/components/look-pieces";
+import { LookVisibility } from "@/components/look-visibility";
 import { ModeratorReports } from "@/components/moderator-reports";
 import { hasLoadoutFacts, LoadoutFacts } from "@/components/outfit-breakdown";
 import { ReportLook } from "@/components/report-look";
@@ -67,6 +68,13 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
   return (
     <article className="flex flex-col gap-8">
       {community && <ModeratorReports id={post.id} />}
+      {/* Only its author can open a private look, so this is said to them alone. */}
+      {post.isPrivate && (
+        <p className="flex items-center gap-2.5 rounded-lg border border-line-strong bg-surface px-4 py-3 text-sm text-ink-dim">
+          <EyeOff className="size-4 shrink-0 text-ink" strokeWidth={1.5} aria-hidden />
+          Only you can see this look. It stays out of the Community Gallery until you set it to public.
+        </p>
+      )}
 
       <header className="flex items-center gap-4">
         <Crest post={post} resolved={resolved} />
@@ -134,6 +142,7 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
                 </Link>
               )}
               {community && <ReportLook id={post.id} authorId={post.authorId} />}
+              {post.authorId && <LookVisibility id={post.id} authorId={post.authorId} isPrivate={post.isPrivate ?? false} />}
               {community && (
                 <DeleteLook id={post.id} authorId={post.authorId} triggerClassName="pill hover:border-bad/50 hover:text-bad" />
               )}

@@ -242,6 +242,54 @@ describe("deleting a look", () => {
   });
 });
 
+describe("setting a look private", () => {
+  it("asks for the author's own look, and says what it became", async () => {
+    user = { id: row.author_id };
+    let sent: unknown = null;
+    reply = (_, init) => {
+      sent = JSON.parse(String(init?.body));
+      return Response.json([{ id: row.id }]);
+    };
+    expect(await repo.setOutfitPrivate(row.id, true)).toEqual({ ok: true, value: true });
+    expect(requests[0].pathname).toBe("/rest/v1/outfits");
+    expect(requests[0].searchParams.get("id")).toBe(`eq.${row.id}`);
+    expect(sent).toEqual({ is_private: true });
+    expect(await repo.setOutfitPrivate(row.id, false)).toEqual({ ok: true, value: false });
+    expect(sent).toEqual({ is_private: false });
+  });
+
+  // RLS answers a refused update with no rows, not an error.
+  it("says so when the look is someone else's", async () => {
+    user = { id: "55555555-5555-4555-8555-555555555555" };
+    expect(await repo.setOutfitPrivate(row.id, true)).toEqual({ ok: false, error: "You can only change your own looks." });
+  });
+
+  it("needs a session and a real look", async () => {
+    expect((await repo.setOutfitPrivate(row.id, true)).ok).toBe(false);
+    user = { id: row.author_id };
+    expect((await repo.setOutfitPrivate("set-1074", true)).ok).toBe(false);
+    expect(requests).toHaveLength(0);
+  });
+
+  it("is refused by the built-in data, which has no authors", async () => {
+    expect((await builtinRepository.setOutfitPrivate(row.id, true)).ok).toBe(false);
+  });
+
+  it("is read back on the look", async () => {
+    reply = () => Response.json({ ...row, is_private: true });
+    expect((await repo.getOutfit(row.id))?.isPrivate).toBe(true);
+    expect(requests[0].searchParams.get("select")).toMatch(/(^|,)is_private(,|$)/);
+  });
+
+  it("stays out of every list unless the list asks for its account's own", async () => {
+    await repo.listOutfits({ sort: "top" });
+    expect(requests[0].searchParams.get("is_private")).toBe("eq.false");
+    requests.length = 0;
+    await repo.listOutfits({ sort: "newest", authorId: row.author_id, includePrivate: true });
+    expect(requests[0].searchParams.has("is_private")).toBe(false);
+  });
+});
+
 describe("publishing", () => {
   it("asks for a name when the database refuses a nameless author", async () => {
     user = { id: row.id };

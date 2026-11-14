@@ -1,4 +1,4 @@
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
@@ -50,6 +50,12 @@ export function OutfitCard({ post }: { post: OutfitPost }) {
       <Link href={`/community-gallery/${post.id}`} className="group flex flex-1 flex-col" aria-label={`Open ${post.title}`}>
         {/* Every card has the same picture frame, so a row of cards lines up with or without a capture. */}
         <div className="relative aspect-[16/10] overflow-hidden border-b border-line bg-void">
+          {/* Only its author is ever shown a private look, on their own lists. */}
+          {post.isPrivate && (
+            <span className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1 rounded-full border border-line-strong bg-void/85 px-2.5 py-1 text-xs text-ink">
+              <EyeOff className="size-3.5" strokeWidth={1.5} aria-hidden />Private
+            </span>
+          )}
           {capture ? (
             // The capture stands alone: the game's own panels already show its pieces, so nothing is laid over it.
             <Image src={thumbOf(capture)} alt="" fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />

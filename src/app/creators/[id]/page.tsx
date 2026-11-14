@@ -29,7 +29,7 @@ export default async function CreatorPage({ params, searchParams }: Props) {
   const creator = await getCreator((await params).id);
   if (!creator) notFound();
   const filters = await wardrobeCache.parse(searchParams);
-  const { posts, total } = await repository.listOutfits({ authorId: creator.id, sort: filters.sort, page: filters.page });
+  const { posts, total } = await repository.listOutfits({ authorId: creator.id, sort: filters.sort, page: filters.page, includePrivate: true });
   const joined = new Date(creator.joinedAt).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
 
   return (

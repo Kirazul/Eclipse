@@ -30,6 +30,7 @@ interface OutfitRow {
   discord_name: string | null;
   gallery: string[];
   profiles: { display_name: string | null; verified: boolean; avatar_url?: string | null } | null;
+  is_private: boolean;
   remix?: { id: string; title: string; discord_name?: string | null; profiles: { display_name: string | null } | null } | null;
 }
 
@@ -101,7 +102,7 @@ const toGameSet = (r: GameSetRow): GameSet => ({
 // The hint is required: outfit_votes, outfit_reports and outfit_bookmarks also join
 // outfits to profiles, and PostgREST refuses a bare profiles(...) embed as ambiguous.
 const OUTFIT_COLUMNS =
-  "id,title,code,class_name,armor,race,categories,tags,description,upvotes,created_at,author_id,discord_name,gallery,profiles!outfits_author_id_fkey(display_name,verified,avatar_url)," +
+  "id,title,code,class_name,armor,race,categories,tags,description,upvotes,created_at,author_id,discord_name,gallery,is_private,profiles!outfits_author_id_fkey(display_name,verified,avatar_url)," +
   // outfits refers to itself. Embedding through the column itself reaches the original (one
   // row, or null); `outfits!remixed_from` reached the other way, the remixes, as an array.
   "remix:remixed_from(id,title,discord_name,profiles!outfits_author_id_fkey(display_name))";
@@ -126,6 +127,7 @@ const toPost = (r: OutfitRow): OutfitPost => ({
   createdAt: r.created_at,
   gallery: r.gallery.map(screenshotUrl),
   remixedFrom: r.remix ? { id: r.remix.id, title: r.remix.title, author: r.remix.profiles?.display_name ?? r.remix.discord_name ?? null } : null,
+  isPrivate: r.is_private,
 });
 
 // A search term goes into PostgREST's filter text, where , ( ) are syntax.
@@ -173,6 +175,8 @@ const outfitRows = (
   let query = savedBy
     ? db.from("outfits").select(`${columns},outfit_bookmarks!inner(user_id)`, options).eq("outfit_bookmarks.user_id", savedBy)
     : db.from("outfits").select(columns, options);
+  // The rows say who may read a private look; a list says whether it wants them.
+  if (!f.includePrivate) query = query.eq("is_private", false);
   if (f.captured) query = query.neq("gallery", "{}");
   if (f.authorId) query = query.eq("author_id", f.authorId);
   // IS DISTINCT FROM, not <>: a look from the Discord showcase has no author until its
@@ -471,6 +475,17 @@ export const supabaseRepository: Repository = {
     const paths = (data[0].gallery as string[]).flatMap((path) => [path, thumbOf(path)]);
     if (paths.length) await db.storage.from(SCREENSHOT_BUCKET).remove(paths);
     return { ok: true, value: id };
+  },
+  async setOutfitPrivate(id, isPrivate) {
+    if (!UUID.test(id)) return { ok: false, error: "That look cannot be changed." };
+    const db = await createServerSupabase();
+    const { data: auth } = await db.auth.getUser();
+    if (!auth.user) return { ok: false, error: "Sign in to change your look." };
+    const { data, error } = await db.from("outfits").update({ is_private: isPrivate }).eq("id", id).select("id");
+    if (error) return { ok: false, error: "That look could not be changed. Try again." };
+    // RLS answers an update it refuses with no rows, not with an error.
+    if (!data.length) return { ok: false, error: "You can only change your own looks." };
+    return { ok: true, value: isPrivate };
   },
   async getAccount() {
     const db = await createServerSupabase();

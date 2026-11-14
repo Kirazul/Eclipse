@@ -200,6 +200,9 @@ export const builtinRepository: Repository = {
   async deleteOutfit() {
     return { ok: false, error: NOT_LIVE };
   },
+  async setOutfitPrivate() {
+    return { ok: false, error: NOT_LIVE };
+  },
   async getAccount() {
     return null;
   },

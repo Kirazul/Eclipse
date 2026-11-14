@@ -212,7 +212,7 @@ export default async function LoadoutsPage({ searchParams }: Props) {
   const [links, sets, published] = await Promise.all([
     repository.listGameLinks(),
     repository.listGameSets(),
-    repository.listOutfits({ sort: "newest", authorId: account.id, pageSize: OWN_LOOKS }),
+    repository.listOutfits({ sort: "newest", authorId: account.id, pageSize: OWN_LOOKS, includePrivate: true }),
   ]);
   const now = Date.now();
   const waiting = sets.filter((set) => set.gallery.length > 0);

@@ -41,7 +41,7 @@ describe("a Showcase poster", () => {
   });
 });
 
-describe("a Wardrobe card", () => {
+describe("a Community Gallery card", () => {
   const card = (post: OutfitPost) => renderToStaticMarkup(createElement(OutfitCard, { post }));
 
   it("leads with the look's own capture when it has one", () => {
@@ -52,5 +52,10 @@ describe("a Wardrobe card", () => {
     const html = card({ ...POST, gallery: [] });
     expect(html).not.toContain("capture");
     expect(html).toContain('aria-label="Copy code"');
+  });
+
+  it("labels a private look, and only a private one", () => {
+    expect(card({ ...POST, isPrivate: true })).toMatch(/<\/svg>Private<\/span>/);
+    expect(card(POST)).not.toContain(">Private<");
   });
 });
