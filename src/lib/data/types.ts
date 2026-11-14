@@ -173,7 +173,10 @@ export interface ReportedComment {
   lastReport: string;
 }
 
-export type WriteResult<T> = { ok: true; value: T } | { ok: false; error: string };
+export type WriteResult<T> =
+  | { ok: true; value: T }
+  /** `existing`: the public look that already has this code, when that is the refusal. */
+  | { ok: false; error: string; existing?: string };
 
 /** The seam: pages know this and nothing about where the rows live. */
 export interface Repository {

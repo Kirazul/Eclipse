@@ -69,14 +69,21 @@ function query<T>(text: string): T[] {
 const messages = await history(SHOWCASE_CHANNEL);
 const byId = new Map(messages.map((m) => [m.id, m]));
 const done = new Set(query<{ message_id: string }>("select message_id from public.discord_looks").map((r) => r.message_id));
+// One public look per code (20261115090000_one_public_look_per_code): a code already in
+// the Gallery, or earlier in this run, is left out rather than refused mid-transaction.
+const taken = new Set(query<{ code: string }>("select code from public.outfits where not is_private").map((r) => r.code));
 
 const looks: (ShowcaseLook & { id: string })[] = [];
 const skipped: string[] = [];
 for (const m of messages) {
   if (done.has(m.id) || m.author.bot || !codeIn(m.content)) continue;
   const made = showcaseLook(m, byId, messages);
-  if (made.ok) looks.push({ id: crypto.randomUUID(), ...made.look });
-  else skipped.push(`${m.timestamp.slice(0, 10)} ${m.author.global_name ?? m.author.username}: ${made.reason}`);
+  if (made.ok && taken.has(made.look.code)) {
+    skipped.push(`${m.timestamp.slice(0, 10)} ${m.author.global_name ?? m.author.username}: its code is already in the Community Gallery`);
+  } else if (made.ok) {
+    taken.add(made.look.code);
+    looks.push({ id: crypto.randomUUID(), ...made.look });
+  } else skipped.push(`${m.timestamp.slice(0, 10)} ${m.author.global_name ?? m.author.username}: ${made.reason}`);
 }
 
 console.log(`${messages.length} messages, ${done.size} already imported, ${looks.length} to import\n`);

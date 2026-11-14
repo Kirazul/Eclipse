@@ -146,7 +146,7 @@ function PublishForm({ code, remixOf, fromSet }: { code: string; remixOf: RemixO
   const [description, setDescription] = useState("");
   const [gallery, setGallery] = useState<string[]>(fromSet?.gallery ?? []);
   const [published, setPublished] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ text: string; existing?: string } | null>(null);
   const [pending, start] = useTransition();
 
   function submit(event: React.FormEvent) {
@@ -164,7 +164,7 @@ function PublishForm({ code, remixOf, fromSet }: { code: string; remixOf: RemixO
         remixedFrom: credit && remixOf ? remixOf.id : undefined,
       });
       if (!r.ok) {
-        setError(r.error);
+        setError({ text: r.error, existing: r.existing });
         return;
       }
       setPublished(r.id);
@@ -219,7 +219,16 @@ function PublishForm({ code, remixOf, fromSet }: { code: string; remixOf: RemixO
         />
       </div>
       <Screenshots images={gallery} onChange={setGallery} fromSet={fromSet} />
-      {error && <p role="alert" className="text-sm text-bad">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-bad">
+          {error.text}
+          {error.existing && (
+            <>
+              {" "}<Link href={`/community-gallery/${error.existing}`} className="text-amber underline underline-offset-2">Open it</Link>
+            </>
+          )}
+        </p>
+      )}
       <Button type="submit" size="sm" disabled={pending} className="self-start">
         {pending && <Loader2 className="size-4 animate-spin" />}
         Publish to the Community Gallery
