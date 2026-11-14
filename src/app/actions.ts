@@ -96,6 +96,26 @@ export async function deleteLook(id: string) {
   return r;
 }
 
+/**
+ * The author's own look out of the Community Gallery, or back in. It keeps its date and
+ * votes, so a look shown again stands where it stood, not on top. Wardrobe Creator
+ * follows: a player whose looks are all private has none that others can see.
+ */
+export async function setLookPrivate(id: string, isPrivate: boolean) {
+  if (typeof isPrivate !== "boolean") return { ok: false as const, error: "That look could not be changed." };
+  const r = await repository.setOutfitPrivate(id, isPrivate);
+  if (r.ok) {
+    revalidateHub();
+    revalidatePath(`/community-gallery/${id}`);
+    revalidatePath("/loadouts");
+    after(async () => {
+      if (isPrivate) await recheckCreator(await creatorOf(id).catch(() => null));
+      else await grantCreatorOfLook(id);
+    });
+  }
+  return r;
+}
+
 export async function saveDisplayName(name: string) {
   const parsed = displayNameSchema.safeParse(name);
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0].message };

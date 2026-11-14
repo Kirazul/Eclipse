@@ -34,6 +34,8 @@ export interface OutfitPost {
   gallery: string[];
   /** The look this one was made from in the Dressing room, while it can still be seen. */
   remixedFrom?: { id: string; title: string; author: string | null } | null;
+  /** Set private by its author, who is then the only one who sees it. */
+  isPrivate?: boolean;
 }
 
 /** Someone who has chosen a public name. Every count is of what visitors can see. */
@@ -63,6 +65,11 @@ export interface OutfitFilters {
   saved?: boolean;
   /** Only looks wearing this item. */
   item?: number | null;
+  /**
+   * Also the signed-in account's own private looks, which only it can read: its own lists
+   * want them, labelled. Everyone else's private looks stay unreadable either way.
+   */
+  includePrivate?: boolean;
   sort: Sort;
   /** From 1. */
   page?: number;
@@ -210,6 +217,8 @@ export interface Repository {
   removeScreenshot(path: string): Promise<WriteResult<string>>;
   /** Removes a look and its screenshots: the author's own, or any for a moderator. */
   deleteOutfit(id: string): Promise<WriteResult<string>>;
+  /** The author's own look, hidden from everyone else or shown again. Returns the new state. */
+  setOutfitPrivate(id: string, isPrivate: boolean): Promise<WriteResult<boolean>>;
   /** Who is signed in, or null for a visitor. */
   getAccount(): Promise<Account | null>;
   setDisplayName(name: string): Promise<WriteResult<string>>;
