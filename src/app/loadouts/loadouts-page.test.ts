@@ -143,13 +143,14 @@ describe("Loadouts", () => {
     expect(page).toMatch(/Your loadouts <span[^>]*>0<\/span>/);
   });
 
-  it("lists a set with its pieces, a way in and a way to remove it", async () => {
+  it("lists a set with its pieces, a way in and a menu to publish or remove it", async () => {
     data.sets = [SET];
     const page = await html(SetsPage({}));
     expect(page).toContain("Raid night");
     expect(page).toContain(`href="/sets/${SET.id}"`);
     expect(page).toMatch(/Your loadouts <span[^>]*>1<\/span>/);
-    expect(page).toContain("Remove Raid night");
+    // Publish and Remove sit in the card's ⋯ menu, drawn when it opens.
+    expect(page).toContain("More options for Raid night");
     expect(page).toContain("<img");
   });
 

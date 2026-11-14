@@ -4,7 +4,7 @@ import Link from "next/link";
 import { after } from "next/server";
 import { CopyButton } from "@/components/copy-button";
 import { Decoder, type RemixOf } from "@/components/decoder";
-import { LinkGame, RemoveGameSet, UnlinkGame } from "@/components/game-sync";
+import { GameSetMenu, LinkGame, UnlinkGame } from "@/components/game-sync";
 import { HubTitle, LOADOUTS_BLURB } from "@/components/hub";
 import { ItemRing } from "@/components/item-icon";
 import { OutfitCard } from "@/components/outfit-card";
@@ -134,7 +134,7 @@ function PublishedLooks({ accountId, posts, total }: { accountId: string } & Out
       </div>
       {posts.length ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => <OutfitCard key={post.id} post={post} />)}
+          {posts.map((post) => <OutfitCard key={post.id} post={post} manage />)}
         </div>
       ) : (
         <p className="rounded-lg border border-dashed border-line p-6 text-center text-sm text-ink-dim">
@@ -170,8 +170,8 @@ function SetCard({ set, now }: { set: GameSet; now: number }) {
         )}
       </Link>
       <div className="flex items-center justify-between gap-2 border-t border-line p-3">
-        <RemoveGameSet id={set.id} name={set.name} />
         <CopyButton code={set.code} className="ml-auto" />
+        <GameSetMenu id={set.id} name={set.name} />
       </div>
     </article>
   );
