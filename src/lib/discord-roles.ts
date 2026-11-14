@@ -4,8 +4,8 @@ import {
 } from "@/lib/data/admin";
 import { botConfigured, setRole } from "@/lib/discord-bot";
 
-// The community server's two earned roles. Wardrobe Creator: someone whose Discord
-// account has a look on the Wardrobe. Look of the Week: the player behind this week's
+// The community server's two earned roles. Gallery Creator: someone whose Discord
+// account has a look on the Community Gallery. Look of the Week: the player behind this week's
 // winner, one person at a time. Each needs its role id set, the server's id and the bot's
 // token; with any missing, nothing is handed out.
 

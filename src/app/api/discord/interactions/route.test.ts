@@ -173,7 +173,7 @@ describe("/community-gallery", () => {
 
   it("lists matching looks by title or creator, every word counting", async () => {
     index = [entry(1, "Frost in the Fens"), entry(2, "Ember Knight", "Frostbite"), entry(3, "Sunlit Robes")];
-    const reply = await answered(command("wardrobe", { search: "frost" }));
+    const reply = await answered(command("gallery", { search: "frost" }));
     const [embed] = reply.embeds as Record<string, string>[];
     expect(embed.description).toContain("Frost in the Fens");
     expect(embed.description).toContain("Ember Knight");
@@ -182,7 +182,7 @@ describe("/community-gallery", () => {
 
   it("shows five and links the rest to the Wardrobe's own search", async () => {
     index = Array.from({ length: 8 }, (_, i) => entry(i + 1, `Frost ${i + 1}`));
-    const reply = await answered(command("wardrobe", { search: "frost" }));
+    const reply = await answered(command("gallery", { search: "frost" }));
     const [embed] = reply.embeds as Record<string, string>[];
     expect(embed.description.match(/\/community-gallery\/0000/g)).toHaveLength(5);
     expect(embed.description).toContain(`${siteUrl}/community-gallery?q=frost`);
@@ -191,8 +191,14 @@ describe("/community-gallery", () => {
 
   it("says so when nothing matches", async () => {
     index = [entry(1, "Sunlit Robes")];
-    const reply = await answered(command("wardrobe", { search: "frost" }));
+    const reply = await answered(command("gallery", { search: "frost" }));
     expect(reply.content).toMatch(/no looks match/i);
+  });
+
+  it("still answers /wardrobe, the command's old name, until Discord forgets it", async () => {
+    index = [entry(1, "Frost in the Fens")];
+    const reply = await answered(command("wardrobe", { search: "frost" }));
+    expect((reply.embeds as Record<string, string>[])[0].description).toContain("Frost in the Fens");
   });
 });
 
@@ -397,6 +403,14 @@ describe("a message's right-click menu", () => {
   });
 
   it("keeps a slow answer private while it thinks", async () => {
+    slowMs = 120;
+    const res = await send(rightClick("Add to Community Gallery", code));
+    expect(await res.json()).toEqual({ type: 5, data: { flags: 64 } });
+    await Promise.all(pending);
+    expect(edits[0].body.content).toBe("Added");
+  });
+
+  it("still runs the old \"Add to Wardrobe\" right-click until Discord forgets it", async () => {
     slowMs = 120;
     const res = await send(rightClick("Add to Wardrobe", code));
     expect(await res.json()).toEqual({ type: 5, data: { flags: 64 } });

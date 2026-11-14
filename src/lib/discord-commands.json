@@ -2,7 +2,7 @@
   {
     "name": "look",
     "type": 1,
-    "description": "Show a look from the Wardrobe",
+    "description": "Show a look from the Community Gallery",
     "integration_types": [0, 1],
     "contexts": [0, 1, 2],
     "options": [
@@ -10,9 +10,9 @@
     ]
   },
   {
-    "name": "wardrobe",
+    "name": "gallery",
     "type": 1,
-    "description": "Search the Wardrobe's looks by title or creator",
+    "description": "Search the Community Gallery by title or creator",
     "integration_types": [0, 1],
     "contexts": [0, 1, 2],
     "options": [
@@ -53,7 +53,7 @@
     "contexts": [0, 1, 2]
   },
   {
-    "name": "Add to Wardrobe",
+    "name": "Add to Community Gallery",
     "type": 3,
     "integration_types": [0],
     "contexts": [0]
