@@ -94,7 +94,7 @@ function Screenshots({
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs text-ink-dim">
-        Screenshots from the Showcase studio, up to {MAX_SCREENSHOTS}. The first is the cover.
+        Screenshots from the Showcase studio, at least one and up to {MAX_SCREENSHOTS}. The first is the cover.
         {fromSet && fromSet.gallery.length > 0 && " The ones your game sent are already here."}
       </p>
       {images.length > 0 && (
@@ -137,7 +137,8 @@ export interface RemixOf {
   author: string | null;
 }
 
-function PublishForm({ code, remixOf, fromSet }: { code: string; remixOf: RemixOf | null; fromSet: SetPictures | null }) {
+/** `code` is null until a valid loadout code is pasted; the form can be filled in before that. */
+function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf: RemixOf | null; fromSet: SetPictures | null }) {
   const [credit, setCredit] = useState(remixOf !== null);
   const [title, setTitle] = useState("");
   const [className, setClassName] = useState<ClassName | null>(null);
@@ -145,12 +146,14 @@ function PublishForm({ code, remixOf, fromSet }: { code: string; remixOf: RemixO
   const [race, setRace] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [gallery, setGallery] = useState<string[]>(fromSet?.gallery ?? []);
-  const [published, setPublished] = useState<string | null>(null);
+  // Which code was published, so pasting another one offers the form again.
+  const [published, setPublished] = useState<{ id: string; code: string } | null>(null);
   const [error, setError] = useState<{ text: string; existing?: string } | null>(null);
   const [pending, start] = useTransition();
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (!code || gallery.length === 0) return;
     setError(null);
     start(async () => {
       const r = await publishOutfit({
@@ -167,15 +170,15 @@ function PublishForm({ code, remixOf, fromSet }: { code: string; remixOf: RemixO
         setError({ text: r.error, existing: r.existing });
         return;
       }
-      setPublished(r.id);
+      setPublished({ id: r.id, code });
       toast.success("Published to the Community Gallery");
     });
   }
 
-  if (published) {
+  if (published && published.code === code) {
     return (
       <p className="text-sm text-ink-dim">
-        Published. <Link href={`/community-gallery/${published}`} className="text-amber underline underline-offset-2">Open it in the Community Gallery</Link>
+        Published. <Link href={`/community-gallery/${published.id}`} className="text-amber underline underline-offset-2">Open it in the Community Gallery</Link>
       </p>
     );
   }
@@ -229,49 +232,48 @@ function PublishForm({ code, remixOf, fromSet }: { code: string; remixOf: RemixO
           )}
         </p>
       )}
-      <Button type="submit" size="sm" disabled={pending} className="self-start">
-        {pending && <Loader2 className="size-4 animate-spin" />}
-        Publish to the Community Gallery
-      </Button>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" size="sm" disabled={pending || !code || gallery.length === 0}>
+          {pending && <Loader2 className="size-4 animate-spin" />}
+          Publish to the Community Gallery
+        </Button>
+        {!code ? (
+          <p className="text-xs text-ink-faint">Paste a loadout code above first.</p>
+        ) : gallery.length === 0 && (
+          <p className="text-xs text-ink-faint">Add a screenshot to publish.</p>
+        )}
+      </div>
     </form>
   );
 }
 
-function OutfitResultView({ result, canPublish, remixOf, fromSet }: {
+function OutfitPanel({ result, code, removed, onRemove }: {
   result: OutfitResult;
-  canPublish: boolean;
-  remixOf: RemixOf | null;
-  fromSet: SetPictures | null;
+  code: string;
+  removed: number[];
+  onRemove: (slot: number) => void;
 }) {
-  // Hand a slot back to the wearer's gear, as the game's own slot clear does.
-  const [removed, setRemoved] = useState<number[]>([]);
-  const code = useMemo(() => {
-    const slots = Object.fromEntries(
-      Object.entries(result.outfit.slots).filter(([s]) => !removed.includes(Number(s))),
-    );
-    return encodeOutfit({ ...result.outfit, slots });
-  }, [result, removed]);
   const shown = result.resolved.slots.filter((s) => !removed.includes(s.slot));
-
   return (
-    <div className={canPublish ? "grid gap-4 lg:grid-cols-2" : "grid gap-4"}>
-      <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label="What the code holds">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-base">{shown.length} {shown.length === 1 ? "piece" : "pieces"}</h2>
-          <CopyButton code={code} label={removed.length ? "Copy edited code" : "Copy code"} />
-        </div>
-        <SlotList slots={shown} onRemove={(s) => setRemoved((r) => [...r, s])} />
-        <LoadoutFacts resolved={result.resolved} />
-        {result.warnings.map((w) => <p key={w} className="text-xs text-info">{w}</p>)}
-      </section>
-      {canPublish && (
-        <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label="Publish">
-          <h2 className="text-base">Publish it</h2>
-          {/* A set's pictures show its look: an edited look starts with none. */}
-          <PublishForm key={code} code={code} remixOf={remixOf} fromSet={removed.length ? null : fromSet} />
-        </section>
-      )}
-    </div>
+    <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label="What the code holds">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-base">{shown.length} {shown.length === 1 ? "piece" : "pieces"}</h2>
+        <CopyButton code={code} label={removed.length ? "Copy edited code" : "Copy code"} />
+      </div>
+      <SlotList slots={shown} onRemove={onRemove} />
+      <LoadoutFacts resolved={result.resolved} />
+      {result.warnings.map((w) => <p key={w} className="text-xs text-info">{w}</p>)}
+    </section>
+  );
+}
+
+/** Where a code's pieces appear, before one is pasted. */
+function EmptyPanel() {
+  return (
+    <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label="What the code holds">
+      <h2 className="text-base">No pieces yet</h2>
+      <p className="text-sm text-ink-dim">Paste a loadout code above and the pieces it holds are listed here.</p>
+    </section>
   );
 }
 
@@ -318,7 +320,25 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
 }) {
   const [text, setText] = useState(initial);
   const [result, setResult] = useState<InspectResult | null>(null);
+  // Slots handed back to the wearer's gear, as the game's own slot clear does. A new code starts with none.
+  const [removed, setRemoved] = useState<number[]>([]);
   const [pending, start] = useTransition();
+
+  function change(next: string) {
+    setText(next);
+    setRemoved([]);
+  }
+
+  const outfit = result?.kind === "outfit" ? result : null;
+  const code = useMemo(() => {
+    if (!outfit) return null;
+    const slots = Object.fromEntries(
+      Object.entries(outfit.outfit.slots).filter(([s]) => !removed.includes(Number(s))),
+    );
+    return encodeOutfit({ ...outfit.outfit, slots });
+  }, [outfit, removed]);
+  // A set's pictures show its look: an edited look starts with none.
+  const pictures = text === initial && removed.length === 0 ? fromSet : null;
 
   useEffect(() => {
     if (!text.trim()) {
@@ -331,7 +351,7 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
 
   async function paste() {
     try {
-      setText(await navigator.clipboard.readText());
+      change(await navigator.clipboard.readText());
     } catch {
       toast.error("The browser refused the clipboard. Paste into the box instead.");
     }
@@ -348,7 +368,7 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
           aria-label="Eclipse code"
           aria-invalid={result?.kind === "error"}
           placeholder="ECA1:c2xvdCAwIDI1OTMwNgpzbG90IDIgMTAwMTczMw..."
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => change(e.target.value)}
           className="min-h-28 bg-surface font-mono text-xs leading-[18px] break-all"
         />
       </div>
@@ -361,16 +381,26 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
         {result?.kind === "error" && <p role="alert" className="text-sm text-bad">{result.error}</p>}
         {result && result.kind !== "error" && <p className="text-sm text-good">Valid {result.kind === "world" ? "world" : "loadout"} code</p>}
       </div>
-      {result?.kind === "outfit" && (
-        <OutfitResultView
-          key={text}
-          result={result}
-          canPublish={canPublish}
-          remixOf={remixOf}
-          fromSet={text === initial ? fromSet : null}
-        />
+      {result?.kind === "world" ? (
+        <WorldResultView result={result} code={text.trim()} />
+      ) : canPublish ? (
+        // The form shows before a code is pasted and stays mounted across pastes, so what was typed is kept.
+        <div className="grid gap-4 lg:grid-cols-2">
+          {outfit && code ? (
+            <OutfitPanel result={outfit} code={code} removed={removed} onRemove={(s) => setRemoved((r) => [...r, s])} />
+          ) : (
+            <EmptyPanel />
+          )}
+          <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label="Publish">
+            <h2 className="text-base">Publish it</h2>
+            <PublishForm key={pictures ? "set" : "code"} code={code} remixOf={remixOf} fromSet={pictures} />
+          </section>
+        </div>
+      ) : (
+        outfit && code && (
+          <OutfitPanel result={outfit} code={code} removed={removed} onRemove={(s) => setRemoved((r) => [...r, s])} />
+        )
       )}
-      {result?.kind === "world" && <WorldResultView result={result} code={text.trim()} />}
     </div>
   );
 }

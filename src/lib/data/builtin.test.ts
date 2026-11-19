@@ -155,11 +155,11 @@ describe("the built-in looks", () => {
 
 describe("submissions", () => {
   it("refuses one the game could not wear", () => {
-    const base = { title: "A look", tags: [] };
+    const upload = "11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.avif";
+    const base = { title: "A look", tags: [], gallery: [upload] };
     expect(submitOutfitSchema.safeParse({ ...base, code: "hello" }).success).toBe(false);
     expect(submitOutfitSchema.safeParse({ ...base, code: "ECA1:c2xvdCAwIDEK" }).success).toBe(true);
     expect(submitOutfitSchema.safeParse({ ...base, title: "a", code: "ECA1:c2xvdCAwIDEK" }).success).toBe(false);
-    const upload = "11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.avif";
     expect(
       submitOutfitSchema.safeParse({ ...base, code: "ECA1:c2xvdCAwIDEK", gallery: ["https://x.test/a.png"] }).success,
     ).toBe(false);
@@ -169,5 +169,13 @@ describe("submissions", () => {
     expect(
       submitOutfitSchema.safeParse({ ...base, code: "ECA1:c2xvdCAwIDEK", gallery: [upload] }).success,
     ).toBe(true);
+  });
+
+  it("needs at least one screenshot", () => {
+    const look = { title: "A look", code: "ECA1:c2xvdCAwIDEK" };
+    const missing = submitOutfitSchema.safeParse(look);
+    expect(missing.success).toBe(false);
+    expect(missing.error?.issues[0].message).toMatch(/screenshot/i);
+    expect(submitOutfitSchema.safeParse({ ...look, gallery: [] }).success).toBe(false);
   });
 });
