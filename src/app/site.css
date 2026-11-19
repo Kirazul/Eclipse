@@ -355,20 +355,6 @@
 
 /* With the video gone the hero is the art and the text: the text stands in the
    middle of the screen, and the foot names what the overlay changes. */
-.hero__text .hero__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  height: 2rem;
-  margin: 0 0 1.4rem;
-  padding: 0 0.9rem;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: rgba(20, 20, 19, 0.55);
-  font-size: 0.82rem;
-  color: #d6d3ca;
-}
-.hero__eyebrow::before { content: ""; width: 0.4rem; height: 0.4rem; border-radius: 999px; background: var(--amber); }
 .hero__text p a { color: var(--ink); text-decoration: underline; text-underline-offset: 0.18em; text-decoration-color: var(--line-strong); }
 .hero__text p a:hover { text-decoration-color: currentColor; }
 .hero__community {
@@ -384,15 +370,6 @@
 .hero__community:hover { color: var(--ink); }
 .hero__community .btn__count { color: var(--ink); }
 .hero__foot { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.9rem; }
-.hero__chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; max-width: 48rem; margin: 0; padding: 0; list-style: none; }
-.hero__chips li {
-  padding: 0.35rem 0.8rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(20, 20, 19, 0.5);
-  font-size: 0.8rem;
-  color: #d6d3ca;
-}
 .hero__more {
   display: inline-flex;
   flex-direction: column;
@@ -630,10 +607,9 @@
   .section__head p { font-size: 0.98rem; }
 
   /* Portrait phones: the text sits low, under the figure's face, and the
-     buttons stack; the chips would crowd the screen, so the link alone stays. */
+     buttons stack. */
   .hero { padding-bottom: 1.25rem; }
   .hero__text { justify-content: flex-end; }
-  .hero__chips { display: none; }
   .cta { flex-direction: column; gap: 0.6rem; width: 100%; margin-top: 1.5rem; }
   .cta .btn { width: 100%; padding: 0 1rem; }
   .bar .btn--sm span { display: none; }
