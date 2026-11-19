@@ -29,7 +29,12 @@ export const submitOutfitSchema = z.object({
   tags: z.array(z.string().trim().min(1).max(24)).max(6).default([]),
   /** The author's caption, shown with the comments. */
   description: descriptionSchema.optional(),
-  gallery: z.array(upload).max(MAX_SCREENSHOTS, `Keep it to ${MAX_SCREENSHOTS} screenshots.`).default([]),
+  // Every look in the Gallery opens on how the game drew it, so a screenshot is required.
+  // No default: a missing gallery must fail, not become an empty one.
+  gallery: z
+    .array(upload, { error: "Add at least one screenshot." })
+    .min(1, "Add at least one screenshot.")
+    .max(MAX_SCREENSHOTS, `Keep it to ${MAX_SCREENSHOTS} screenshots.`),
   /** The published look this was made from, credited on the new one. */
   remixedFrom: z.uuid().optional(),
 });

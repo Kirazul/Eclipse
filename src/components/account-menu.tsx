@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, ChevronDown, Flag, Heart, Layers, LogOut, Settings, Shirt } from "lucide-react";
+import { Bookmark, ChevronDown, Flag, Heart, Layers, LogOut, Settings, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { AccountDialog } from "@/components/account-dialog";
@@ -43,7 +43,7 @@ export function AccountMenu({ account, onNamed }: { account: Account; onNamed: (
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href={`/creators/${account.id}`}><Shirt />Your looks</Link>
+            <Link href={`/creators/${account.id}`}><UserRound />Your profile</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/community-gallery?saved=true&sort=newest"><Bookmark />Bookmarks</Link>

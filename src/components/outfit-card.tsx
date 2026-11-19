@@ -1,4 +1,4 @@
-import { BadgeCheck, EyeOff } from "lucide-react";
+import { BadgeCheck, Copy, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
@@ -8,6 +8,7 @@ import { UpvoteButton } from "@/components/upvote-button";
 import { resolveOutfit, type ResolvedOutfit } from "@/lib/catalog";
 import { decodeOutfit } from "@/lib/codec/outfit";
 import type { OutfitPost } from "@/lib/data/types";
+import { posted } from "@/lib/ago";
 import { ARMOR_LABEL, RACE_LABEL, VISIBLE_SLOTS } from "@/lib/domain";
 import { thumbOf } from "@/lib/screenshots";
 import { cardBackdropFor, classArt, raceArt } from "@/lib/wow-assets";
@@ -27,11 +28,11 @@ const crestArt = (post: OutfitPost, resolved: ResolvedOutfit | null) =>
       ? raceArt(resolved.raceKey, resolved.sex)
       : null;
 
-// How many worn pieces the strip shows before it counts the rest.
-const STRIP = 8;
+const COUNT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
+const WHOLE = new Intl.NumberFormat("en");
 
 /**
- * The Wardrobe's view: the look, who made it, what it wears, its tags and its code.
+ * The Gallery's view: the look, who made it, its copies, one detail, when, and its code; hover shows its caption and the other details.
  * With `manage`, on its author's own list, a ⋯ menu adds Dressing room, private and Delete.
  * Follows the Eclipse design system: radius-md, a line hairline and no shadow,
  * surface-raised and the corona rim on hover, 120ms, one primary action.
@@ -41,15 +42,26 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
   const worn = pieces(resolved);
   const crest = crestArt(post, resolved);
   const capture = post.gallery[0];
-  const tags = [
-    ...post.categories,
+  // Details wait for hover; the card at rest shows only the title, author, copies and date.
+  const rest = [
+    post.className,
     post.race ? RACE_LABEL[post.race] : null,
     post.armor ? ARMOR_LABEL[post.armor] : null,
+    ...post.categories,
   ].filter((t): t is string => Boolean(t));
+  const caption = post.description?.trim();
+  const copies = post.copies ?? 0;
+  const copiesLabel = `${WHOLE.format(copies)} ${copies === 1 ? "copy" : "copies"}`;
 
   return (
     <article className="corona-rim relative isolate flex flex-col overflow-hidden rounded-[8px] border border-line bg-surface transition-colors duration-[120ms] hover:bg-surface-raised">
-      <Link href={`/community-gallery/${post.id}`} className="group flex flex-1 flex-col" aria-label={`Open ${post.title}`}>
+      {/* The look's link covers the card from underneath, so the author's name can be a link of its own above it: a link inside a link is not allowed. */}
+      <div className="group relative flex flex-1 flex-col">
+        <Link
+          href={`/community-gallery/${post.id}`}
+          className="absolute inset-0 z-20 rounded-t-[8px] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-amber"
+          aria-label={`Open ${post.title}`}
+        />
         {/* Every card has the same picture frame, so a row of cards lines up with or without a capture. */}
         <div className="relative aspect-[16/10] overflow-hidden border-b border-line bg-void">
           {/* Only its author is ever shown a private look, on their own lists. */}
@@ -59,7 +71,7 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
             </span>
           )}
           {capture ? (
-            // The capture stands alone: the game's own panels already show its pieces, so nothing is laid over it.
+            // The capture stands alone at rest; only hover lays the caption over it.
             <Image src={thumbOf(capture)} alt="" fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
           ) : (
             <>
@@ -72,6 +84,19 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
               )}
             </>
           )}
+          {/* More on hover, as a store shelf does: what the author wrote and the details the card leaves out. Under the link, so a click still opens the look. Tailwind's hover applies only where a pointer can hover; on a phone the look's page has all of it. */}
+          {(caption || rest.length > 0) && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col gap-2 bg-gradient-to-t from-void via-void/90 to-transparent px-4 pt-10 pb-3 opacity-0 transition-opacity duration-[120ms] group-focus-within:opacity-100 group-hover:opacity-100">
+              {caption && <p className="line-clamp-3 text-sm leading-5 text-ink">{caption}</p>}
+              {rest.length > 0 && (
+                <ul className="flex flex-wrap gap-1">
+                  {rest.map((t) => (
+                    <li key={t} className="rounded-[6px] border border-line-strong px-2 py-0.5 text-xs leading-4 text-ink-dim">{t}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex flex-1 flex-col gap-3 p-4">
           <div className="flex items-center gap-3">
@@ -79,33 +104,38 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-base leading-6 font-semibold tracking-[-0.02em] text-ink">{post.title}</h3>
               <p className="flex items-center gap-1 text-xs text-ink-faint">
-                <span className="truncate">{post.author ?? "Item set"}</span>
+                {post.authorId && post.author ? (
+                  <Link href={`/creators/${post.authorId}`} className="relative z-30 truncate underline-offset-2 hover:text-ink hover:underline">
+                    {post.author}
+                  </Link>
+                ) : (
+                  <span className="truncate">{post.author ?? "Item set"}</span>
+                )}
                 {post.authorVerified && <BadgeCheck className="size-3.5 shrink-0 text-amber" strokeWidth={1.5} aria-label="Verified" />}
               </p>
             </div>
           </div>
-          {/* What it wears, the same row on every card, so looks compare at a glance. */}
-          {worn.length > 0 && (
-            <div className="flex items-center gap-1">
-              {worn.slice(0, STRIP).map((p) => (
-                <ItemRing key={p.slot} icon={p.icon} slot={p.slot} quality={p.quality} size={28} hidden={p.item === 0} />
-              ))}
-              {worn.length > STRIP && <span className="nums pl-1 text-xs text-ink-faint">+{worn.length - STRIP}</span>}
+          {/* Copies and date at rest, the details on hover: no item strip, the look's page lists what it wears. */}
+          {(copies > 0 || post.createdAt) && (
+            <div className="mt-auto flex items-center gap-2 text-xs leading-4 text-ink-faint">
+              {/* Shown once someone has copied it: a row of zeros would say nothing. */}
+              {copies > 0 && (
+                <span className="nums inline-flex shrink-0 items-center gap-1 text-ink-dim" title={copiesLabel}>
+                  <Copy className="size-3.5" strokeWidth={1.5} aria-hidden />
+                  <span aria-hidden>{COUNT.format(copies)}</span>
+                  <span className="sr-only">{copiesLabel}</span>
+                </span>
+              )}
+              {post.createdAt && (
+                <time dateTime={post.createdAt} className="nums ml-auto shrink-0">{posted(post.createdAt, Date.now())}</time>
+              )}
             </div>
           )}
-          {/* Scanned, not read: tags before prose. */}
-          {tags.length > 0 && (
-            <ul className="mt-auto flex flex-wrap gap-1">
-              {tags.map((t) => (
-                <li key={t} className="rounded-[6px] border border-line px-2 py-0.5 text-xs leading-4 text-ink-dim">{t}</li>
-              ))}
-            </ul>
-          )}
         </div>
-      </Link>
+      </div>
       <div className="flex items-center gap-2 px-4 pb-4">
         {post.upvotes !== null && <UpvoteButton id={post.id} count={post.upvotes} />}
-        <CopyButton code={post.code} className="ml-auto" />
+        <CopyButton code={post.code} look={post.id} className="ml-auto" />
         {manage && (
           <LookMenu
             id={post.id}
@@ -141,7 +171,7 @@ export function OutfitPoster({ post }: { post: OutfitPost }) {
       </Link>
       {/* Stacked: side by side they overlap on a phone's two-column grid. */}
       <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1.5">
-        <CopyButton code={post.code} />
+        <CopyButton code={post.code} look={post.id} />
         {post.upvotes !== null && <UpvoteButton id={post.id} count={post.upvotes} className="bg-surface/85 text-ink backdrop-blur-sm" />}
       </div>
     </article>

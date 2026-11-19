@@ -6,7 +6,7 @@ import { SCREENSHOT_BUCKET, screenshotUrl, thumbOf } from "@/lib/screenshots";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { compressScreenshot, SCREENSHOT_EXTENSION, SCREENSHOT_TYPE } from "./compress";
 import type {
-  CommentReportReason, GameLink, GameSet, LookComment, OutfitFilters, OutfitList, OutfitPost, ReportReason, Repository,
+  CommentReportReason, CreatorEntry, GameLink, GameSet, LookComment, OutfitFilters, OutfitList, OutfitPost, ReportReason, Repository,
   WriteResult,
 } from "./types";
 
@@ -24,6 +24,7 @@ interface OutfitRow {
   tags: string[];
   description: string | null;
   upvotes: number;
+  copies: number;
   created_at: string;
   /** Null on a look from the Discord showcase until its player signs in. */
   author_id: string | null;
@@ -102,7 +103,7 @@ const toGameSet = (r: GameSetRow): GameSet => ({
 // The hint is required: outfit_votes, outfit_reports and outfit_bookmarks also join
 // outfits to profiles, and PostgREST refuses a bare profiles(...) embed as ambiguous.
 const OUTFIT_COLUMNS =
-  "id,title,code,class_name,armor,race,categories,tags,description,upvotes,created_at,author_id,discord_name,gallery,is_private,profiles!outfits_author_id_fkey(display_name,verified,avatar_url)," +
+  "id,title,code,class_name,armor,race,categories,tags,description,upvotes,copies,created_at,author_id,discord_name,gallery,is_private,profiles!outfits_author_id_fkey(display_name,verified,avatar_url)," +
   // outfits refers to itself. Embedding through the column itself reaches the original (one
   // row, or null); `outfits!remixed_from` reached the other way, the remixes, as an array.
   "remix:remixed_from(id,title,discord_name,profiles!outfits_author_id_fkey(display_name))";
@@ -124,6 +125,7 @@ const toPost = (r: OutfitRow): OutfitPost => ({
   tags: r.tags,
   description: r.description,
   upvotes: r.upvotes,
+  copies: r.copies,
   createdAt: r.created_at,
   gallery: r.gallery.map(screenshotUrl),
   remixedFrom: r.remix ? { id: r.remix.id, title: r.remix.title, author: r.remix.profiles?.display_name ?? r.remix.discord_name ?? null } : null,
@@ -165,6 +167,8 @@ const uploadError = (message: string): WriteResult<string> => ({
     : "That screenshot could not be stored. Try again.",
 });
 const SEARCH_INDEX_SIZE = 200;
+/** How many public looks finding creators reads, the most upvoted first. Far more than exist today. */
+const CREATOR_SCAN = 2000;
 
 /** People can edit their own user metadata, so this is only a suggestion. */
 const safeAvatar = (url: unknown) => (typeof url === "string" && url.startsWith("https://") ? url : null);
@@ -256,22 +260,54 @@ export const supabaseRepository: Repository = {
   async getCreator(id) {
     if (!UUID.test(id)) return null;
     const db = await createServerSupabase();
-    // RLS limits the looks to what this visitor can see, so a hidden look is not counted.
+    // RLS limits the looks to what this visitor can see, so a hidden look is not counted,
+    // and only public ones count, so the owner sees the numbers everyone else does.
     const [profile, looks] = await Promise.all([
-      db.from("profiles").select("display_name,verified,created_at").eq("id", id).maybeSingle(),
-      db.from("outfits").select("upvotes").eq("author_id", id),
+      db.from("profiles").select("display_name,verified,created_at,avatar_url").eq("id", id).maybeSingle(),
+      db.from("outfits").select("upvotes,class_name").eq("author_id", id).eq("is_private", false),
     ]);
     if (profile.error) throw new Error(profile.error.message);
     if (looks.error) throw new Error(looks.error.message);
     if (!profile.data?.display_name) return null;
+    const classes = new Map<ClassName, number>();
+    for (const r of looks.data) {
+      if (r.class_name) classes.set(r.class_name as ClassName, (classes.get(r.class_name as ClassName) ?? 0) + 1);
+    }
     return {
       id,
       name: profile.data.display_name,
       verified: profile.data.verified,
       joinedAt: profile.data.created_at,
+      avatar: safeAvatar(profile.data.avatar_url),
       looks: looks.data.length,
       upvotes: looks.data.reduce((sum, r) => sum + r.upvotes, 0),
+      classes: [...classes].map(([className, n]) => ({ className, looks: n })).sort((a, b) => b.looks - a.looks),
     };
+  },
+  async listCreators({ q, limit }) {
+    const db = await createServerSupabase();
+    // Counted from the looks rather than the profiles, so nobody without a public look is listed.
+    // The inner join drops looks whose author's name does not match the search.
+    let query = db
+      .from("outfits")
+      .select("author_id,profiles!outfits_author_id_fkey!inner(display_name,verified,avatar_url)")
+      .eq("is_private", false)
+      .not("author_id", "is", null)
+      .order("upvotes", { ascending: false })
+      .limit(CREATOR_SCAN);
+    const term = q ? safeTerm(q) : "";
+    if (term) query = query.ilike("profiles.display_name", `%${term}%`);
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    const found = new Map<string, CreatorEntry>();
+    for (const r of data as unknown as { author_id: string; profiles: OutfitRow["profiles"] }[]) {
+      const name = r.profiles?.display_name;
+      if (!name) continue;
+      const seen = found.get(r.author_id);
+      if (seen) seen.looks += 1;
+      else found.set(r.author_id, { id: r.author_id, name, verified: r.profiles?.verified ?? false, avatar: safeAvatar(r.profiles?.avatar_url), looks: 1 });
+    }
+    return [...found.values()].sort((a, b) => b.looks - a.looks || a.name.localeCompare(b.name)).slice(0, limit);
   },
   async searchIndex() {
     const { posts } = await listOutfits({ sort: "top", pageSize: SEARCH_INDEX_SIZE });

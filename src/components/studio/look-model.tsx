@@ -4,6 +4,7 @@ import { Box, Images } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
+import { PreviewNotice } from "@/components/preview-notice";
 import { StudioGallery } from "@/components/studio/studio-gallery";
 import type { Wearer } from "@/lib/viewer/figure";
 
@@ -38,6 +39,11 @@ export function LookModel({ pieces, wearer, gallery, backdrop, title }: {
         <div className="mx-auto w-full max-w-sm">
           <ModelStage pieces={pieces} wearer={wearer} />
         </div>
+        <PreviewNotice
+          advice={gallery.length > 0 ? "The screenshots show it as the game draws it." : undefined}
+          compact
+          className="mx-auto w-full max-w-sm"
+        />
         {gallery.length > 0 && (
           <button type="button" className={`${toggle} self-center`} onClick={() => setFigure(false)}>
             <Images className="size-3.5" aria-hidden />

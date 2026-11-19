@@ -1,12 +1,19 @@
 "use client";
 
-import { BookOpen, Braces, Download, Images, LayoutGrid, Rabbit, Search, Shirt } from "lucide-react";
+import { BadgeCheck, BookOpen, Braces, Download, Images, LayoutGrid, Rabbit, Search, Shirt } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut,
 } from "@/components/ui/command";
-import type { SearchEntry } from "@/lib/data/types";
+import type { SearchIndex } from "@/app/api/search/route";
+import { Avatar } from "@/components/avatar";
+import { sizedAvatar } from "@/lib/avatar";
+import type { CreatorEntry, SearchEntry } from "@/lib/data/types";
+
+// Until the CDN's copy from before creators were listed expires, the route may still answer with only the looks.
+const readIndex = (body: SearchIndex | SearchEntry[]): SearchIndex =>
+  Array.isArray(body) ? { looks: body, creators: [] } : body;
 
 const PAGES = [
   { href: "/community-gallery", label: "Community Gallery", icon: Shirt },
@@ -22,6 +29,7 @@ const PAGES = [
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const [outfits, setOutfits] = useState<SearchEntry[]>([]);
+  const [creators, setCreators] = useState<CreatorEntry[]>([]);
   const fetched = useRef(false);
   const router = useRouter();
 
@@ -33,9 +41,13 @@ export function CommandMenu() {
     fetch("/api/search")
       .then((r) => {
         if (!r.ok) throw new Error(r.statusText);
-        return r.json() as Promise<SearchEntry[]>;
+        return r.json() as Promise<SearchIndex | SearchEntry[]>;
       })
-      .then(setOutfits)
+      .then((body) => {
+        const index = readIndex(body);
+        setOutfits(index.looks);
+        setCreators(index.creators);
+      })
       .catch(() => {
         fetched.current = false;
       });
@@ -63,11 +75,11 @@ export function CommandMenu() {
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen} title="Search Eclipse" description="Find an outfit or a page">
+    <CommandDialog open={open} onOpenChange={setOpen} title="Search Eclipse" description="Find an outfit, a creator or a page">
       {/* This shadcn CommandDialog has no cmdk root of its own: without Command
           the input has no store, and opening the menu takes the page down. */}
       <Command>
-        <CommandInput placeholder="Search outfits and pages" />
+        <CommandInput placeholder="Search outfits, creators and pages" />
         <CommandList>
         <CommandEmpty>Nothing matches that.</CommandEmpty>
         <CommandGroup heading="Pages">
@@ -78,6 +90,18 @@ export function CommandMenu() {
             </CommandItem>
           ))}
         </CommandGroup>
+        {creators.length > 0 && (
+          <CommandGroup heading="Creators">
+            {creators.map((c) => (
+              <CommandItem key={c.id} value={`${c.name} ${c.id}`} onSelect={() => go(`/creators/${c.id}`)}>
+                <Avatar account={{ name: c.name, avatar: sizedAvatar(c.avatar) }} size={22} />
+                <span className="truncate">{c.name}</span>
+                {c.verified && <BadgeCheck className="text-amber" strokeWidth={1.5} aria-label="Verified" />}
+                <CommandShortcut className="tracking-normal">{c.looks} {c.looks === 1 ? "look" : "looks"}</CommandShortcut>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
         <CommandGroup heading="Outfits">
           {outfits.map((o) => (
             // The id keeps values unique: real sets can share a name.

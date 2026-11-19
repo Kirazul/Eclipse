@@ -29,6 +29,8 @@ export interface OutfitPost {
   description?: string | null;
   /** Null where nobody can vote: the site never shows a count it did not record. */
   upvotes: number | null;
+  /** Visitors who copied its code, each once. Missing where nobody counts copies. */
+  copies?: number | null;
   createdAt: string | null;
   /** Links to studio screenshots, the cover first. The code holds no pictures. */
   gallery: string[];
@@ -44,8 +46,22 @@ export interface Creator {
   name: string;
   verified: boolean;
   joinedAt: string;
+  /** Their Discord picture, public like their name. */
+  avatar: string | null;
   looks: number;
   upvotes: number;
+  /** The classes their public looks are for, most dressed first. */
+  classes: { className: ClassName; looks: number }[];
+}
+
+/** A creator as search lists them: enough to recognise and open their page. */
+export interface CreatorEntry {
+  id: string;
+  name: string;
+  verified: boolean;
+  avatar: string | null;
+  /** Their public looks. */
+  looks: number;
 }
 
 export interface OutfitFilters {
@@ -189,6 +205,8 @@ export interface Repository {
   /** A creator's public page. Null for an unknown id or someone with no public name. */
   getCreator(id: string): Promise<Creator | null>;
   searchIndex(): Promise<SearchEntry[]>;
+  /** People with public looks, the most prolific first; with `q`, only names that contain it. */
+  listCreators(filter: { q?: string; limit: number }): Promise<CreatorEntry[]>;
   createOutfit(input: ParsedOutfit): Promise<WriteResult<OutfitPost>>;
   upvote(id: string): Promise<WriteResult<number>>;
   /**

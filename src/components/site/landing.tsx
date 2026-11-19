@@ -16,9 +16,6 @@ import { DISCORD_URL, dllUrl, downloadUrl } from "@/lib/site";
 // the exception: Kira took the showcase video out on 2026-11-14 and asked for the
 // text in the middle of the screen.
 
-/** The hero's quick answer to "what does it change", from the feature grid's titles. */
-const HERO_CHIPS = ["Wardrobe", "Customization", "Mounts", "Creature morph", "Enchants", "Spell visuals", "Titles", "World"];
-
 /** Discord's own member count for the invite, or nothing when Discord does not say. */
 async function DiscordMembers() {
   const count = await discordMembers();
@@ -46,7 +43,6 @@ export function Hero() {
     <section className="hero" id="top">
       <HeroStage />
       <div className="wrap hero__text">
-        <p className="hero__eyebrow">A free overlay for the 3.3.5a client</p>
         <h1>
           A wardrobe for <span className="flow-text">World of Warcraft</span>
         </h1>
@@ -64,11 +60,8 @@ export function Hero() {
         </a>
       </div>
       <div className="wrap hero__foot">
-        <ul className="hero__chips" aria-label="What Eclipse changes">
-          {HERO_CHIPS.map((name) => <li key={name}>{name}</li>)}
-        </ul>
-        <a className="hero__more" href="#features">
-          <span>See everything it does</span><ChevronDown aria-hidden="true" />
+        <a className="hero__more" href="#features" aria-label="See everything it does">
+          <ChevronDown aria-hidden="true" />
         </a>
       </div>
     </section>

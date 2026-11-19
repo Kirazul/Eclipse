@@ -54,6 +54,37 @@ describe("a Community Gallery card", () => {
     expect(html).toContain('aria-label="Copy code"');
   });
 
+  it("stays clean: no strip of item icons", () => {
+    expect(card(POST)).not.toMatch(/class="hex[\s"]/);
+  });
+
+  it("keeps the details off the card at rest: they show on hover only", () => {
+    const html = card({ ...POST, className: "Death Knight", race: "dwarf", armor: "plate" });
+    expect(html).not.toContain(">+3<");
+    expect(html).not.toContain(">+4<");
+    expect(html).not.toMatch(/truncate rounded-\[6px\] border border-line px-2/);
+  });
+
+  it("shows how many copied it, once anyone has", () => {
+    expect(card({ ...POST, copies: 1234 })).toContain(">1,234 copies<");
+    expect(card({ ...POST, copies: 1234 })).toContain(">1.2K<");
+    expect(card({ ...POST, copies: 1 })).toContain(">1 copy<");
+    expect(card({ ...POST, copies: 0 })).not.toContain("copies");
+    expect(card(POST)).not.toContain("copies");
+  });
+
+  it("says when it was posted", () => {
+    expect(card(POST)).toContain("Nov 1, 2026");
+    expect(card({ ...POST, createdAt: null })).not.toContain("2026");
+  });
+
+  it("keeps the caption and the other details for hover", () => {
+    const html = card({ ...POST, race: "dwarf", description: "Made for raid night" });
+    expect(html).toContain("Made for raid night");
+    expect(html).toContain(">Armor<");
+    expect(card({ ...POST, categories: [] })).not.toContain("group-hover:opacity-100");
+  });
+
   it("labels a private look, and only a private one", () => {
     expect(card({ ...POST, isPrivate: true })).toMatch(/<\/svg>Private<\/span>/);
     expect(card(POST)).not.toContain(">Private<");

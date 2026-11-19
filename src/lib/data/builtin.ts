@@ -149,6 +149,10 @@ export const builtinRepository: Repository = {
   async searchIndex() {
     return allLooks().map(({ id, title, author }) => ({ id, title, author }));
   },
+  // The game's own sets have no creators.
+  async listCreators() {
+    return [];
+  },
   async createOutfit() {
     return { ok: false, error: NOT_LIVE };
   },
