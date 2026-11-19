@@ -49,7 +49,13 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
 
   return (
     <article className="corona-rim relative isolate flex flex-col overflow-hidden rounded-[8px] border border-line bg-surface transition-colors duration-[120ms] hover:bg-surface-raised">
-      <Link href={`/community-gallery/${post.id}`} className="group flex flex-1 flex-col" aria-label={`Open ${post.title}`}>
+      {/* The look's link covers the card from underneath, so the author's name can be a link of its own above it: a link inside a link is not allowed. */}
+      <div className="group relative flex flex-1 flex-col">
+        <Link
+          href={`/community-gallery/${post.id}`}
+          className="absolute inset-0 z-20 rounded-t-[8px] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-amber"
+          aria-label={`Open ${post.title}`}
+        />
         {/* Every card has the same picture frame, so a row of cards lines up with or without a capture. */}
         <div className="relative aspect-[16/10] overflow-hidden border-b border-line bg-void">
           {/* Only its author is ever shown a private look, on their own lists. */}
@@ -79,7 +85,13 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-base leading-6 font-semibold tracking-[-0.02em] text-ink">{post.title}</h3>
               <p className="flex items-center gap-1 text-xs text-ink-faint">
-                <span className="truncate">{post.author ?? "Item set"}</span>
+                {post.authorId && post.author ? (
+                  <Link href={`/creators/${post.authorId}`} className="relative z-30 truncate underline-offset-2 hover:text-ink hover:underline">
+                    {post.author}
+                  </Link>
+                ) : (
+                  <span className="truncate">{post.author ?? "Item set"}</span>
+                )}
                 {post.authorVerified && <BadgeCheck className="size-3.5 shrink-0 text-amber" strokeWidth={1.5} aria-label="Verified" />}
               </p>
             </div>
@@ -102,7 +114,7 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
             </ul>
           )}
         </div>
-      </Link>
+      </div>
       <div className="flex items-center gap-2 px-4 pb-4">
         {post.upvotes !== null && <UpvoteButton id={post.id} count={post.upvotes} />}
         <CopyButton code={post.code} className="ml-auto" />

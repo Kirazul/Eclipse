@@ -379,11 +379,35 @@ describe("the look of the week", () => {
 describe("a creator's page", () => {
   it("counts the looks and upvotes visitors can see", async () => {
     reply = (url) => url.pathname.endsWith("/profiles")
-      ? Response.json({ display_name: "Kira", verified: true, created_at: row.created_at })
-      : Response.json([{ upvotes: 3 }, { upvotes: 4 }]);
+      ? Response.json({ display_name: "Kira", verified: true, created_at: row.created_at, avatar_url: null })
+      : Response.json([{ upvotes: 3, class_name: null }, { upvotes: 4, class_name: null }]);
     expect(await repo.getCreator(row.author_id)).toEqual({
-      id: row.author_id, name: "Kira", verified: true, joinedAt: row.created_at, looks: 2, upvotes: 7,
+      id: row.author_id, name: "Kira", verified: true, joinedAt: row.created_at, avatar: null, looks: 2, upvotes: 7, classes: [],
     });
+  });
+
+  it("counts only public looks, so the owner sees the same numbers as everyone else", async () => {
+    reply = (url) => url.pathname.endsWith("/profiles")
+      ? Response.json({ display_name: "Kira", verified: false, created_at: row.created_at, avatar_url: null })
+      : Response.json([]);
+    await repo.getCreator(row.author_id);
+    const looks = requests.find((r) => r.pathname.endsWith("/outfits"));
+    expect(looks?.searchParams.get("is_private")).toBe("eq.false");
+  });
+
+  it("shows their Discord picture and the classes they dress, most dressed first", async () => {
+    const avatar = "https://cdn.discordapp.com/avatars/1/abc.png";
+    reply = (url) => url.pathname.endsWith("/profiles")
+      ? Response.json({ display_name: "Kira", verified: false, created_at: row.created_at, avatar_url: avatar })
+      : Response.json([
+        { upvotes: 1, class_name: "Mage" },
+        { upvotes: 1, class_name: "Paladin" },
+        { upvotes: 1, class_name: "Paladin" },
+        { upvotes: 1, class_name: null },
+      ]);
+    const creator = await repo.getCreator(row.author_id);
+    expect(creator?.avatar).toBe(avatar);
+    expect(creator?.classes).toEqual([{ className: "Paladin", looks: 2 }, { className: "Mage", looks: 1 }]);
   });
 
   it("has no page for someone with no public name", async () => {
@@ -396,6 +420,36 @@ describe("a creator's page", () => {
   it("is a 404, not a crash, for a malformed id", async () => {
     expect(await repo.getCreator("not-a-uuid")).toBeNull();
     expect(requests).toEqual([]);
+  });
+});
+
+describe("finding creators", () => {
+  const kira = "11111111-1111-4111-8111-111111111111";
+  const ana = "22222222-2222-4222-8222-222222222222";
+  const look = (author: string, name: string | null) => ({
+    author_id: author, profiles: { display_name: name, verified: author === kira, avatar_url: null },
+  });
+
+  it("lists people with public looks, the most prolific first", async () => {
+    reply = () => Response.json([look(ana, "Ana"), look(kira, "Kira"), look(kira, "Kira")]);
+    expect(await repo.listCreators({ limit: 10 })).toEqual([
+      { id: kira, name: "Kira", verified: true, avatar: null, looks: 2 },
+      { id: ana, name: "Ana", verified: false, avatar: null, looks: 1 },
+    ]);
+    // Public looks only: the list is cached for everyone, whoever asked first.
+    expect(requests[0].searchParams.get("is_private")).toBe("eq.false");
+  });
+
+  it("matches a name, through the profile", async () => {
+    reply = () => Response.json([]);
+    await repo.listCreators({ q: "ki%", limit: 6 });
+    expect(requests[0].searchParams.get("profiles.display_name")).toBe("ilike.%ki%");
+    expect(requests[0].searchParams.get("select")).toContain("!inner(");
+  });
+
+  it("stops at the limit and leaves out anyone with no public name", async () => {
+    reply = () => Response.json([look(kira, "Kira"), look(ana, null)]);
+    expect((await repo.listCreators({ limit: 1 })).map((c) => c.name)).toEqual(["Kira"]);
   });
 });
 

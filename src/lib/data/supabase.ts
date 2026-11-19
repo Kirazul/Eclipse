@@ -6,7 +6,7 @@ import { SCREENSHOT_BUCKET, screenshotUrl, thumbOf } from "@/lib/screenshots";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { compressScreenshot, SCREENSHOT_EXTENSION, SCREENSHOT_TYPE } from "./compress";
 import type {
-  CommentReportReason, GameLink, GameSet, LookComment, OutfitFilters, OutfitList, OutfitPost, ReportReason, Repository,
+  CommentReportReason, CreatorEntry, GameLink, GameSet, LookComment, OutfitFilters, OutfitList, OutfitPost, ReportReason, Repository,
   WriteResult,
 } from "./types";
 
@@ -165,6 +165,8 @@ const uploadError = (message: string): WriteResult<string> => ({
     : "That screenshot could not be stored. Try again.",
 });
 const SEARCH_INDEX_SIZE = 200;
+/** How many public looks finding creators reads, the most upvoted first. Far more than exist today. */
+const CREATOR_SCAN = 2000;
 
 /** People can edit their own user metadata, so this is only a suggestion. */
 const safeAvatar = (url: unknown) => (typeof url === "string" && url.startsWith("https://") ? url : null);
@@ -256,22 +258,54 @@ export const supabaseRepository: Repository = {
   async getCreator(id) {
     if (!UUID.test(id)) return null;
     const db = await createServerSupabase();
-    // RLS limits the looks to what this visitor can see, so a hidden look is not counted.
+    // RLS limits the looks to what this visitor can see, so a hidden look is not counted,
+    // and only public ones count, so the owner sees the numbers everyone else does.
     const [profile, looks] = await Promise.all([
-      db.from("profiles").select("display_name,verified,created_at").eq("id", id).maybeSingle(),
-      db.from("outfits").select("upvotes").eq("author_id", id),
+      db.from("profiles").select("display_name,verified,created_at,avatar_url").eq("id", id).maybeSingle(),
+      db.from("outfits").select("upvotes,class_name").eq("author_id", id).eq("is_private", false),
     ]);
     if (profile.error) throw new Error(profile.error.message);
     if (looks.error) throw new Error(looks.error.message);
     if (!profile.data?.display_name) return null;
+    const classes = new Map<ClassName, number>();
+    for (const r of looks.data) {
+      if (r.class_name) classes.set(r.class_name as ClassName, (classes.get(r.class_name as ClassName) ?? 0) + 1);
+    }
     return {
       id,
       name: profile.data.display_name,
       verified: profile.data.verified,
       joinedAt: profile.data.created_at,
+      avatar: safeAvatar(profile.data.avatar_url),
       looks: looks.data.length,
       upvotes: looks.data.reduce((sum, r) => sum + r.upvotes, 0),
+      classes: [...classes].map(([className, n]) => ({ className, looks: n })).sort((a, b) => b.looks - a.looks),
     };
+  },
+  async listCreators({ q, limit }) {
+    const db = await createServerSupabase();
+    // Counted from the looks rather than the profiles, so nobody without a public look is listed.
+    // The inner join drops looks whose author's name does not match the search.
+    let query = db
+      .from("outfits")
+      .select("author_id,profiles!outfits_author_id_fkey!inner(display_name,verified,avatar_url)")
+      .eq("is_private", false)
+      .not("author_id", "is", null)
+      .order("upvotes", { ascending: false })
+      .limit(CREATOR_SCAN);
+    const term = q ? safeTerm(q) : "";
+    if (term) query = query.ilike("profiles.display_name", `%${term}%`);
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    const found = new Map<string, CreatorEntry>();
+    for (const r of data as unknown as { author_id: string; profiles: OutfitRow["profiles"] }[]) {
+      const name = r.profiles?.display_name;
+      if (!name) continue;
+      const seen = found.get(r.author_id);
+      if (seen) seen.looks += 1;
+      else found.set(r.author_id, { id: r.author_id, name, verified: r.profiles?.verified ?? false, avatar: safeAvatar(r.profiles?.avatar_url), looks: 1 });
+    }
+    return [...found.values()].sort((a, b) => b.looks - a.looks || a.name.localeCompare(b.name)).slice(0, limit);
   },
   async searchIndex() {
     const { posts } = await listOutfits({ sort: "top", pageSize: SEARCH_INDEX_SIZE });

@@ -5,15 +5,13 @@ import { CommentActions, CommentsViewer } from "@/components/comment-actions";
 import { CommentForm } from "@/components/comment-form";
 import { CommentScroller } from "@/components/comment-scroller";
 import { ago } from "@/lib/ago";
+import { sizedAvatar } from "@/lib/avatar";
 import { repository } from "@/lib/data";
 import type { LookComment } from "@/lib/data/types";
 
-/** A Discord picture at the size it is drawn, from Discord's own resizer. */
-const sized = (url: string | null) => (url ? `${url}?size=64` : null);
-
 /** Who wrote it: their Discord picture, or their initial if they have none. */
 function Face({ name, avatar }: { name: string | null; avatar: string | null }) {
-  return <Avatar account={{ name, avatar: sized(avatar) }} size={32} />;
+  return <Avatar account={{ name, avatar: sizedAvatar(avatar) }} size={32} />;
 }
 
 /** A social app's comment: the name and words in a bubble, when and what to do under it. */
