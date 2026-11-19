@@ -128,7 +128,7 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
 
         <div className="flex min-w-0 flex-col gap-6 lg:col-start-1 lg:row-start-2">
           <div className="flex flex-wrap items-center gap-2 border-b border-line pb-5" aria-label="Use this look" role="group">
-            <CopyButton code={post.code} className="h-[2.9rem] px-6 text-[0.95rem]" />
+            <CopyButton code={post.code} look={post.id} className="h-[2.9rem] px-6 text-[0.95rem]" />
             {repository.live && <SendToGame id={post.id} />}
             {post.upvotes !== null && (
               <UpvoteButton id={post.id} count={post.upvotes} className="h-[2.9rem] rounded-full px-4" />
@@ -192,7 +192,7 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
             <pre className="max-h-40 overflow-auto rounded-md border border-line bg-void p-3 font-mono text-xs leading-[18px] break-all whitespace-pre-wrap text-ink-dim">
               {post.code}
             </pre>
-            <CopyButton code={post.code} variant="outline" className="self-start" />
+            <CopyButton code={post.code} look={post.id} variant="outline" className="self-start" />
           </div>
         </details>
 

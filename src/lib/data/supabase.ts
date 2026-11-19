@@ -24,6 +24,7 @@ interface OutfitRow {
   tags: string[];
   description: string | null;
   upvotes: number;
+  copies: number;
   created_at: string;
   /** Null on a look from the Discord showcase until its player signs in. */
   author_id: string | null;
@@ -102,7 +103,7 @@ const toGameSet = (r: GameSetRow): GameSet => ({
 // The hint is required: outfit_votes, outfit_reports and outfit_bookmarks also join
 // outfits to profiles, and PostgREST refuses a bare profiles(...) embed as ambiguous.
 const OUTFIT_COLUMNS =
-  "id,title,code,class_name,armor,race,categories,tags,description,upvotes,created_at,author_id,discord_name,gallery,is_private,profiles!outfits_author_id_fkey(display_name,verified,avatar_url)," +
+  "id,title,code,class_name,armor,race,categories,tags,description,upvotes,copies,created_at,author_id,discord_name,gallery,is_private,profiles!outfits_author_id_fkey(display_name,verified,avatar_url)," +
   // outfits refers to itself. Embedding through the column itself reaches the original (one
   // row, or null); `outfits!remixed_from` reached the other way, the remixes, as an array.
   "remix:remixed_from(id,title,discord_name,profiles!outfits_author_id_fkey(display_name))";
@@ -124,6 +125,7 @@ const toPost = (r: OutfitRow): OutfitPost => ({
   tags: r.tags,
   description: r.description,
   upvotes: r.upvotes,
+  copies: r.copies,
   createdAt: r.created_at,
   gallery: r.gallery.map(screenshotUrl),
   remixedFrom: r.remix ? { id: r.remix.id, title: r.remix.title, author: r.remix.profiles?.display_name ?? r.remix.discord_name ?? null } : null,

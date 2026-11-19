@@ -6,10 +6,12 @@ import { supabaseUrl } from "@/lib/supabase/config";
 import { SCREENSHOT_TYPE } from "./compress";
 
 // The one place the site acts with the database's secret key, which skips every row
-// rule. It serves only the Discord bot, where no visitor's session exists, and reaches
-// only the functions in supabase/migrations/20261114090000_discord_bot_bridge.sql, the
-// Discord showcase table and imported looks' own screenshot folders. Keep it that narrow:
-// anything added here runs with full power over the database.
+// rule. It serves the Discord bot, where no visitor's session exists, and reaches only
+// the functions in supabase/migrations/20261114090000_discord_bot_bridge.sql, the
+// Discord showcase table and imported looks' own screenshot folders. One exception
+// serves visitors: recordCopy, which can only add one copy per visitor to a public look's
+// count (20261119090000_look_copies.sql). Keep it that narrow: anything added here runs
+// with full power over the database.
 
 const secretKey = () => process.env.SUPABASE_SECRET_KEY ?? "";
 
@@ -40,6 +42,12 @@ export const discordCreators = async () => (await call<string[] | null>("discord
 /** Hands the role to its next holder, or to nobody, and says who held it before. */
 export const swapRoleHolder = (which: "look_of_the_week", holder: string | null) =>
   call<string | null>("swap_discord_role_holder", { which, holder });
+
+/**
+ * Counts a visitor's copy of a look, once per visitor. `visitor` must come from the
+ * request's own headers (visitorOf), never from anything the visitor sent.
+ */
+export const recordCopy = (look: string, visitor: string) => call<null>("record_copy", { look, visitor });
 
 /** The look a showcase message already became, if it did. */
 export async function lookOfMessage(message: string): Promise<string | null> {

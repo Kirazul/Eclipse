@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { after } from "next/server";
+import { z } from "zod";
 import { resolveOutfit, resolveWorld, type ResolvedOutfit, type ResolvedWorldPlace } from "@/lib/catalog";
 import { decodeOutfit, OUTFIT_TAG, type Outfit } from "@/lib/codec/outfit";
 import {
@@ -9,6 +11,7 @@ import {
 } from "@/lib/codec/schema";
 import { decodeWorld, OUTFIT_WORLD_TAG } from "@/lib/codec/world";
 import { repository } from "@/lib/data";
+import { adminConfigured, recordCopy } from "@/lib/data/admin";
 import {
   COMMENT_REPORT_REASONS, REPORT_REASONS, type CommentReportReason, type ReportReason,
 } from "@/lib/data/types";
@@ -17,6 +20,7 @@ import { creatorOf, grantCreatorOfLook, recheckCreator } from "@/lib/discord-rol
 import { announceLook } from "@/lib/look-feed";
 import { alertCommentReport, alertModerators } from "@/lib/moderation-alert";
 import { UPLOAD_PATH } from "@/lib/screenshots";
+import { visitorOf } from "@/lib/visitor";
 
 export type InspectResult =
   | { kind: "outfit"; outfit: Outfit; resolved: ResolvedOutfit; warnings: string[] }
@@ -167,6 +171,18 @@ export async function upvoteOutfit(id: string) {
   const r = await repository.upvote(id);
   if (r.ok) revalidateHub();
   return r;
+}
+
+/**
+ * A visitor copied a look's code. Counted once per visitor, who is read from the request's
+ * own headers, never from anything sent with it. Never an error: copying already worked.
+ */
+export async function copiedLook(id: string) {
+  if (!z.uuid().safeParse(id).success || !adminConfigured()) return;
+  const visitor = visitorOf(await headers());
+  if (!visitor) return;
+  // A fresh count shows at the page's next render; no page is rebuilt for one copy.
+  after(() => recordCopy(id, visitor).catch((e: unknown) => console.error("copiedLook", e)));
 }
 
 export async function reportLook(id: string, reason: string) {

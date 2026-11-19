@@ -29,6 +29,8 @@ export interface OutfitPost {
   description?: string | null;
   /** Null where nobody can vote: the site never shows a count it did not record. */
   upvotes: number | null;
+  /** Visitors who copied its code, each once. Missing where nobody counts copies. */
+  copies?: number | null;
   createdAt: string | null;
   /** Links to studio screenshots, the cover first. The code holds no pictures. */
   gallery: string[];

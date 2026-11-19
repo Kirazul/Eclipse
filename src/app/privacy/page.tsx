@@ -5,7 +5,7 @@ import { DISCORD_URL } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata("/privacy");
 
-const UPDATED = "November 14, 2026";
+const UPDATED = "November 19, 2026";
 
 const SECTIONS = [
   {
@@ -14,6 +14,7 @@ const SECTIONS = [
     points: [
       "You do not need an account. The site has no ads, no analytics and no tracking cookies.",
       "Our hosting provider handles each request, and that includes your IP address and browser details.",
+      "When you copy a look's code, we count it once per visitor. We keep only a scrambled fingerprint of your IP address, browser and that look, which cannot be turned back into your address.",
       "The site remembers that you have seen the support message, in your browser only, until you close the tab.",
     ],
   },
@@ -49,7 +50,7 @@ const SECTIONS = [
     title: "What is public",
     points: [
       "Your public name, and any look you publish with its title, code, tags and screenshots. Anyone can see these without an account.",
-      "How many votes a look has. Which looks you voted for stays private.",
+      "How many votes and copies a look has. Which looks you voted for or copied stays private.",
       "Your bookmarks, which only you can see.",
       "Any report you send, with its reason. Only moderators see who reported a look.",
       "Uploaded screenshots are compressed and their file details are removed, including any location data. Still, avoid uploading anything you would not want public, and remember a screenshot can show your character or account names.",

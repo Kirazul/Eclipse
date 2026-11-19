@@ -3,6 +3,7 @@
 import { Check, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { copiedLook } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { copyText } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ const CONFIRM_MS = 1800;
 
 export function CopyButton({
   code,
+  look,
   label = "Copy code",
   toastTitle = "Code copied",
   toastHint = "Paste it with Import in the game.",
@@ -18,6 +20,8 @@ export function CopyButton({
   className,
 }: {
   code: string;
+  /** The look this code belongs to, so the copy counts toward its card. */
+  look?: string;
   label?: string;
   toastTitle?: string;
   toastHint?: string;
@@ -37,6 +41,8 @@ export function CopyButton({
       return;
     }
     setCopied(true);
+    // Counting is the server's job and never the visitor's problem: a failure stays silent.
+    if (look) copiedLook(look).catch(() => {});
     toast.success(toastTitle, { description: toastHint });
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setCopied(false), CONFIRM_MS);
