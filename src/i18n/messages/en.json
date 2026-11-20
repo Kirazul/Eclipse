@@ -238,7 +238,8 @@
     "settings": "Settings",
     "support": "Support Eclipse",
     "discord": "Join the Discord",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "discordRoles": "Discord roles"
   },
   "signIn": {
     "button": "Sign in",
@@ -507,7 +508,8 @@
           "p2": "Discord gives us your email address, your name or username, your profile picture and an account ID. These stay private.",
           "p3": "Your profile picture appears only to you, in your account menu.",
           "p4": "Your Discord username is your public name until you change it.",
-          "p5": "Cookies keep you signed in and return you to the page you were on."
+          "p5": "Cookies keep you signed in and return you to the page you were on.",
+          "p6": "If you connect Discord roles, we keep a Discord token that can only report your public name, looks and upvotes to the Eclipse server's roles. It ends when you remove the connection in Discord."
         }
       },
       "game": {
@@ -888,5 +890,15 @@
     "dismissed": "Reports dismissed. The look stays up.",
     "dismissing": "Dismissing",
     "dismiss": "Dismiss reports"
+  },
+  "linkedRoles": {
+    "title": "Discord roles",
+    "lead": "Connect your Discord to Eclipse and the Eclipse server can give you roles for what you share: how many looks you have published, and how many upvotes they earned. Your numbers update every day.",
+    "connect": "Connect Discord",
+    "ok": "Connected. Your roles in the Eclipse Discord follow your looks from now on.",
+    "noAccount": "That Discord account has no Eclipse account yet. Sign in to this site with Discord once, then connect again.",
+    "failed": "The connection did not finish. Try again.",
+    "off": "Discord roles are not switched on yet.",
+    "shares": "Eclipse shares only your public name and those two numbers with Discord. Remove the connection any time in Discord's settings, under Connections."
   }
 }

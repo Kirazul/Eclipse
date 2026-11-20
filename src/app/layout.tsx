@@ -11,6 +11,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import { OPEN_GRAPH, siteUrl } from "@/lib/site";
+import { linkedRolesConfigured } from "@/lib/linked-roles";
 import { supabaseConfigured } from "@/lib/supabase/config";
 import "./globals.css";
 
@@ -73,7 +74,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <NextIntlClientProvider>
         <NuqsAdapter>
           <TooltipProvider>
-            <SiteHeader signIn={supabaseConfigured()} />
+            <SiteHeader signIn={supabaseConfigured()} linkedRoles={linkedRolesConfigured()} />
             {children}
             <SiteFooter />
             <CommandMenu />

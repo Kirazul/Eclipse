@@ -6,11 +6,11 @@ import { DISCORD_URL } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata("/privacy");
 
-const UPDATED = "2026-11-19";
+const UPDATED = "2026-11-20";
 
 /** Each section and how many points it has, in src/i18n/messages (privacy.sections). */
 const SECTIONS = [
-  ["visiting", 4], ["account", 5], ["game", 3], ["updates", 1], ["public", 5], ["services", 5], ["control", 6],
+  ["visiting", 4], ["account", 6], ["game", 3], ["updates", 1], ["public", 5], ["services", 5], ["control", 6],
 ] as const;
 
 export default function PrivacyPage() {

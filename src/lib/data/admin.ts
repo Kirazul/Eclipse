@@ -11,8 +11,10 @@ import { SCREENSHOT_TYPE } from "./compress";
 // Discord showcase table and imported looks' own screenshot folders. One exception
 // serves visitors: recordCopy, which can only add one copy per visitor to a public look's
 // count (20261119090000_look_copies.sql). Moderators also act from Discord through the
-// functions in 20261120120000_discord_moderation.sql, which check who clicked. Keep it
-// that narrow: anything added here runs with full power over the database.
+// functions in 20261120120000_discord_moderation.sql, which check who clicked. The
+// functions in 20261120150000_discord_linked_roles.sql keep connected players' Discord
+// tokens for Linked Roles. Keep it that narrow: anything added here runs with full power
+// over the database.
 
 const secretKey = () => process.env.SUPABASE_SECRET_KEY ?? "";
 
@@ -109,3 +111,30 @@ export async function discordDeleteReported(player: string, kind: Reported, targ
   }
   return true;
 }
+
+// Discord Linked Roles (20261120150000_discord_linked_roles.sql): a player's Discord token
+// for this app, kept to update the numbers their server roles are judged on.
+export interface LinkStats {
+  looks: number;
+  upvotes: number;
+  name: string | null;
+}
+
+export interface DiscordLink {
+  discord_id: string;
+  access_token: string;
+  refresh_token: string;
+  expires_at: string;
+  stats: LinkStats;
+}
+
+/** Keeps the connection. Null when no site account signs in with that Discord account. */
+export const discordLinkSave = (player: string, access: string, refresh: string, expires: string) =>
+  call<LinkStats | null>("discord_link_save", { player, access, refresh, expires });
+
+export const discordLinks = async () => (await call<DiscordLink[] | null>("discord_links")) ?? [];
+
+export const discordLinkTokens = (player: string, access: string, refresh: string, expires: string) =>
+  call<null>("discord_link_tokens", { player, access, refresh, expires });
+
+export const discordLinkForget = (player: string) => call<null>("discord_link_forget", { player });
