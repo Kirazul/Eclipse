@@ -103,6 +103,13 @@ describe("the weekly Discord post", () => {
     expect(embed.description).toContain("Kira\\_\\*the\\*\\_Bold");
   });
 
+  it("shows the code in a block Discord gives a copy button", async () => {
+    pick = { post, votes: 4 };
+    await call("Bearer cron-secret");
+    const embed = (sent[0].body.embeds as Record<string, unknown>[])[0];
+    expect(embed.description).toContain("```\nECA1:c2xvdCAwIDEK\n```");
+  });
+
   it("leaves the image out when the look has no screenshot", async () => {
     pick = { post: { ...post, gallery: [] }, votes: 2 };
     await call("Bearer cron-secret");

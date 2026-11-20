@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useDeferredValue, useState } from "react";
@@ -7,13 +8,14 @@ import { Input } from "@/components/ui/input";
 import type { MountCard } from "@/lib/viewer/mounts";
 
 const KINDS = [
-  { value: "all", label: "All" },
-  { value: "flying", label: "Flying" },
-  { value: "ground", label: "Ground" },
+  { value: "all", label: "all" },
+  { value: "flying", label: "flying" },
+  { value: "ground", label: "ground" },
 ] as const;
 
 /** Every mount, searchable by name, each opening on its own animated stage. */
 export function MountGrid({ mounts }: { mounts: MountCard[] }) {
+  const t = useTranslations("mounts");
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState<(typeof KINDS)[number]["value"]>("all");
   const q = useDeferredValue(query.trim().toLowerCase());
@@ -27,19 +29,19 @@ export function MountGrid({ mounts }: { mounts: MountCard[] }) {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          aria-label="Search mounts"
-          placeholder={`Search ${mounts.length.toLocaleString("en-US")} mounts`}
+          aria-label={t("search")}
+          placeholder={t("searchCount", { count: mounts.length })}
           className="max-w-sm"
         />
-        <div className="flex gap-1.5" role="group" aria-label="Kind">
+        <div className="flex gap-1.5" role="group" aria-label={t("kind")}>
           {KINDS.map((k) => (
             <button key={k.value} type="button" className="pill" aria-pressed={kind === k.value} onClick={() => setKind(k.value)}>
-              {k.label}
+              {t(k.label)}
             </button>
           ))}
         </div>
       </div>
-      {!shown.length && <p className="text-sm text-ink-dim">No mount by that name.</p>}
+      {!shown.length && <p className="text-sm text-ink-dim">{t("none")}</p>}
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {shown.map((m) => (
           <li key={m.id}>
@@ -50,7 +52,7 @@ export function MountGrid({ mounts }: { mounts: MountCard[] }) {
               <span className="flex flex-col gap-0.5 p-2">
                 <span className="truncate text-sm">{m.name}</span>
                 <span className="text-xs text-ink-faint">
-                  {m.flying ? "Flying" : "Ground"}{m.colours > 1 ? ` · ${m.colours} colours` : ""}
+                  {m.flying ? t("flying") : t("ground")}{m.colours > 1 ? t("colours", { count: m.colours }) : ""}
                 </span>
               </span>
             </Link>

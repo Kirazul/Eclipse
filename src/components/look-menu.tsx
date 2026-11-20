@@ -1,6 +1,7 @@
 "use client";
 
 import { Bookmark, Eye, EyeOff, Flag, MoreHorizontal, Shirt, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -45,6 +46,7 @@ type Props = {
  * whoever may use it; the database decides either way.
  */
 export function LookMenu({ id, authorId, community, isPrivate, saved: initialSaved, dressingRoom, afterDelete, className }: Props) {
+  const t = useTranslations("lookMenu");
   const [account] = useAccount();
   const [open, setOpen] = useState<"delete" | "report" | null>(null);
   const [saved, setSaved] = useState(initialSaved ?? false);
@@ -68,7 +70,7 @@ export function LookMenu({ id, authorId, community, isPrivate, saved: initialSav
         return;
       }
       setSaved(next);
-      toast.success(next ? "Saved. Find it under Bookmarks in your account menu." : "Removed from your bookmarks");
+      toast.success(next ? t("saved") : t("unsaved"));
     });
   }
 
@@ -77,10 +79,10 @@ export function LookMenu({ id, authorId, community, isPrivate, saved: initialSav
       const r = await setLookPrivate(id, !isPrivate);
       if (!r.ok) {
         const existing = "existing" in r ? r.existing : undefined;
-        toast.error(r.error, existing ? { action: { label: "Open it", onClick: () => router.push(`/community-gallery/${existing}`) } } : undefined);
+        toast.error(r.error, existing ? { action: { label: t("openIt"), onClick: () => router.push(`/community-gallery/${existing}`) } } : undefined);
         return;
       }
-      toast.success(r.value ? "Only you can see this look now" : "Your look is back in the Community Gallery");
+      toast.success(r.value ? t("nowPrivate") : t("nowPublic"));
       router.refresh();
     });
   }
@@ -89,8 +91,8 @@ export function LookMenu({ id, authorId, community, isPrivate, saved: initialSav
     <>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger
-          aria-label="More options"
-          title="More options"
+          aria-label={t("more")}
+          title={t("more")}
           disabled={busy}
           className={cn(
             "grid size-9 shrink-0 place-items-center rounded-full border border-line text-ink-dim transition-colors hover:border-line-strong hover:text-ink data-[state=open]:border-line-strong data-[state=open]:bg-surface-raised data-[state=open]:text-ink",
@@ -103,18 +105,18 @@ export function LookMenu({ id, authorId, community, isPrivate, saved: initialSav
           {canSave && (
             <DropdownMenuItem onSelect={save}>
               <Bookmark aria-hidden fill={saved ? "currentColor" : "none"} className={saved ? "text-amber" : undefined} />
-              {saved ? "Remove from saved" : "Save look"}
+              {saved ? t("unsave") : t("save")}
             </DropdownMenuItem>
           )}
           {dressingRoom && (
             <DropdownMenuItem asChild>
-              <Link href={dressingRoom}><Shirt aria-hidden />Open in Dressing room</Link>
+              <Link href={dressingRoom}><Shirt aria-hidden />{t("dressingRoom")}</Link>
             </DropdownMenuItem>
           )}
           {canToggle && (
             <DropdownMenuItem onSelect={toggle}>
               {isPrivate ? <Eye aria-hidden /> : <EyeOff aria-hidden />}
-              {isPrivate ? "Set to public" : "Set to private"}
+              {isPrivate ? t("setPublic") : t("setPrivate")}
             </DropdownMenuItem>
           )}
           {(canReport || canDelete) && (canSave || dressingRoom || canToggle) && <DropdownMenuSeparator />}
@@ -140,6 +142,7 @@ type DialogProps = { open: boolean; onOpenChange: (open: boolean) => void };
 
 /** Asks once: a deleted look and its screenshots are gone for everyone. */
 function DeleteLook({ id, after, open, onOpenChange }: { id: string; after?: string } & DialogProps) {
+  const t = useTranslations("lookMenu");
   const [deleting, startDeleting] = useTransition();
   const router = useRouter();
 
@@ -151,7 +154,7 @@ function DeleteLook({ id, after, open, onOpenChange }: { id: string; after?: str
         return;
       }
       onOpenChange(false);
-      toast.success("Look deleted");
+      toast.success(t("deleted"));
       if (after) router.push(after);
       else router.refresh();
     });
@@ -161,13 +164,13 @@ function DeleteLook({ id, after, open, onOpenChange }: { id: string; after?: str
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-5 border-line bg-surface p-6">
         <DialogHeader>
-          <DialogTitle>Delete this look?</DialogTitle>
+          <DialogTitle>{t("deleteTitle")}</DialogTitle>
           <DialogDescription>
-            It and its screenshots are removed for everyone. This cannot be undone.
+            {t("deleteBody")}
           </DialogDescription>
         </DialogHeader>
         <button type="button" className="btn btn--primary btn--block" disabled={deleting} onClick={remove}>
-          {deleting ? "Deleting" : "Delete look"}
+          {deleting ? t("deleting") : t("delete")}
         </button>
       </DialogContent>
     </Dialog>
@@ -176,6 +179,8 @@ function DeleteLook({ id, after, open, onOpenChange }: { id: string; after?: str
 
 /** Moderators see every report and decide what happens. */
 function ReportLook({ id, open, onOpenChange }: { id: string } & DialogProps) {
+  const t = useTranslations("lookMenu");
+  const tr = useTranslations("reportReason");
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [sending, startSending] = useTransition();
 
@@ -188,7 +193,7 @@ function ReportLook({ id, open, onOpenChange }: { id: string } & DialogProps) {
         return;
       }
       onOpenChange(false);
-      toast.success("Thanks. A moderator will take a look.");
+      toast.success(t("reported"));
     });
   }
 
@@ -196,22 +201,22 @@ function ReportLook({ id, open, onOpenChange }: { id: string } & DialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-5 border-line bg-surface p-6">
         <DialogHeader>
-          <DialogTitle>Report this look?</DialogTitle>
+          <DialogTitle>{t("reportTitle")}</DialogTitle>
           <DialogDescription>
-            Moderators see every report and decide whether the look stays up.
+            {t("reportBody")}
           </DialogDescription>
         </DialogHeader>
         <fieldset className="flex flex-col gap-2">
-          <legend className="sr-only">Reason</legend>
-          {(Object.entries(REPORT_REASONS) as [ReportReason, string][]).map(([key, label]) => (
+          <legend className="sr-only">{t("reason")}</legend>
+          {(Object.keys(REPORT_REASONS) as ReportReason[]).map((key) => (
             <label key={key} className="flex cursor-pointer items-center gap-2 text-sm text-ink-dim has-checked:text-ink">
               <input type="radio" name="reason" value={key} checked={reason === key} onChange={() => setReason(key)} />
-              {label}
+              {tr(key)}
             </label>
           ))}
         </fieldset>
         <button type="button" className="btn btn--primary btn--block" disabled={!reason || sending} onClick={send}>
-          {sending ? "Sending" : "Send report"}
+          {sending ? t("sending") : t("send")}
         </button>
       </DialogContent>
     </Dialog>

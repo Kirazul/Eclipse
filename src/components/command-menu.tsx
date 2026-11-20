@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, BookOpen, Braces, Download, Images, LayoutGrid, Rabbit, Search, Shirt } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -16,17 +17,18 @@ const readIndex = (body: SearchIndex | SearchEntry[]): SearchIndex =>
   Array.isArray(body) ? { looks: body, creators: [] } : body;
 
 const PAGES = [
-  { href: "/community-gallery", label: "Community Gallery", icon: Shirt },
-  { href: "/community-gallery?pictures=true", label: "Looks with pictures", icon: Images },
-  { href: "/loadouts", label: "Import a code", icon: Braces },
-  { href: "/dressing-room", label: "Dressing room", icon: Shirt },
-  { href: "/mounts", label: "Mounts", icon: Rabbit },
-  { href: "/guide", label: "Setup guide", icon: BookOpen },
-  { href: "/#features", label: "Features", icon: LayoutGrid },
-  { href: "/#download", label: "Download Eclipse", icon: Download },
-];
+  { href: "/community-gallery", label: "gallery", icon: Shirt },
+  { href: "/community-gallery?pictures=true", label: "pictures", icon: Images },
+  { href: "/loadouts", label: "import", icon: Braces },
+  { href: "/dressing-room", label: "dressingRoom", icon: Shirt },
+  { href: "/mounts", label: "mounts", icon: Rabbit },
+  { href: "/guide", label: "guide", icon: BookOpen },
+  { href: "/#features", label: "features", icon: LayoutGrid },
+  { href: "/#download", label: "download", icon: Download },
+] as const;
 
 export function CommandMenu() {
+  const t = useTranslations("search");
   const [open, setOpen] = useState(false);
   const [outfits, setOutfits] = useState<SearchEntry[]>([]);
   const [creators, setCreators] = useState<CreatorEntry[]>([]);
@@ -75,34 +77,34 @@ export function CommandMenu() {
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen} title="Search Eclipse" description="Find an outfit, a creator or a page">
+    <CommandDialog open={open} onOpenChange={setOpen} title={t("title")} description={t("description")}>
       {/* This shadcn CommandDialog has no cmdk root of its own: without Command
           the input has no store, and opening the menu takes the page down. */}
       <Command>
-        <CommandInput placeholder="Search outfits, creators and pages" />
+        <CommandInput placeholder={t("placeholder")} />
         <CommandList>
-        <CommandEmpty>Nothing matches that.</CommandEmpty>
-        <CommandGroup heading="Pages">
+        <CommandEmpty>{t("empty")}</CommandEmpty>
+        <CommandGroup heading={t("pages")}>
           {PAGES.map(({ href, label, icon: Icon }) => (
-            <CommandItem key={href} value={label} onSelect={() => go(href)}>
+            <CommandItem key={href} value={t(`page.${label}`)} onSelect={() => go(href)}>
               <Icon strokeWidth={1.5} />
-              {label}
+              {t(`page.${label}`)}
             </CommandItem>
           ))}
         </CommandGroup>
         {creators.length > 0 && (
-          <CommandGroup heading="Creators">
+          <CommandGroup heading={t("creators")}>
             {creators.map((c) => (
               <CommandItem key={c.id} value={`${c.name} ${c.id}`} onSelect={() => go(`/creators/${c.id}`)}>
                 <Avatar account={{ name: c.name, avatar: sizedAvatar(c.avatar) }} size={22} />
                 <span className="truncate">{c.name}</span>
-                {c.verified && <BadgeCheck className="text-amber" strokeWidth={1.5} aria-label="Verified" />}
-                <CommandShortcut className="tracking-normal">{c.looks} {c.looks === 1 ? "look" : "looks"}</CommandShortcut>
+                {c.verified && <BadgeCheck className="text-amber" strokeWidth={1.5} aria-label={t("verified")} />}
+                <CommandShortcut className="tracking-normal">{t("looks", { count: c.looks })}</CommandShortcut>
               </CommandItem>
             ))}
           </CommandGroup>
         )}
-        <CommandGroup heading="Outfits">
+        <CommandGroup heading={t("outfits")}>
           {outfits.map((o) => (
             // The id keeps values unique: real sets can share a name.
             <CommandItem key={o.id} value={`${o.title} ${o.author ?? ""} ${o.id}`} onSelect={() => go(`/community-gallery/${o.id}`)}>
@@ -118,14 +120,15 @@ export function CommandMenu() {
 }
 
 export function SearchTrigger() {
+  const t = useTranslations("search");
   return (
     <button
       type="button"
       onClick={() => window.dispatchEvent(new Event("eclipse:search"))}
       className="icon-btn"
-      aria-label="Search"
+      aria-label={t("button")}
       aria-keyshortcuts="Control+K"
-      title="Search (Ctrl K)"
+      title={t("buttonTitle")}
     >
       <Search />
     </button>

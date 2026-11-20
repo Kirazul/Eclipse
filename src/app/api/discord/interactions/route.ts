@@ -1,5 +1,7 @@
 import { after } from "next/server";
 import { EPHEMERAL, answer, isQuiet, quickReply, suggest, timing, type Interaction, type Reply } from "./commands";
+import { isModeration, moderate, opensMessage, type ClickAnswer } from "./moderate";
+import { translator } from "./t";
 import { verifyDiscord } from "./verify";
 
 // Discord's Interactions Endpoint URL for the Eclipse app. Discord POSTs each command,
@@ -9,10 +11,12 @@ import { verifyDiscord } from "./verify";
 
 const PING = 1;
 const COMMAND = 2;
+const CLICK = 3;
 const AUTOCOMPLETE = 4;
 const PONG = 1;
 const MESSAGE = 4;
 const DEFERRED = 5;
+const DEFERRED_UPDATE = 6;
 const CHOICES = 8;
 
 const EDIT_TRIES = 4;
@@ -40,7 +44,42 @@ async function finish(interaction: Interaction, reply: Reply) {
   }
 }
 
-const FAILED: Reply = { content: "Eclipse could not answer that. Try again.", allowed_mentions: { parse: [] } };
+/** The answer when something broke, in the asker's language. */
+const failed = (interaction: Interaction): Reply =>
+  ({ content: translator(interaction.locale)("bot.failed"), allowed_mentions: { parse: [] } });
+
+/** A private message after the fact, for a slow click whose answer is not a change to its message. */
+async function followUp(interaction: Interaction, reply: Reply) {
+  const res = await fetch(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...reply, flags: EPHEMERAL }),
+  });
+  if (!res.ok) console.error("Discord refused a click's answer:", res.status, await res.text());
+}
+
+/** A button on a report alert. Same three seconds, same "thinking" when slower. */
+async function click(interaction: Interaction): Promise<Response> {
+  const id = interaction.data?.custom_id ?? "";
+  const broke: ClickAnswer = { type: MESSAGE, data: { ...failed(interaction), flags: EPHEMERAL } };
+  const work = isModeration(id)
+    ? moderate(interaction).catch((error) => {
+      console.error("A Discord button failed:", error);
+      return broke;
+    })
+    : Promise.resolve(broke);
+  const inTime = await Promise.race([work, sleep(timing.inlineMs).then(() => null)]);
+  if (inTime) return Response.json(inTime);
+
+  const asks = opensMessage(id);
+  after(async () => {
+    const { type, data } = await work;
+    // A change goes to the message clicked; anything else must not overwrite it.
+    if (asks || type !== MESSAGE) await finish(interaction, data);
+    else await followUp(interaction, data);
+  });
+  return Response.json(asks ? { type: DEFERRED, data: { flags: EPHEMERAL } } : { type: DEFERRED_UPDATE });
+}
 
 export async function POST(request: Request) {
   // The signature covers the raw body, so it is checked before anything parses it.
@@ -60,18 +99,19 @@ export async function POST(request: Request) {
   // Suggestions cannot wait for a "thinking" message: none in time is better than late.
   if (interaction.type === AUTOCOMPLETE && interaction.data) {
     const none = sleep(timing.inlineMs).then(() => []);
-    const choices = await Promise.race([suggest(interaction.data).catch(() => []), none]);
+    const choices = await Promise.race([suggest(interaction.data, interaction.locale).catch(() => []), none]);
     return Response.json({ type: CHOICES, data: { choices } });
   }
+  if (interaction.type === CLICK && interaction.data?.custom_id) return click(interaction);
   if (interaction.type !== COMMAND || !interaction.data) return new Response(null, { status: 400 });
 
   const quick = quickReply(interaction);
   if (quick) return Response.json({ type: MESSAGE, data: quick });
 
-  // A failure becomes the FAILED answer, so the work never rejects unhandled.
+  // A failure becomes the failed answer, so the work never rejects unhandled.
   const work = answer(interaction).catch((error) => {
     console.error("A Discord command failed:", error);
-    return FAILED;
+    return failed(interaction);
   });
   const inTime = await Promise.race([work, sleep(timing.inlineMs).then(() => null)]);
   if (inTime) return Response.json({ type: MESSAGE, data: inTime });

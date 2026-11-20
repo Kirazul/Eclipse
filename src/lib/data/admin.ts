@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { SCREENSHOT_BUCKET } from "@/lib/screenshots";
+import { SCREENSHOT_BUCKET, thumbOf } from "@/lib/screenshots";
 import type { ShowcaseLook } from "@/lib/showcase-post";
 import { supabaseUrl } from "@/lib/supabase/config";
 import { SCREENSHOT_TYPE } from "./compress";
@@ -10,8 +10,11 @@ import { SCREENSHOT_TYPE } from "./compress";
 // the functions in supabase/migrations/20261114090000_discord_bot_bridge.sql, the
 // Discord showcase table and imported looks' own screenshot folders. One exception
 // serves visitors: recordCopy, which can only add one copy per visitor to a public look's
-// count (20261119090000_look_copies.sql). Keep it that narrow: anything added here runs
-// with full power over the database.
+// count (20261119090000_look_copies.sql). Moderators also act from Discord through the
+// functions in 20261120120000_discord_moderation.sql, which check who clicked. The
+// functions in 20261120150000_discord_linked_roles.sql keep connected players' Discord
+// tokens for Linked Roles. Keep it that narrow: anything added here runs with full power
+// over the database.
 
 const secretKey = () => process.env.SUPABASE_SECRET_KEY ?? "";
 
@@ -85,3 +88,53 @@ export async function removeScreenshots(paths: string[]) {
   const ours = paths.filter((p) => IMPORTED.test(p));
   if (ours.length) await admin().storage.from(SCREENSHOT_BUCKET).remove(ours);
 }
+
+// Moderating from Discord's report alerts (20261120120000_discord_moderation.sql). The
+// database itself checks that the clicking Discord account is a site moderator's.
+export type Reported = "look" | "comment";
+
+export const discordIsModerator = (player: string) => call<boolean>("discord_is_moderator", { player });
+
+/** Keeps a reported look or comment. False when it is already gone. */
+export const discordKeepReported = (player: string, kind: Reported, target: string) =>
+  call<boolean>("discord_keep_reported", { player, kind, target });
+
+/** Deletes it, and a look's screenshots with it. False when it is already gone. */
+export async function discordDeleteReported(player: string, kind: Reported, target: string): Promise<boolean> {
+  const shots = await call<string[] | null>("discord_delete_reported", { player, kind, target });
+  if (!shots) return false;
+  // The paths come from the deleted row itself, never from what Discord sent.
+  const paths = shots.flatMap((path) => [path, thumbOf(path)]);
+  if (paths.length) {
+    const { error } = await admin().storage.from(SCREENSHOT_BUCKET).remove(paths);
+    if (error) console.error("A deleted look's screenshots stayed in storage:", error.message);
+  }
+  return true;
+}
+
+// Discord Linked Roles (20261120150000_discord_linked_roles.sql): a player's Discord token
+// for this app, kept to update the numbers their server roles are judged on.
+export interface LinkStats {
+  looks: number;
+  upvotes: number;
+  name: string | null;
+}
+
+export interface DiscordLink {
+  discord_id: string;
+  access_token: string;
+  refresh_token: string;
+  expires_at: string;
+  stats: LinkStats;
+}
+
+/** Keeps the connection. Null when no site account signs in with that Discord account. */
+export const discordLinkSave = (player: string, access: string, refresh: string, expires: string) =>
+  call<LinkStats | null>("discord_link_save", { player, access, refresh, expires });
+
+export const discordLinks = async () => (await call<DiscordLink[] | null>("discord_links")) ?? [];
+
+export const discordLinkTokens = (player: string, access: string, refresh: string, expires: string) =>
+  call<null>("discord_link_tokens", { player, access, refresh, expires });
+
+export const discordLinkForget = (player: string) => call<null>("discord_link_forget", { player });

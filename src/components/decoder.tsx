@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ClipboardPaste, Loader2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +8,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { inspectCode, publishOutfit, removeScreenshot, removeSetPicture, uploadScreenshot, type InspectResult } from "@/app/actions";
 import { CopyButton } from "@/components/copy-button";
+import { term } from "@/i18n/terms";
 import { LoadoutFacts, SlotList } from "@/components/outfit-breakdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,13 +38,14 @@ function Choice<T extends string>({
   onChange: (v: T | null) => void;
   required?: boolean;
 }) {
+  const t = useTranslations("decoder");
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-xs text-ink-dim">{label}</label>
       <Select value={value ?? NONE} onValueChange={(v) => onChange(v === NONE ? null : (v as T))}>
         <SelectTrigger id={id} size="sm" className="w-full bg-surface"><SelectValue /></SelectTrigger>
         <SelectContent>
-          {!required && <SelectItem value={NONE}>Not set</SelectItem>}
+          {!required && <SelectItem value={NONE}>{t("notSet")}</SelectItem>}
           {options.map((o) => <SelectItem key={o} value={o}>{format(o)}</SelectItem>)}
         </SelectContent>
       </Select>
@@ -64,6 +67,7 @@ function Screenshots({
   onChange: (images: string[]) => void;
   fromSet: SetPictures | null;
 }) {
+  const t = useTranslations("decoder");
   const [uploading, startUpload] = useTransition();
   const full = images.length >= MAX_SCREENSHOTS;
 
@@ -94,17 +98,17 @@ function Screenshots({
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs text-ink-dim">
-        Screenshots from the Showcase studio, at least one and up to {MAX_SCREENSHOTS}. The first is the cover.
-        {fromSet && fromSet.gallery.length > 0 && " The ones your game sent are already here."}
+        {t("shotsLead", { max: MAX_SCREENSHOTS })}
+        {fromSet && fromSet.gallery.length > 0 && t("fromGame")}
       </p>
       {images.length > 0 && (
         <ul className="flex flex-wrap gap-2">
           {images.map((path, i) => (
             <li key={path} className="relative size-16 overflow-hidden rounded-md border border-line">
-              <Image src={thumbOf(screenshotUrl(path))} alt={`Screenshot ${i + 1}`} fill unoptimized sizes="4rem" className="object-cover" />
+              <Image src={thumbOf(screenshotUrl(path))} alt={t("shot", { index: i + 1 })} fill unoptimized sizes="4rem" className="object-cover" />
               <button
                 type="button"
-                aria-label={`Remove screenshot ${i + 1}`}
+                aria-label={t("removeShot", { index: i + 1 })}
                 onClick={() => remove(path)}
                 className="absolute top-0.5 right-0.5 rounded-full bg-black/70 p-0.5 text-ink"
               >
@@ -116,7 +120,7 @@ function Screenshots({
       )}
       <label className="pill self-start">
         {uploading && <Loader2 className="size-3.5 animate-spin" />}
-        Upload from this computer
+        {t("upload")}
         <input
           type="file"
           multiple
@@ -139,6 +143,8 @@ export interface RemixOf {
 
 /** `code` is null until a valid loadout code is pasted; the form can be filled in before that. */
 function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf: RemixOf | null; fromSet: SetPictures | null }) {
+  const t = useTranslations("decoder");
+  const tw = useTranslations();
   const [credit, setCredit] = useState(remixOf !== null);
   const [title, setTitle] = useState("");
   const [className, setClassName] = useState<ClassName | null>(null);
@@ -171,14 +177,16 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
         return;
       }
       setPublished({ id: r.id, code });
-      toast.success("Published to the Community Gallery");
+      toast.success(t("published"));
     });
   }
 
   if (published && published.code === code) {
     return (
       <p className="text-sm text-ink-dim">
-        Published. <Link href={`/community-gallery/${published.id}`} className="text-amber underline underline-offset-2">Open it in the Community Gallery</Link>
+        {t.rich("publishedOpen", {
+          open: (c) => <Link href={`/community-gallery/${published.id}`} className="text-amber underline underline-offset-2">{c}</Link>,
+        })}
       </p>
     );
   }
@@ -189,23 +197,33 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
         <label className="flex items-center gap-2 text-sm text-ink-dim">
           <input type="checkbox" checked={credit} onChange={(e) => setCredit(e.target.checked)} />
           <span>
-            Based on <Link href={`/community-gallery/${remixOf.id}`} className="text-amber underline underline-offset-2">{remixOf.title}</Link>
-            {remixOf.author && <> by {remixOf.author}</>}
+            {t.rich("basedOn", {
+              title: remixOf.title,
+              look: (c) => <Link href={`/community-gallery/${remixOf.id}`} className="text-amber underline underline-offset-2">{c}</Link>,
+            })}
+            {remixOf.author && t("basedOnBy", { author: remixOf.author })}
           </span>
         </label>
       )}
       <div className="flex flex-col gap-1">
-        <label htmlFor="outfit-title" className="text-xs text-ink-dim">Title</label>
+        <label htmlFor="outfit-title" className="text-xs text-ink-dim">{t("title")}</label>
         <Input id="outfit-title" value={title} maxLength={80} required onChange={(e) => setTitle(e.target.value)} className="bg-surface" />
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Choice id="outfit-class" label="Class" value={className} options={CLASSES} onChange={setClassName} />
-        <Choice id="outfit-armor" label="Armor" value={armor} options={ARMOR_TYPES} format={(a) => ARMOR_LABEL[a]} onChange={setArmor} />
-        <Choice id="outfit-race" label="Race" value={race} options={Object.keys(RACE_LABEL)} format={(k) => RACE_LABEL[k]} onChange={setRace} />
+        <Choice id="outfit-class" label={t("class")} value={className} options={CLASSES} format={(c) => term(tw, "class", c)} onChange={setClassName} />
+        <Choice id="outfit-armor" label={t("armor")} value={armor} options={ARMOR_TYPES} format={(a) => term(tw, "armor", a, ARMOR_LABEL[a])} onChange={setArmor} />
+        <Choice
+          id="outfit-race"
+          label={t("race")}
+          value={race}
+          options={Object.keys(RACE_LABEL)}
+          format={(k) => term(tw, "race", k, RACE_LABEL[k])}
+          onChange={setRace}
+        />
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="outfit-description" className="flex justify-between text-xs text-ink-dim">
-          <span>Description <span className="text-ink-faint">(optional)</span></span>
+          <span>{t.rich("description", { optional: (c) => <span className="text-ink-faint">{c}</span> })}</span>
           {description.length > DESCRIPTION_MAX - 80 && (
             <span className={`nums ${description.length > DESCRIPTION_MAX ? "text-bad" : "text-ink-faint"}`}>
               {DESCRIPTION_MAX - description.length}
@@ -216,7 +234,7 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
           id="outfit-description"
           value={description}
           rows={3}
-          placeholder="What inspired it?"
+          placeholder={t("inspired")}
           onChange={(e) => setDescription(e.target.value)}
           className="max-h-48 resize-none bg-surface"
         />
@@ -227,7 +245,7 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
           {error.text}
           {error.existing && (
             <>
-              {" "}<Link href={`/community-gallery/${error.existing}`} className="text-amber underline underline-offset-2">Open it</Link>
+              {" "}<Link href={`/community-gallery/${error.existing}`} className="text-amber underline underline-offset-2">{t("openIt")}</Link>
             </>
           )}
         </p>
@@ -235,12 +253,12 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" size="sm" disabled={pending || !code || gallery.length === 0}>
           {pending && <Loader2 className="size-4 animate-spin" />}
-          Publish to the Community Gallery
+          {t("publish")}
         </Button>
         {!code ? (
-          <p className="text-xs text-ink-faint">Paste a loadout code above first.</p>
+          <p className="text-xs text-ink-faint">{t("pasteFirst")}</p>
         ) : gallery.length === 0 && (
-          <p className="text-xs text-ink-faint">Add a screenshot to publish.</p>
+          <p className="text-xs text-ink-faint">{t("addShot")}</p>
         )}
       </div>
     </form>
@@ -254,11 +272,12 @@ function OutfitPanel({ result, code, removed, onRemove }: {
   onRemove: (slot: number) => void;
 }) {
   const shown = result.resolved.slots.filter((s) => !removed.includes(s.slot));
+  const t = useTranslations("decoder");
   return (
-    <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label="What the code holds">
+    <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label={t("holds")}>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-base">{shown.length} {shown.length === 1 ? "piece" : "pieces"}</h2>
-        <CopyButton code={code} label={removed.length ? "Copy edited code" : "Copy code"} />
+        <h2 className="text-base">{t("pieceCount", { count: shown.length })}</h2>
+        <CopyButton code={code} label={removed.length ? t("copyEdited") : undefined} />
       </div>
       <SlotList slots={shown} onRemove={onRemove} />
       <LoadoutFacts resolved={result.resolved} />
@@ -269,27 +288,29 @@ function OutfitPanel({ result, code, removed, onRemove }: {
 
 /** Where a code's pieces appear, before one is pasted. */
 function EmptyPanel() {
+  const t = useTranslations("decoder");
   return (
-    <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label="What the code holds">
-      <h2 className="text-base">No pieces yet</h2>
-      <p className="text-sm text-ink-dim">Paste a loadout code above and the pieces it holds are listed here.</p>
+    <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label={t("holds")}>
+      <h2 className="text-base">{t("noPieces")}</h2>
+      <p className="text-sm text-ink-dim">{t("noPiecesLead")}</p>
     </section>
   );
 }
 
 function WorldResultView({ result, code }: { result: WorldResult; code: string }) {
+  const t = useTranslations("decoder");
   return (
-    <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label="What the code holds">
+    <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label={t("holds")}>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-base">{result.places.length} {result.places.length === 1 ? "place" : "places"}</h2>
-        <CopyButton code={code} toastHint="Paste it with Import on Colors > World." />
+        <h2 className="text-base">{t("placeCount", { count: result.places.length })}</h2>
+        <CopyButton code={code} toastHint={t("worldHint")} />
       </div>
       <ul className="divide-y divide-line">
         {result.places.map((p) => (
           <li key={p.tag} className="py-2">
-            <p className="text-sm">{p.info?.name ?? `Unknown place ${p.tag}`}</p>
+            <p className="text-sm">{p.info?.name ?? t("unknownPlace", { tag: p.tag })}</p>
             <p className="text-xs text-ink-faint">
-              {p.info ? p.info.path || p.info.group : "Not in the catalogue: the game skips this one."}
+              {p.info ? p.info.path || p.info.group : t("notInCatalogue")}
             </p>
             <ul className="mt-1.5 flex flex-wrap gap-3">
               {WORLD_ROWS.map((row) => {
@@ -318,6 +339,7 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
   /** The saved set `initial` came from, whose pictures are offered while it is unchanged. */
   fromSet?: SetPictures | null;
 }) {
+  const t = useTranslations("decoder");
   const [text, setText] = useState(initial);
   const [result, setResult] = useState<InspectResult | null>(null);
   // Slots handed back to the wearer's gear, as the game's own slot clear does. A new code starts with none.
@@ -353,7 +375,7 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
     try {
       change(await navigator.clipboard.readText());
     } catch {
-      toast.error("The browser refused the clipboard. Paste into the box instead.");
+      toast.error(t("clipboardRefused"));
     }
   }
 
@@ -365,7 +387,7 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
           value={text}
           autoFocus
           spellCheck={false}
-          aria-label="Eclipse code"
+          aria-label={t("codeLabel")}
           aria-invalid={result?.kind === "error"}
           placeholder="ECA1:c2xvdCAwIDI1OTMwNgpzbG90IDIgMTAwMTczMw..."
           onChange={(e) => change(e.target.value)}
@@ -375,11 +397,11 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
       <div className="flex items-center gap-3">
         <Button type="button" size="sm" variant="outline" onClick={paste} className="gap-1.5">
           <ClipboardPaste className="size-4" strokeWidth={1.5} />
-          Paste from clipboard
+          {t("paste")}
         </Button>
-        {pending && <Loader2 className="size-4 animate-spin text-ink-faint" aria-label="Reading the code" />}
+        {pending && <Loader2 className="size-4 animate-spin text-ink-faint" aria-label={t("reading")} />}
         {result?.kind === "error" && <p role="alert" className="text-sm text-bad">{result.error}</p>}
-        {result && result.kind !== "error" && <p className="text-sm text-good">Valid {result.kind === "world" ? "world" : "loadout"} code</p>}
+        {result && result.kind !== "error" && <p className="text-sm text-good">{t("valid", { kind: result.kind })}</p>}
       </div>
       {result?.kind === "world" ? (
         <WorldResultView result={result} code={text.trim()} />
@@ -391,8 +413,8 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
           ) : (
             <EmptyPanel />
           )}
-          <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label="Publish">
-            <h2 className="text-base">Publish it</h2>
+          <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label={t("publishLabel")}>
+            <h2 className="text-base">{t("publishIt")}</h2>
             <PublishForm key={pictures ? "set" : "code"} code={code} remixOf={remixOf} fromSet={pictures} />
           </section>
         </div>

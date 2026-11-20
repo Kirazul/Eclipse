@@ -9,6 +9,17 @@ export const AMBER = 0xf2a93b;
 
 export const NO_MENTIONS = { parse: [] as string[] };
 
+/** Discord shows a code block with a copy button; past this, the site is the place to copy it. */
+const MAX_CODE = 1000;
+
+/**
+ * A look's code as a block Discord gives a copy button. Null when it is too long to
+ * show, or holds a backtick that could close the block and turn the rest into markdown.
+ */
+export function codeBlock(code: string): string | null {
+  return code.length <= MAX_CODE && !code.includes("`") ? `\`\`\`\n${code}\n\`\`\`` : null;
+}
+
 export interface Embed {
   title?: string;
   url?: string;

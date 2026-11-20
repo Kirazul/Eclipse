@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LookOfTheWeek } from "@/components/look-of-the-week";
@@ -20,20 +21,21 @@ async function FeaturedLooks() {
   const looks = captures.length ? [] : (await repository.listOutfits({ sort: "top", pageSize: 4 })).posts;
   if (!captures.length && !looks.length) return null;
   const community = captures.length > 0 || looks.some((post) => post.authorId || post.sharedOnDiscord);
+  const t = await getTranslations("home");
   return (
     <section className="section" id="wardrobe" aria-labelledby="featured-heading">
       <div className="wrap">
         <div className="section__row">
           <header className="section__head">
-            <h2 id="featured-heading">From the Community Gallery</h2>
+            <h2 id="featured-heading">{t("featured")}</h2>
             <p>
               {community
-                ? "Looks the community has dressed, every one a code away from your character."
-                : "Real item sets from the game, every one a code away from your character."}
+                ? t("community")
+                : t("sets")}
             </p>
           </header>
           <Link href={captures.length ? "/community-gallery?pictures=true" : "/community-gallery"} className="btn btn--ghost btn--sm">
-            <span>Open the Community Gallery</span><Icon id="i-arrow" />
+            <span>{t("open")}</span><Icon id="i-arrow" />
           </Link>
         </div>
         <div className="featured">

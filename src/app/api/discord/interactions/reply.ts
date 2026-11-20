@@ -11,6 +11,8 @@ export interface CommandData {
   /** A right-clicked message, with the message itself under resolved. */
   target_id?: string;
   resolved?: { messages?: Record<string, ShowcaseMessage> };
+  /** A clicked button's id. A click sends no name. */
+  custom_id?: string;
 }
 
 export interface Interaction {
@@ -19,8 +21,12 @@ export interface Interaction {
   token: string;
   guild_id?: string;
   channel_id?: string;
+  /** The asker's Discord language, such as "en-US" or "ru". */
+  locale?: string;
   /** In a server: who asked, with their permissions there. Signed by Discord, so trusted. */
-  member?: { user: { id: string }; permissions?: string };
+  member?: { user: { id: string; username?: string; global_name?: string | null }; permissions?: string };
+  /** For a click: the message the button is on. */
+  message?: { id: string };
   data?: CommandData;
 }
 

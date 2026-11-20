@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Loader2, SendHorizontal } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -25,6 +26,8 @@ const BAR = "shrink-0 border-t border-line p-3";
  */
 export function CommentForm({ outfitId }: { outfitId: string }) {
   const { account, checking } = useViewer();
+  const t = useTranslations("comments");
+  const ts = useTranslations("signIn");
   const [text, setText] = useState("");
   const [posting, startPosting] = useTransition();
   const field = useRef<HTMLTextAreaElement>(null);
@@ -35,13 +38,13 @@ export function CommentForm({ outfitId }: { outfitId: string }) {
   if (!account) {
     return (
       <div className={`${BAR} flex flex-wrap items-center justify-between gap-3`}>
-        <p className="text-sm text-ink-dim">Sign in to join the conversation.</p>
+        <p className="text-sm text-ink-dim">{t("signInPrompt")}</p>
         <Dialog>
-          <DialogTrigger className="btn btn--ghost btn--sm">Sign in</DialogTrigger>
+          <DialogTrigger className="btn btn--ghost btn--sm">{ts("button")}</DialogTrigger>
           <DialogContent className="gap-5 border-line bg-surface p-6">
             <DialogHeader>
-              <DialogTitle>Sign in to comment</DialogTitle>
-              <DialogDescription>Comment, publish your looks and vote.</DialogDescription>
+              <DialogTitle>{t("signInTitle")}</DialogTitle>
+              <DialogDescription>{t("signInBody")}</DialogDescription>
             </DialogHeader>
             <SignInOptions />
           </DialogContent>
@@ -74,7 +77,7 @@ export function CommentForm({ outfitId }: { outfitId: string }) {
       }}
     >
       <div className="flex items-end gap-2 rounded-2xl border border-transparent bg-surface-raised py-1.5 pr-1.5 pl-3.5 focus-within:border-line-strong">
-        <label htmlFor="comment-body" className="sr-only">Write a comment</label>
+        <label htmlFor="comment-body" className="sr-only">{t("write")}</label>
         <textarea
           ref={field}
           id="comment-body"
@@ -89,12 +92,12 @@ export function CommentForm({ outfitId }: { outfitId: string }) {
           }}
           rows={1}
           maxLength={COMMENT_MAX + 100}
-          placeholder={account.name ? `Comment as ${account.name}` : "Write a comment"}
+          placeholder={account.name ? t("commentAs", { name: account.name }) : t("write")}
           className="field-sizing-content max-h-32 min-h-[1.75rem] flex-1 resize-none self-center bg-transparent py-1 text-sm text-ink outline-none placeholder:text-ink-faint"
         />
         <button
           type="submit"
-          aria-label="Post comment"
+          aria-label={t("post")}
           className="flex size-8 shrink-0 items-center justify-center rounded-full text-amber transition-colors hover:bg-surface-high disabled:text-ink-faint disabled:hover:bg-transparent"
           disabled={posting || !text.trim() || left < 0}
         >
