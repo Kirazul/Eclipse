@@ -1,7 +1,7 @@
 import "server-only";
 import { repository } from "@/lib/data";
 import type { OutfitPost, SearchEntry } from "@/lib/data/types";
-import { AMBER, NO_MENTIONS, plain } from "@/lib/discord";
+import { AMBER, NO_MENTIONS, codeBlock, plain } from "@/lib/discord";
 import { HELP } from "@/lib/help";
 import { codeIn } from "@/lib/showcase-post";
 import { siteUrl } from "@/lib/site";
@@ -31,18 +31,13 @@ export function lookId(text: string): string | null {
   return /^[\w-]{1,64}$/.test(t) ? t : null;
 }
 
-/** Discord shows a code block with a copy button; past this, the site is the place to copy it. */
-const MAX_CODE = 1000;
-
 function lookReply(post: OutfitPost): Reply {
   const url = `${siteUrl}/community-gallery/${post.id}`;
   const facts = [
     post.author ? `by ${plain(post.author)}` : null,
     post.upvotes != null ? `${post.upvotes.toLocaleString("en-US")} upvotes` : null,
   ].filter(Boolean);
-  const code = post.code.length <= MAX_CODE
-    ? `\`\`\`\n${post.code}\n\`\`\``
-    : "Copy its code from the Community Gallery.";
+  const code = codeBlock(post.code) ?? "Copy its code from the Community Gallery.";
   return {
     embeds: [{
       title: post.title.slice(0, 256),

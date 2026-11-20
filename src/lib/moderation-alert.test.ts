@@ -125,3 +125,48 @@ describe("the moderators' alert for a comment", () => {
     expect(sent).toEqual([]);
   });
 });
+
+describe("the alert's Keep and Delete buttons", () => {
+  const CHANNEL = "1300000000000000001";
+  let botAnswers = 200;
+  const calls: { url: string; method: string; body: Record<string, unknown> | null }[] = [];
+
+  beforeEach(() => {
+    calls.length = 0;
+    botAnswers = 200;
+    vi.stubEnv("DISCORD_BOT_TOKEN", "bot-token");
+    vi.stubGlobal("fetch", async (url: string, init: RequestInit = {}) => {
+      const method = init.method ?? "GET";
+      calls.push({ url, method, body: init.body ? JSON.parse(String(init.body)) : null });
+      if (method === "GET" && url === HOOK) return Response.json({ channel_id: CHANNEL });
+      if (url.includes("/channels/")) return new Response(null, { status: botAnswers });
+      return new Response(null, { status: 204 });
+    });
+  });
+
+  it("has the bot post the alert in the webhook's channel, with buttons naming the look", async () => {
+    await alertModerators(post.id, "spam");
+    const posted = calls.find((c) => c.method === "POST")!;
+    expect(posted.url).toBe(`https://discord.com/api/v10/channels/${CHANNEL}/messages`);
+    expect(posted.body!.allowed_mentions).toEqual({ parse: [] });
+    const [row] = posted.body!.components as { components: { custom_id?: string; url?: string }[] }[];
+    expect(row.components.map((b) => b.custom_id ?? b.url)).toEqual([
+      `mod:keep:look:${post.id}`, `mod:ask:look:${post.id}`, `${siteUrl}/moderation`,
+    ]);
+  });
+
+  it("names the comment on a comment's alert", async () => {
+    await alertCommentReport(said.id, "spam");
+    const posted = calls.find((c) => c.method === "POST")!;
+    const [row] = posted.body!.components as { components: { custom_id?: string }[] }[];
+    expect(row.components[0].custom_id).toBe(`mod:keep:comment:${said.id}`);
+  });
+
+  it("still alerts through the webhook, without buttons, when the bot may not post there", async () => {
+    botAnswers = 403;
+    await alertModerators(post.id, "spam");
+    const posts = calls.filter((c) => c.method === "POST");
+    expect(posts.at(-1)!.url).toBe(HOOK);
+    expect(posts.at(-1)!.body!.components).toBeUndefined();
+  });
+});
