@@ -4,38 +4,20 @@
 // backticks is a file, a setting line or a command: Discord shows it as code, and
 // so does the guide.
 
+import en from "@/i18n/messages/en.json";
+
+// The text lives in src/i18n/messages (help.<id>), so each language has its own.
+export const HELP_IDS = ["f2", "crash", "missing", "names"] as const;
+export type HelpId = (typeof HELP_IDS)[number];
+
 export interface HelpEntry {
-  id: string;
+  id: HelpId;
   question: string;
   answer: string;
 }
 
-export const HELP: readonly HelpEntry[] = [
-  {
-    id: "f2",
-    question: "F2 does nothing",
-    answer:
-      "Eclipse opens once you are in the world, not at the login or character screen. Check that `dinput8.dll` sits right next to `Wow.exe`, not in a folder of its own. If you changed the key in Eclipse's settings, press that one.",
-  },
-  {
-    id: "crash",
-    question: "The game crashes while Eclipse loads, or closes as you enter the world",
-    answer:
-      "Get the latest Eclipse, which fixed most of these. If it still happens, add `SET dbCompress \"0\"` to `WTF/Config.wtf` in your game folder.",
-  },
-  {
-    id: "missing",
-    question: "The HD font or some Incarnations are missing",
-    answer:
-      "Those need the `Eclipse` folder from Eclipse.zip, next to `Wow.exe` as well. `dinput8.dll` runs on its own, but with fewer features.",
-  },
-  {
-    id: "names",
-    question: "Pieces show file names instead of their real names",
-    answer:
-      "Real names arrive from the server a moment after a piece first shows. Turn on Settings > Wardrobe > Item caching to load them ahead of time. To find one piece, use `/item` in the Eclipse Discord: it gives the id that the wardrobe's search finds it by.",
-  },
-];
+/** The list in English. */
+export const HELP: readonly HelpEntry[] = HELP_IDS.map((id) => ({ id, ...en.help[id] }));
 
 /** Splits an answer into plain text and the parts written between backticks. */
 export function helpParts(text: string): { text: string; code: boolean }[] {

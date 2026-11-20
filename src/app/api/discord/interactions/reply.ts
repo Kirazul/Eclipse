@@ -21,6 +21,8 @@ export interface Interaction {
   token: string;
   guild_id?: string;
   channel_id?: string;
+  /** The asker's Discord language, such as "en-US" or "ru". */
+  locale?: string;
   /** In a server: who asked, with their permissions there. Signed by Discord, so trusted. */
   member?: { user: { id: string; username?: string; global_name?: string | null }; permissions?: string };
   /** For a click: the message the button is on. */

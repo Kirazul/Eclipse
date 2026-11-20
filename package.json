@@ -24,6 +24,7 @@
     "lucide-react": "^1.66.0",
     "nanostores": "1.5.5",
     "next": "15.5.28",
+    "next-intl": "4.14.9",
     "nuqs": "^2.10.2",
     "radix-ui": "^1.8.1",
     "react": "19.1.0",
