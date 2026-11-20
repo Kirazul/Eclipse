@@ -1,6 +1,7 @@
 import { BadgeCheck, Copy, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { CopyButton } from "@/components/copy-button";
 import { ItemRing } from "@/components/item-icon";
 import { LookMenu } from "@/components/look-menu";
@@ -8,6 +9,7 @@ import { UpvoteButton } from "@/components/upvote-button";
 import { resolveOutfit, type ResolvedOutfit } from "@/lib/catalog";
 import { decodeOutfit } from "@/lib/codec/outfit";
 import type { OutfitPost } from "@/lib/data/types";
+import { term } from "@/i18n/terms";
 import { posted } from "@/lib/ago";
 import { ARMOR_LABEL, RACE_LABEL, VISIBLE_SLOTS } from "@/lib/domain";
 import { thumbOf } from "@/lib/screenshots";
@@ -28,8 +30,8 @@ const crestArt = (post: OutfitPost, resolved: ResolvedOutfit | null) =>
       ? raceArt(resolved.raceKey, resolved.sex)
       : null;
 
-const COUNT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
-const WHOLE = new Intl.NumberFormat("en");
+const compact = (locale: string, n: number) =>
+  new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 }).format(n);
 
 /**
  * The Gallery's view: the look, who made it, its copies, one detail, when, and its code; hover shows its caption and the other details.
@@ -38,20 +40,22 @@ const WHOLE = new Intl.NumberFormat("en");
  * surface-raised and the corona rim on hover, 120ms, one primary action.
  */
 export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?: boolean }) {
+  const t = useTranslations();
+  const locale = useLocale();
   const resolved = resolve(post);
   const worn = pieces(resolved);
   const crest = crestArt(post, resolved);
   const capture = post.gallery[0];
   // Details wait for hover; the card at rest shows only the title, author, copies and date.
   const rest = [
-    post.className,
-    post.race ? RACE_LABEL[post.race] : null,
-    post.armor ? ARMOR_LABEL[post.armor] : null,
-    ...post.categories,
+    post.className ? term(t, "class", post.className) : null,
+    post.race ? term(t, "race", post.race, RACE_LABEL[post.race]) : null,
+    post.armor ? term(t, "armor", post.armor, ARMOR_LABEL[post.armor]) : null,
+    ...post.categories.map((c) => term(t, "category", c)),
   ].filter((t): t is string => Boolean(t));
   const caption = post.description?.trim();
   const copies = post.copies ?? 0;
-  const copiesLabel = `${WHOLE.format(copies)} ${copies === 1 ? "copy" : "copies"}`;
+  const copiesLabel = t("card.copies", { count: copies });
 
   return (
     <article className="corona-rim relative isolate flex flex-col overflow-hidden rounded-[8px] border border-line bg-surface transition-colors duration-[120ms] hover:bg-surface-raised">
@@ -60,14 +64,14 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
         <Link
           href={`/community-gallery/${post.id}`}
           className="absolute inset-0 z-20 rounded-t-[8px] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-amber"
-          aria-label={`Open ${post.title}`}
+          aria-label={t("card.open", { title: post.title })}
         />
         {/* Every card has the same picture frame, so a row of cards lines up with or without a capture. */}
         <div className="relative aspect-[16/10] overflow-hidden border-b border-line bg-void">
           {/* Only its author is ever shown a private look, on their own lists. */}
           {post.isPrivate && (
             <span className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1 rounded-full border border-line-strong bg-void/85 px-2.5 py-1 text-xs text-ink">
-              <EyeOff className="size-3.5" strokeWidth={1.5} aria-hidden />Private
+              <EyeOff className="size-3.5" strokeWidth={1.5} aria-hidden />{t("card.private")}
             </span>
           )}
           {capture ? (
@@ -109,9 +113,9 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
                     {post.author}
                   </Link>
                 ) : (
-                  <span className="truncate">{post.author ?? "Item set"}</span>
+                  <span className="truncate">{post.author ?? t("card.itemSet")}</span>
                 )}
-                {post.authorVerified && <BadgeCheck className="size-3.5 shrink-0 text-amber" strokeWidth={1.5} aria-label="Verified" />}
+                {post.authorVerified && <BadgeCheck className="size-3.5 shrink-0 text-amber" strokeWidth={1.5} aria-label={t("look.verified")} />}
               </p>
             </div>
           </div>
@@ -122,12 +126,12 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
               {copies > 0 && (
                 <span className="nums inline-flex shrink-0 items-center gap-1 text-ink-dim" title={copiesLabel}>
                   <Copy className="size-3.5" strokeWidth={1.5} aria-hidden />
-                  <span aria-hidden>{COUNT.format(copies)}</span>
+                  <span aria-hidden>{compact(locale, copies)}</span>
                   <span className="sr-only">{copiesLabel}</span>
                 </span>
               )}
               {post.createdAt && (
-                <time dateTime={post.createdAt} className="nums ml-auto shrink-0">{posted(post.createdAt, Date.now())}</time>
+                <time dateTime={post.createdAt} className="nums ml-auto shrink-0">{posted(post.createdAt, Date.now(), locale)}</time>
               )}
             </div>
           )}
@@ -157,18 +161,20 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
  * A look with no capture gets its crest on a backdrop, so a grid lines up either way.
  */
 export function OutfitPoster({ post }: { post: OutfitPost }) {
+  const t = useTranslations();
+  const locale = useLocale();
   const resolved = resolve(post);
   const capture = post.gallery[0];
   const crest = capture ? null : crestArt(post, resolved);
-  const line = [post.race ? RACE_LABEL[post.race] : null, post.className].filter(Boolean).join(" ");
+  const line = [post.race ? term(t, "race", post.race, RACE_LABEL[post.race]) : null, post.className ? term(t, "class", post.className) : null].filter(Boolean).join(" ");
   // Race and class are already on the card's line; hover adds the rest.
-  const tags = [post.armor ? ARMOR_LABEL[post.armor] : null, ...post.categories].filter((t): t is string => Boolean(t));
+  const tags = [post.armor ? term(t, "armor", post.armor, ARMOR_LABEL[post.armor]) : null, ...post.categories.map((c) => term(t, "category", c))].filter((t): t is string => Boolean(t));
   const caption = post.description?.trim();
   const copies = post.copies ?? 0;
-  const copiesLabel = `${WHOLE.format(copies)} ${copies === 1 ? "copy" : "copies"}`;
+  const copiesLabel = t("card.copies", { count: copies });
   return (
     <article className="relative">
-      <Link href={`/community-gallery/${post.id}`} className="poster group" aria-label={`Open ${post.title}`}>
+      <Link href={`/community-gallery/${post.id}`} className="poster group" aria-label={t("card.open", { title: post.title })}>
         {capture ? (
           <Image src={thumbOf(capture)} alt="" fill unoptimized sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" className="poster__art" />
         ) : (
@@ -190,7 +196,7 @@ export function OutfitPoster({ post }: { post: OutfitPost }) {
             ))}
           </div>
           <h3 className="font-serif text-lg leading-tight font-normal tracking-[-0.01em]">{post.title}</h3>
-          <p className="truncate text-xs text-ink-dim">{line || post.categories.join(", ")}</p>
+          <p className="truncate text-xs text-ink-dim">{line || post.categories.map((c) => term(t, "category", c)).join(", ")}</p>
           {/* Rows animate from 0fr to 1fr, so the panel grows to its own height without a fixed max-height. */}
           <div className="grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-200 group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-visible:grid-rows-[1fr] group-focus-visible:opacity-100">
             <div className="flex min-h-0 flex-col gap-2 overflow-hidden">
@@ -204,17 +210,17 @@ export function OutfitPoster({ post }: { post: OutfitPost }) {
               )}
               <p className={`flex items-center gap-2 text-xs leading-4 text-ink-faint ${caption || tags.length ? "" : "mt-2"}`}>
                 <span className="flex min-w-0 items-center gap-1">
-                  <span className="truncate">{post.author ?? "Item set"}</span>
-                  {post.authorVerified && <BadgeCheck className="size-3.5 shrink-0 text-amber" strokeWidth={1.5} aria-label="Verified" />}
+                  <span className="truncate">{post.author ?? t("card.itemSet")}</span>
+                  {post.authorVerified && <BadgeCheck className="size-3.5 shrink-0 text-amber" strokeWidth={1.5} aria-label={t("look.verified")} />}
                 </span>
                 {copies > 0 && (
                   <span className="nums inline-flex shrink-0 items-center gap-1 text-ink-dim" title={copiesLabel}>
                     <Copy className="size-3.5" strokeWidth={1.5} aria-hidden />
-                    <span aria-hidden>{COUNT.format(copies)}</span>
+                    <span aria-hidden>{compact(locale, copies)}</span>
                     <span className="sr-only">{copiesLabel}</span>
                   </span>
                 )}
-                {post.createdAt && <time dateTime={post.createdAt} className="nums ml-auto shrink-0">{posted(post.createdAt, Date.now())}</time>}
+                {post.createdAt && <time dateTime={post.createdAt} className="nums ml-auto shrink-0">{posted(post.createdAt, Date.now(), locale)}</time>}
               </p>
             </div>
           </div>

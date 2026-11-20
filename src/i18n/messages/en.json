@@ -656,7 +656,9 @@
     "removeShort": "Remove"
   },
   "upvote": {
-    "label": "Upvote, {count, plural, one {# vote} other {# votes}}"
+    "label": "Upvote, {count, plural, one {# vote} other {# votes}}",
+    "remove": "Remove upvote, {count, plural, one {# vote} other {# votes}}",
+    "failed": "That vote could not be counted. Try again."
   },
   "pieces": {
     "hidden": "Hidden",
@@ -900,5 +902,43 @@
     "failed": "The connection did not finish. Try again.",
     "off": "Discord roles are not switched on yet.",
     "shares": "Eclipse shares only your public name and those two numbers with Discord. Remove the connection any time in Discord's settings, under Connections."
+  },
+  "gallery": {
+    "bookmarksTitle": "Bookmarks",
+    "bookmarksBlurb": "The looks you bookmarked, which only you can see. Copy a code here and use Import on the Loadout page to wear it.",
+    "title": "Community Gallery",
+    "blurb": "Loadouts the Eclipse community has published from their games. Find one you like, copy its code, and use Import on the Loadout page to wear it.",
+    "onePerson": "Showing one person's looks.",
+    "everyone": "Show everyone's",
+    "wearing": "Showing looks that wear {item}.",
+    "itemFallback": "item {id}",
+    "everyLook": "Show every look",
+    "back": "Back to the Community Gallery",
+    "creators": "Creators",
+    "looks": "{count, plural, one {# look} other {# looks}}",
+    "noTitles": "No look titles match that search."
+  },
+  "card": {
+    "open": "Open {title}",
+    "private": "Private",
+    "itemSet": "Item set",
+    "copies": "{count, plural, one {# copy} other {# copies}}"
+  },
+  "filters": {
+    "search": "Search outfits",
+    "placeholder": "Search by title",
+    "class": "Class",
+    "race": "Race",
+    "armor": "Armor",
+    "anyClass": "Any class",
+    "anyRace": "Any race",
+    "anyArmor": "Any armor",
+    "tags": "Tags",
+    "tagsSelected": "Tags, {count} selected",
+    "pictures": "With pictures",
+    "changes": "Changes",
+    "sort": "Sort",
+    "removeTag": "Remove tag {tag}",
+    "clear": "Clear"
   }
 }

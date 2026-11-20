@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowBigUp } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { votedLooks, voteOutfit } from "@/app/actions";
@@ -12,6 +13,8 @@ import { cn } from "@/lib/utils";
 const hasVoted = voteReader(votedLooks, () => SESSION_COOKIE.test(document.cookie));
 
 export function UpvoteButton({ id, count, className }: { id: string; count: number; className?: string }) {
+  const t = useTranslations("upvote");
+  const locale = useLocale();
   const [voted, setVoted] = useState(false);
   const [shown, setShown] = useState(count);
   // A fresh count from the server, after a revalidation, replaces the one on screen.
@@ -37,7 +40,7 @@ export function UpvoteButton({ id, count, className }: { id: string; count: numb
   return (
     <button
       type="button"
-      aria-label={`${voted ? "Remove upvote" : "Upvote"}, ${shown} votes`}
+      aria-label={voted ? t("remove", { count: shown }) : t("label", { count: shown })}
       aria-pressed={voted}
       onClick={(e) => {
         e.preventDefault();
@@ -59,7 +62,7 @@ export function UpvoteButton({ id, count, className }: { id: string; count: numb
             if (request !== latest.current) return;
             setVoted(before.voted);
             setShown(before.shown);
-            toast.error("That vote could not be counted. Try again.");
+            toast.error(t("failed"));
           },
         );
       }}
@@ -71,7 +74,7 @@ export function UpvoteButton({ id, count, className }: { id: string; count: numb
       )}
     >
       <ArrowBigUp className="size-4" strokeWidth={1.5} fill={voted ? "currentColor" : "none"} />
-      {shown.toLocaleString("en-US")}
+      {shown.toLocaleString(locale)}
     </button>
   );
 }
