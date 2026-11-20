@@ -20,7 +20,8 @@ vi.mock("@/app/actions", () => ({
   removeSetPicture: vi.fn(),
   unlinkGame: vi.fn(),
   uploadScreenshot: vi.fn(),
-  upvoteOutfit: vi.fn(),
+  voteOutfit: vi.fn(),
+  votedLooks: vi.fn(),
 }));
 
 // The signed-in page cannot be reached with a test session while email login is off,

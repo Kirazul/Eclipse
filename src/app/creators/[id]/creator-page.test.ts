@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/creators",
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
-vi.mock("@/app/actions", () => ({ upvoteOutfit: vi.fn() }));
+vi.mock("@/app/actions", () => ({ voteOutfit: vi.fn(), votedLooks: vi.fn() }));
 
 // A visitor's view and the owner's differ only by who is signed in, which no test
 // session can be while email login is off: the data layer is stubbed instead.

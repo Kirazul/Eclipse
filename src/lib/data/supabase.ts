@@ -143,7 +143,7 @@ const lookId = (detail: string | null | undefined) => (detail && UUID.test(detai
 
 // What PostgREST answers when the requested page starts past the last row.
 const RANGE_NOT_SATISFIABLE = "PGRST103";
-// The errcode upvote_outfit raises for a signed-out caller.
+// The errcode set_outfit_vote raises for a signed-out caller.
 const SIGNED_OUT = "28000";
 // What Postgres answers when RLS refuses a row: here, an author with no name yet.
 const REFUSED_BY_POLICY = "42501";
@@ -339,13 +339,22 @@ export const supabaseRepository: Repository = {
     if (error) return { ok: false, error: "That outfit could not be saved. Try again." };
     return { ok: true, value: toPost(data as unknown as OutfitRow) };
   },
-  async upvote(id) {
+  async vote(id, up) {
     if (!UUID.test(id)) return { ok: false, error: "That look cannot be voted on." };
     const db = await createServerSupabase();
-    const { data, error } = await db.rpc("upvote_outfit", { target: id });
+    const { data, error } = await db.rpc("set_outfit_vote", { target: id, up });
     if (error?.code === SIGNED_OUT) return { ok: false, error: "Sign in to vote." };
     if (error) return { ok: false, error: "That vote could not be counted. Try again." };
     return { ok: true, value: data as number };
+  },
+  async votedOn(ids) {
+    const looks = ids.filter((id) => UUID.test(id));
+    if (!looks.length) return [];
+    const db = await createServerSupabase();
+    const { data: auth } = await db.auth.getUser();
+    if (!auth.user) return [];
+    const { data } = await db.from("outfit_votes").select("outfit_id").eq("user_id", auth.user.id).in("outfit_id", looks);
+    return (data ?? []).map((r) => r.outfit_id as string);
   },
   async report(id, reason) {
     if (!UUID.test(id)) return { ok: false, error: "That look cannot be reported." };

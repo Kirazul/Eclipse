@@ -140,7 +140,8 @@ describe("the built-in looks", () => {
     const before = (await repo.listOutfits({ sort: "top" })).total;
     const created = await repo.createOutfit({ title: "A look", code: "ECA1:c2xvdCAwIDEK", tags: [], gallery: [] });
     expect(created.ok).toBe(false);
-    expect((await repo.upvote("crystal-scholar")).ok).toBe(false);
+    expect((await repo.vote("crystal-scholar", true)).ok).toBe(false);
+    expect(await repo.votedOn(["crystal-scholar"])).toEqual([]);
     expect((await repo.uploadScreenshot(new File([], "a.png"))).ok).toBe(false);
     expect((await repo.report("crystal-scholar", "spam")).ok).toBe(false);
     expect((await repo.setBookmark("crystal-scholar", true)).ok).toBe(false);

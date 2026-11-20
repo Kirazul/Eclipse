@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { OutfitPost } from "@/lib/data/types";
 
 vi.mock("server-only", () => ({}));
-vi.mock("@/app/actions", () => ({ upvoteOutfit: vi.fn() }));
+vi.mock("@/app/actions", () => ({ voteOutfit: vi.fn(), votedLooks: vi.fn() }));
 
 import { OutfitCard, OutfitPoster } from "./outfit-card";
 

@@ -167,10 +167,17 @@ export async function removeSetPicture(setId: string, path: string) {
   return r;
 }
 
-export async function upvoteOutfit(id: string) {
-  const r = await repository.upvote(id);
+/** Sets the visitor's vote on a look, on or off. A second click takes the vote back. */
+export async function voteOutfit(id: string, up: boolean) {
+  const r = await repository.vote(id, up === true);
   if (r.ok) revalidateHub();
   return r;
+}
+
+/** Which of the looks on a page the visitor voted for, so their buttons show it. */
+export async function votedLooks(ids: string[]) {
+  if (!Array.isArray(ids)) return [];
+  return repository.votedOn(ids.filter((id) => typeof id === "string").slice(0, 100));
 }
 
 /**
