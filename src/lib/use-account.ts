@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { Account } from "@/lib/data/types";
 
 // The session cookie itself, not the short-lived ones a sign-in leaves on its way out.
-const SESSION_COOKIE = /(?:^|; )sb-[^=]+-auth-token(?:\.0)?=/;
+export const SESSION_COOKIE =/(?:^|; )sb-[^=]+-auth-token(?:\.0)?=/;
 
 /**
  * Who is signed in. Visitors with no session cookie cost no request. `checking` holds

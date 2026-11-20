@@ -208,7 +208,10 @@ export interface Repository {
   /** People with public looks, the most prolific first; with `q`, only names that contain it. */
   listCreators(filter: { q?: string; limit: number }): Promise<CreatorEntry[]>;
   createOutfit(input: ParsedOutfit): Promise<WriteResult<OutfitPost>>;
-  upvote(id: string): Promise<WriteResult<number>>;
+  /** Sets the signed-in account's vote on a look, on or off, and answers its new count. */
+  vote(id: string, up: boolean): Promise<WriteResult<number>>;
+  /** Which of these looks the signed-in account voted for. Empty for a visitor. */
+  votedOn(ids: string[]): Promise<string[]>;
   /**
    * Files a report for moderators. A report never hides the look by itself. True when
    * it is this person's first report of the look, false when it counted for nothing.

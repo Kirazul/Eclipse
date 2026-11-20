@@ -453,6 +453,39 @@ describe("finding creators", () => {
   });
 });
 
+describe("votes", () => {
+  it("sets the vote the visitor wants, on or off, and answers the new count", async () => {
+    user = { id: row.author_id };
+    let sent: unknown = null;
+    reply = (_, init) => {
+      sent = JSON.parse(String(init?.body));
+      return Response.json(0);
+    };
+    expect(await repo.vote(row.id, false)).toEqual({ ok: true, value: 0 });
+    expect(requests[0].pathname).toBe("/rest/v1/rpc/set_outfit_vote");
+    expect(sent).toEqual({ target: row.id, up: false });
+  });
+
+  it("asks a signed-out visitor to sign in", async () => {
+    reply = failWith("28000", 401);
+    expect(await repo.vote(row.id, true)).toEqual({ ok: false, error: "Sign in to vote." });
+  });
+
+  it("reads which of the given looks the account voted for", async () => {
+    user = { id: row.author_id };
+    reply = () => Response.json([{ outfit_id: row.id }]);
+    expect(await repo.votedOn([row.id, "not-a-uuid"])).toEqual([row.id]);
+    expect(requests[0].pathname).toBe("/rest/v1/outfit_votes");
+    expect(requests[0].searchParams.get("user_id")).toBe(`eq.${row.author_id}`);
+    expect(requests[0].searchParams.get("outfit_id")).toBe(`in.(${row.id})`);
+  });
+
+  it("has voted for nothing as a visitor, and asks the database nothing", async () => {
+    expect(await repo.votedOn([row.id])).toEqual([]);
+    expect(requests).toEqual([]);
+  });
+});
+
 describe("reports", () => {
   it("files the reason through report_outfit, and says when the report is new", async () => {
     user = { id: row.author_id };
@@ -644,7 +677,7 @@ describe("the Supabase adapter", () => {
 
   it("never sends a non-uuid id to Postgres", async () => {
     await expect(repo.getOutfit("not-a-uuid")).resolves.toBeNull();
-    const vote = await repo.upvote("not-a-uuid");
+    const vote = await repo.vote("not-a-uuid", true);
     expect(vote.ok).toBe(false);
     expect(requests).toEqual([]);
   });

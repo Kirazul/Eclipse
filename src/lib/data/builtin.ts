@@ -156,8 +156,11 @@ export const builtinRepository: Repository = {
   async createOutfit() {
     return { ok: false, error: NOT_LIVE };
   },
-  async upvote() {
+  async vote() {
     return { ok: false, error: NOT_LIVE };
+  },
+  async votedOn() {
+    return [];
   },
   async report() {
     return { ok: false, error: NOT_LIVE };
