@@ -1,7 +1,9 @@
 import { BadgeCheck, ChevronDown, Code, EyeOff } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
+import { term } from "@/i18n/terms";
 import { LookComments } from "@/components/look-comments";
 import { LookPieces } from "@/components/look-pieces";
 import { LookMenu } from "@/components/look-menu";
@@ -56,9 +58,16 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
   const saved = community ? await repository.isBookmarked(post.id) : false;
   const decoded = decodeOutfit(post.code);
   const resolved = decoded.ok ? resolveOutfit(decoded.outfit) : null;
-  const facts = [post.className, post.race ? RACE_LABEL[post.race] : null, post.armor ? ARMOR_LABEL[post.armor] : null]
-    .filter((t): t is string => Boolean(t));
-  const tags = [...post.categories, ...post.tags];
+  const t = await getTranslations("look");
+  const tw = await getTranslations();
+  const locale = await getLocale();
+  const facts = [
+    post.className ? term(tw, "class", post.className) : null,
+    post.race ? term(tw, "race", post.race, RACE_LABEL[post.race] ?? post.race) : null,
+    post.armor ? term(tw, "armor", post.armor, ARMOR_LABEL[post.armor]) : null,
+  ].filter((f): f is string => Boolean(f));
+  // A category is the game's word; a tag is the player's own, shown as typed.
+  const tags = [...post.categories.map((c) => term(tw, "category", c)), ...post.tags];
   // Only a player's look has someone to talk to, and only a live site stores what is said.
   const social = repository.live && community;
 
@@ -69,7 +78,7 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
       {post.isPrivate && (
         <p className="flex items-center gap-2.5 rounded-lg border border-line-strong bg-surface px-4 py-3 text-sm text-ink-dim">
           <EyeOff className="size-4 shrink-0 text-ink" strokeWidth={1.5} aria-hidden />
-          Only you can see this look. It stays out of the Community Gallery until you set it to public.
+          {t("private")}
         </p>
       )}
 
@@ -82,34 +91,39 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
             {facts.length > 0 && <span aria-hidden className="text-ink-faint">·</span>}
             <span className="inline-flex items-center gap-1">
               {post.authorId && post.author ? (
-                <>by <Link href={`/creators/${post.authorId}`} className="text-ink underline-offset-2 hover:underline">{post.author}</Link></>
+                t.rich("by", {
+                  author: post.author,
+                  creator: (c) => <Link href={`/creators/${post.authorId}`} className="text-ink underline-offset-2 hover:underline">{c}</Link>,
+                })
               ) : post.sharedOnDiscord && post.author ? (
                 // No account to link yet: it becomes theirs when they sign in with Discord.
-                <>by <span className="text-ink">{post.author}</span>, shared on Discord</>
-              ) : (post.author ?? "The game's own set")}
-              {post.authorVerified && <BadgeCheck className="size-3.5 text-amber" strokeWidth={1.5} aria-label="Verified" />}
+                t.rich("byDiscord", { author: post.author, name: (c) => <span className="text-ink">{c}</span> })
+              ) : (post.author ?? t("gameSet"))}
+              {post.authorVerified && <BadgeCheck className="size-3.5 text-amber" strokeWidth={1.5} aria-label={t("verified")} />}
             </span>
             {/* Only what was recorded: a look with no date shows none. */}
             {post.createdAt && (
               <>
                 <span aria-hidden className="text-ink-faint">·</span>
                 <time dateTime={post.createdAt} title={new Date(post.createdAt).toUTCString()}>
-                  {posted(post.createdAt, Date.now())}
+                  {posted(post.createdAt, Date.now(), locale)}
                 </time>
               </>
             )}
           </p>
           {post.remixedFrom && (
             <p className="mt-0.5 text-sm text-ink-faint">
-              Based on{" "}
-              <Link href={`/community-gallery/${post.remixedFrom.id}`} className="text-amber underline-offset-2 hover:underline">{post.remixedFrom.title}</Link>
-              {post.remixedFrom.author && <> by {post.remixedFrom.author}</>}
+              {t.rich("basedOn", {
+                title: post.remixedFrom.title,
+                look: (c) => <Link href={`/community-gallery/${post.remixedFrom!.id}`} className="text-amber underline-offset-2 hover:underline">{c}</Link>,
+              })}
+              {post.remixedFrom.author && t("basedOnBy", { author: post.remixedFrom.author })}
             </p>
           )}
         </div>
       </header>
 
-      {!resolved && <p className="text-sm text-bad">This look&apos;s code no longer decodes.</p>}
+      {!resolved && <p className="text-sm text-bad">{t("broken")}</p>}
 
       {/*
         As a photo on a social app: the picture with the conversation beside it, and
@@ -127,7 +141,7 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-6 lg:col-start-1 lg:row-start-2">
-          <div className="flex flex-wrap items-center gap-2 border-b border-line pb-5" aria-label="Use this look" role="group">
+          <div className="flex flex-wrap items-center gap-2 border-b border-line pb-5" aria-label={t("use")} role="group">
             <CopyButton code={post.code} look={post.id} className="h-[2.9rem] px-6 text-[0.95rem]" />
             {repository.live && <SendToGame id={post.id} />}
             {post.upvotes !== null && (
@@ -149,17 +163,17 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
 
           {resolved && hasLoadoutFacts(resolved) && (
             <section aria-labelledby="facts-heading" className="flex flex-col gap-2">
-              <h2 id="facts-heading" className="font-sans text-sm font-medium text-ink">Also in this code</h2>
+              <h2 id="facts-heading" className="font-sans text-sm font-medium text-ink">{t("alsoInCode")}</h2>
               <LoadoutFacts resolved={resolved} />
             </section>
           )}
 
           {tags.length > 0 && (
             <section aria-labelledby="tags-heading" className="flex flex-col gap-2">
-              <h2 id="tags-heading" className="font-sans text-sm font-medium text-ink">Tags</h2>
+              <h2 id="tags-heading" className="font-sans text-sm font-medium text-ink">{t("tags")}</h2>
               <ul className="flex flex-wrap gap-1.5">
-                {tags.map((t) => (
-                  <li key={t} className="rounded-full border border-line bg-surface-raised px-2.5 py-0.5 text-xs text-ink-dim">{t}</li>
+                {tags.map((tag) => (
+                  <li key={tag} className="rounded-full border border-line bg-surface-raised px-2.5 py-0.5 text-xs text-ink-dim">{tag}</li>
                 ))}
               </ul>
             </section>
@@ -169,7 +183,7 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
         {social && (
           // Last on a phone, after the look. Beside the picture on a wide screen, and
           // exactly its height: the box fills the row the picture sets, never stretches it.
-          <aside className="relative order-last lg:order-none lg:col-start-2 lg:row-start-1 lg:min-h-[26rem]" aria-label="Comments">
+          <aside className="relative order-last lg:order-none lg:col-start-2 lg:row-start-1 lg:min-h-[26rem]" aria-label={t("comments")}>
             <LookComments
               outfitId={post.id}
               lookAuthorId={post.authorId}
@@ -185,7 +199,7 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
         <details className="group rounded-lg border border-line bg-surface">
           <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-ink-dim transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
             <Code className="size-4" strokeWidth={1.5} aria-hidden />
-            Look code
+            {t("code")}
             <ChevronDown className="ml-auto size-4 transition-transform group-open:rotate-180" strokeWidth={1.5} aria-hidden />
           </summary>
           <div className="flex flex-col gap-3 border-t border-line p-4">
@@ -197,9 +211,9 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
         </details>
 
         <p className="text-xs text-ink-faint">
-          Scene and rings:{" "}
-          <a href={NARCISSUS_URL} target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-ink-dim">Narcissus</a>
-          {" "}by Peterodox, CC BY-NC-SA 4.0
+          {t.rich("credit", {
+            narcissus: (c) => <a href={NARCISSUS_URL} target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-ink-dim">{c}</a>,
+          })}
         </p>
       </footer>
     </article>

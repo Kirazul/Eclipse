@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -14,6 +15,7 @@ const SIZES = "(min-width: 1024px) 40rem, 100vw";
  * over a blurred copy of itself.
  */
 export function StudioGallery({ images, title }: { images: string[]; title: string }) {
+  const t = useTranslations("shots");
   const [index, setIndex] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const count = images.length;
@@ -24,7 +26,7 @@ export function StudioGallery({ images, title }: { images: string[]; title: stri
     <div
       role="group"
       aria-roledescription="carousel"
-      aria-label={`Screenshots of ${title}`}
+      aria-label={t("of", { title })}
       tabIndex={count > 1 ? 0 : undefined}
       onKeyDown={(e) => {
         if (count < 2) return;
@@ -36,7 +38,7 @@ export function StudioGallery({ images, title }: { images: string[]; title: stri
         <Image src={src} alt="" aria-hidden fill unoptimized sizes={SIZES} className="gallery__fill" />
         <Image
           src={src}
-          alt={count > 1 ? `${title}, screenshot ${index + 1} of ${count}` : `${title}, screenshot`}
+          alt={count > 1 ? t("nth", { title, index: index + 1, count }) : t("one", { title })}
           fill
           unoptimized
           priority
@@ -46,7 +48,7 @@ export function StudioGallery({ images, title }: { images: string[]; title: stri
         {/* The whole picture opens it full screen, to zoom in; the arrows sit above it. */}
         <button
           type="button"
-          aria-label="View full screen and zoom"
+          aria-label={t("fullScreen")}
           className="absolute inset-0 cursor-zoom-in"
           onClick={() => setZoomed(true)}
         />
@@ -55,10 +57,10 @@ export function StudioGallery({ images, title }: { images: string[]; title: stri
         </span>
         {count > 1 && (
           <>
-            <button type="button" aria-label="Previous screenshot" onClick={() => step(-1)} className="gallery__nav left-2">
+            <button type="button" aria-label={t("previous")} onClick={() => step(-1)} className="gallery__nav left-2">
               <ChevronLeft className="size-4" />
             </button>
-            <button type="button" aria-label="Next screenshot" onClick={() => step(1)} className="gallery__nav right-2">
+            <button type="button" aria-label={t("next")} onClick={() => step(1)} className="gallery__nav right-2">
               <ChevronRight className="size-4" />
             </button>
           </>
@@ -72,7 +74,7 @@ export function StudioGallery({ images, title }: { images: string[]; title: stri
               key={image}
               type="button"
               className="gallery__thumb"
-              aria-label={`Show screenshot ${i + 1}`}
+              aria-label={t("show", { index: i + 1 })}
               aria-current={i === index}
               onClick={() => setIndex(i)}
             >

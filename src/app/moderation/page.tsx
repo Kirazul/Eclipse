@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -15,12 +16,14 @@ export default async function ModerationPage() {
   const account = await repository.getAccount();
   if (!account?.moderator) notFound();
   const [reported, comments] = await Promise.all([repository.listReports(), repository.listCommentReports()]);
+  const t = await getTranslations("moderation");
+  const tc = await getTranslations("comments");
 
   return (
     <main id="main" className="wrap flex flex-col gap-5 py-10">
-      <h1 className="text-2xl">Reports</h1>
+      <h1 className="text-2xl">{t("title")}</h1>
       <p className="text-sm text-ink-dim">
-        Reports never hide a look. Open one to dismiss its reports and keep it, or to delete it.
+        {t("lead")}
       </p>
       {reported.length ? (
         <ul className="flex flex-col divide-y divide-line rounded-md border border-line bg-surface">
@@ -38,17 +41,17 @@ export default async function ModerationPage() {
         </ul>
       ) : (
         <p className="rounded-lg border border-dashed border-line p-10 text-center text-sm text-ink-dim">
-          No reports waiting.
+          {t("none")}
         </p>
       )}
 
-      <h2 className="pt-4 text-xl">Reported comments</h2>
+      <h2 className="pt-4 text-xl">{t("comments")}</h2>
       {comments.length ? (
         <ul className="flex flex-col divide-y divide-line rounded-md border border-line bg-surface">
           {comments.map((c) => (
             <li key={c.id} className="flex flex-col gap-2 p-3">
               <p className="flex flex-wrap items-baseline gap-x-2 text-sm text-ink-dim">
-                <span className="text-ink">{c.author ?? "Someone"}</span>
+                <span className="text-ink">{c.author ?? tc("someone")}</span>
                 on
                 <Link href={`/community-gallery/${c.outfitId}#comment-${c.id}`} className="text-ink underline-offset-2 hover:underline">
                   {c.title}
@@ -67,7 +70,7 @@ export default async function ModerationPage() {
         </ul>
       ) : (
         <p className="rounded-lg border border-dashed border-line p-10 text-center text-sm text-ink-dim">
-          No reported comments.
+          {t("noComments")}
         </p>
       )}
     </main>

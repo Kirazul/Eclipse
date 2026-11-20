@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Box, Images } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -8,10 +9,15 @@ import { PreviewNotice } from "@/components/preview-notice";
 import { StudioGallery } from "@/components/studio/studio-gallery";
 import type { Wearer } from "@/lib/viewer/figure";
 
+function Loading3d() {
+  const t = useTranslations("shots");
+  return <div className="mx-auto aspect-[3/4] w-full max-w-sm animate-pulse rounded-md bg-surface" aria-label={t("loading3d")} />;
+}
+
 // The figure's code and the models it streams load only once a visitor asks for them.
 const ModelStage = dynamic(() => import("@/components/model-stage").then((m) => m.ModelStage), {
   ssr: false,
-  loading: () => <div className="mx-auto aspect-[3/4] w-full max-w-sm animate-pulse rounded-md bg-surface" aria-label="Loading the 3D preview" />,
+  loading: () => <Loading3d />,
 });
 
 const toggle = "inline-flex items-center gap-1.5 text-xs text-ink-dim underline-offset-4 transition-colors hover:text-ink hover:underline";
@@ -29,6 +35,7 @@ export function LookModel({ pieces, wearer, gallery, backdrop, title }: {
   backdrop: string;
   title: string;
 }) {
+  const t = useTranslations("shots");
   const [figure, setFigure] = useState(false);
   const drawable = wearer !== null || Object.values(pieces).some(Boolean);
   const incomplete = Object.values(pieces).some((display) => display === null);
@@ -40,14 +47,14 @@ export function LookModel({ pieces, wearer, gallery, backdrop, title }: {
           <ModelStage pieces={pieces} wearer={wearer} />
         </div>
         <PreviewNotice
-          advice={gallery.length > 0 ? "The screenshots show it as the game draws it." : undefined}
+          advice={gallery.length > 0 ? t("advice") : undefined}
           compact
           className="mx-auto w-full max-w-sm"
         />
         {gallery.length > 0 && (
           <button type="button" className={`${toggle} self-center`} onClick={() => setFigure(false)}>
             <Images className="size-3.5" aria-hidden />
-            Show screenshots
+            {t("showShots")}
           </button>
         )}
       </div>
@@ -63,8 +70,8 @@ export function LookModel({ pieces, wearer, gallery, backdrop, title }: {
           <Image src={backdrop} alt="" fill unoptimized sizes="(min-width: 1024px) 40rem, 100vw" className="object-cover opacity-60" />
           <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 pt-12 text-center text-sm text-ink-dim">
             {drawable
-              ? "No screenshot from the game yet. The code works in game."
-              : "No screenshot from the game yet, and these pieces are not in the 3D preview. The code still works in game."}
+              ? t("noShot")
+              : t("noShotNo3d")}
           </p>
         </div>
       )}
@@ -72,9 +79,9 @@ export function LookModel({ pieces, wearer, gallery, backdrop, title }: {
         <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
           <button type="button" className={toggle} onClick={() => setFigure(true)}>
             <Box className="size-3.5" aria-hidden />
-            Show 3D preview
+            {t("show3d")}
           </button>
-          {incomplete && <span className="text-xs text-ink-faint">Some pieces are not in the 3D preview yet.</span>}
+          {incomplete && <span className="text-xs text-ink-faint">{t("incomplete")}</span>}
         </p>
       )}
     </div>

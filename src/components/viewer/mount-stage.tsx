@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { MountEntry } from "@eclipse/format";
 import { ImageDown, UserRound } from "lucide-react";
 import Image from "next/image";
@@ -16,6 +17,7 @@ const RIDER = "human-male";
 export function MountStage({ mount }: { mount: MountEntry }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const engine = useEngine(canvas);
+  const t = useTranslations("mounts");
   const [variant, setVariant] = useState(mount.variants[0]!);
   const [rider, setRider] = useState(false);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
@@ -52,16 +54,16 @@ export function MountStage({ mount }: { mount: MountEntry }) {
         <canvas ref={canvas} className="absolute inset-0 size-full" />
         {status !== "ready" && (
           <p role="status" className="absolute inset-0 grid place-items-center p-4 text-center text-sm text-ink-dim">
-            {status === "loading" ? "Saddling up…" : "This mount could not load. Try again in a moment."}
+            {status === "loading" ? t("saddling") : t("failed")}
           </p>
         )}
         {status === "ready" && (
           <div className="absolute inset-x-3 bottom-3 flex items-center gap-2 sm:max-w-sm">
             <ClipPicker />
-            <button type="button" className="pill bg-surface/90 px-2.5" aria-pressed={rider} aria-label="Show a rider" title="Show a rider" onClick={toggleRider}>
+            <button type="button" className="pill bg-surface/90 px-2.5" aria-pressed={rider} aria-label={t("rider")} title={t("rider")} onClick={toggleRider}>
               <UserRound className="size-4" aria-hidden />
             </button>
-            <button type="button" className="pill bg-surface/90 px-2.5" aria-label="Save an image" title="Save an image" onClick={() => void engine().then((e) => e.exportPNG(2, true))}>
+            <button type="button" className="pill bg-surface/90 px-2.5" aria-label={t("saveImage")} title={t("saveImage")} onClick={() => void engine().then((e) => e.exportPNG(2, true))}>
               <ImageDown className="size-4" aria-hidden />
             </button>
           </div>
@@ -72,7 +74,7 @@ export function MountStage({ mount }: { mount: MountEntry }) {
         {mount.variants.length > 1 && <p className="text-xs text-ink-faint">{mount.variants.length} colours</p>}
       </div>
       {mount.variants.length > 1 && (
-        <ul className="flex flex-wrap gap-2" aria-label="Colours">
+        <ul className="flex flex-wrap gap-2" aria-label={t("colourList")}>
           {mount.variants.map((v) => {
             const icon = art(v.icon);
             return (

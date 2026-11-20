@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useStore } from "@nanostores/react";
 import { $clipLoading, $clips, $currentClip } from "@eclipse/engine/stores";
 import type { ClipEntry } from "@eclipse/format";
@@ -20,6 +21,7 @@ export function ClipPicker() {
   const current = useStore($currentClip);
   const loading = useStore($clipLoading);
   const engine = useStore($engine);
+  const t = useTranslations("viewer");
   const [open, setOpen] = useState(false);
 
   const rows = [
@@ -35,7 +37,7 @@ export function ClipPicker() {
       <Popover.Trigger asChild>
         <button
           type="button"
-          aria-label="Animation"
+          aria-label={t("animation")}
           disabled={!engine || !clips.length}
           className="pill min-w-0 flex-1 justify-between bg-surface/90"
         >
@@ -46,9 +48,9 @@ export function ClipPicker() {
       <Popover.Portal>
         <Popover.Content sideOffset={6} align="start" collisionPadding={8} className="z-50 w-64 rounded-md border border-line bg-surface shadow-lg">
           <Command loop>
-            <CommandInput placeholder="Search animations" autoFocus />
+            <CommandInput placeholder={t("searchAnimations")} autoFocus />
             <CommandList className="max-h-72">
-              <CommandEmpty>No animations found.</CommandEmpty>
+              <CommandEmpty>{t("noAnimations")}</CommandEmpty>
               {rows.map((r) => (
                 <CommandItem
                   key={r.id}

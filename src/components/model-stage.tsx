@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { SlotId } from "@eclipse/format";
 import { useEffect, useRef, useState } from "react";
 import { SLOT_NAMES } from "@/lib/domain";
@@ -24,6 +25,7 @@ export function ModelStage({ pieces, wearer, children }: {
   const engine = useEngine(canvas);
   // The body on this engine; a new engine (a remount) has none yet.
   const body = useRef<{ on: object; id: string } | null>(null);
+  const t = useTranslations("shots");
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
   const [notShown, setNotShown] = useState<number[]>([]);
 
@@ -66,7 +68,7 @@ export function ModelStage({ pieces, wearer, children }: {
         <canvas ref={canvas} className="absolute inset-0 size-full" />
         {status !== "ready" && (
           <p role="status" className="absolute inset-0 grid place-items-center p-4 text-center text-sm text-ink-dim">
-            {status === "loading" ? "Dressing the character…" : "The preview could not load. The code still works."}
+            {status === "loading" ? t("dressing") : t("failed")}
           </p>
         )}
         {children && status === "ready" && <div className="absolute inset-x-2 bottom-2 flex items-center gap-2">{children}</div>}
