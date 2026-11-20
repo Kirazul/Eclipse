@@ -151,14 +151,38 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
   );
 }
 
-/** The Showcase's view: a real capture first, always one click from its code. */
+/**
+ * The Gallery's and Showcase's view: a real capture first, always one click from its code.
+ * Hover (or keyboard focus) slides up what the author wrote, the remaining details, who made it, its copies and when.
+ * A look with no capture gets its crest on a backdrop, so a grid lines up either way.
+ */
 export function OutfitPoster({ post }: { post: OutfitPost }) {
   const resolved = resolve(post);
+  const capture = post.gallery[0];
+  const crest = capture ? null : crestArt(post, resolved);
   const line = [post.race ? RACE_LABEL[post.race] : null, post.className].filter(Boolean).join(" ");
+  // Race and class are already on the card's line; hover adds the rest.
+  const tags = [post.armor ? ARMOR_LABEL[post.armor] : null, ...post.categories].filter((t): t is string => Boolean(t));
+  const caption = post.description?.trim();
+  const copies = post.copies ?? 0;
+  const copiesLabel = `${WHOLE.format(copies)} ${copies === 1 ? "copy" : "copies"}`;
   return (
     <article className="relative">
-      <Link href={`/community-gallery/${post.id}`} className="poster" aria-label={`Open ${post.title}`}>
-        <Image src={thumbOf(post.gallery[0])} alt="" fill unoptimized sizes="(max-width: 1100px) 72vw, 22vw" className="poster__art" />
+      <Link href={`/community-gallery/${post.id}`} className="poster group" aria-label={`Open ${post.title}`}>
+        {capture ? (
+          <Image src={thumbOf(capture)} alt="" fill unoptimized sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" className="poster__art" />
+        ) : (
+          <>
+            <Image src={cardBackdropFor(post.id)} alt="" aria-hidden fill unoptimized loading="lazy" sizes="25vw" className="poster__art opacity-40" />
+            {crest && (
+              <div className="absolute inset-0 grid place-items-center pb-16">
+                <Image src={crest} alt="" width={72} height={72} unoptimized className="size-18 rounded-full ring-1 ring-line-strong" />
+              </div>
+            )}
+          </>
+        )}
+        {/* A deeper shade on hover, so the details read over a bright capture. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-void via-void/70 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100" />
         <div className="poster__body">
           <div className="poster__rings">
             {pieces(resolved).slice(0, 5).map((p) => (
@@ -167,6 +191,33 @@ export function OutfitPoster({ post }: { post: OutfitPost }) {
           </div>
           <h3 className="font-serif text-lg leading-tight font-normal tracking-[-0.01em]">{post.title}</h3>
           <p className="truncate text-xs text-ink-dim">{line || post.categories.join(", ")}</p>
+          {/* Rows animate from 0fr to 1fr, so the panel grows to its own height without a fixed max-height. */}
+          <div className="grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-200 group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-visible:grid-rows-[1fr] group-focus-visible:opacity-100">
+            <div className="flex min-h-0 flex-col gap-2 overflow-hidden">
+              {caption && <p className="mt-2 line-clamp-3 text-sm leading-5 text-ink">{caption}</p>}
+              {tags.length > 0 && (
+                <ul className={`flex flex-wrap gap-1 ${caption ? "" : "mt-2"}`}>
+                  {tags.map((t) => (
+                    <li key={t} className="rounded-[6px] border border-line-strong bg-void/40 px-2 py-0.5 text-xs leading-4 text-ink-dim">{t}</li>
+                  ))}
+                </ul>
+              )}
+              <p className={`flex items-center gap-2 text-xs leading-4 text-ink-faint ${caption || tags.length ? "" : "mt-2"}`}>
+                <span className="flex min-w-0 items-center gap-1">
+                  <span className="truncate">{post.author ?? "Item set"}</span>
+                  {post.authorVerified && <BadgeCheck className="size-3.5 shrink-0 text-amber" strokeWidth={1.5} aria-label="Verified" />}
+                </span>
+                {copies > 0 && (
+                  <span className="nums inline-flex shrink-0 items-center gap-1 text-ink-dim" title={copiesLabel}>
+                    <Copy className="size-3.5" strokeWidth={1.5} aria-hidden />
+                    <span aria-hidden>{COUNT.format(copies)}</span>
+                    <span className="sr-only">{copiesLabel}</span>
+                  </span>
+                )}
+                {post.createdAt && <time dateTime={post.createdAt} className="nums ml-auto shrink-0">{posted(post.createdAt, Date.now())}</time>}
+              </p>
+            </div>
+          </div>
         </div>
       </Link>
       {/* Stacked: side by side they overlap on a phone's two-column grid. */}

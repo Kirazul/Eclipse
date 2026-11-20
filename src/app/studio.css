@@ -302,19 +302,6 @@
 .card-stroke:hover::before { width: calc(100% - 2rem); }
 .card-stroke:nth-child(even) { --c: var(--ember); }
 
-/* The class filter: real crests, lit when chosen. */
-.crest {
-  width: 2.1rem;
-  height: 2.1rem;
-  overflow: hidden;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--line-strong);
-  opacity: 0.62;
-  cursor: pointer;
-  transition: opacity 0.2s var(--ease), box-shadow 0.2s var(--ease);
-}
-.crest:hover { opacity: 1; }
-.crest[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--amber); }
 
 .pill {
   display: inline-flex;

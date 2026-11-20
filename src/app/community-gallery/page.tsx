@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { SearchParams } from "nuqs/server";
 import { Avatar } from "@/components/avatar";
 import { BuiltinNotice, HubTitle, listFromSearch, NoLooks, Pager, PublishButton } from "@/components/hub";
-import { OutfitCard, OutfitPoster } from "@/components/outfit-card";
+import { OutfitPoster } from "@/components/outfit-card";
 import { OutfitFilters } from "@/components/outfit-filters";
 import { sizedAvatar } from "@/lib/avatar";
 import { itemName } from "@/lib/catalog";
@@ -74,13 +74,9 @@ export default async function CommunityGalleryPage({ searchParams }: { searchPar
         </nav>
       )}
       {/* A search that found someone has not come up empty, so it does not ask for a first look. */}
-      {!posts.length ? (people.length ? <p className="text-sm text-ink-dim">No look titles match that search.</p> : <NoLooks bookmarks={filters.saved} />) : filters.pictures ? (
+      {!posts.length ? (people.length ? <p className="text-sm text-ink-dim">No look titles match that search.</p> : <NoLooks bookmarks={filters.saved} />) : (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
           {posts.map((post) => <OutfitPoster key={post.id} post={post} />)}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => <OutfitCard key={post.id} post={post} />)}
         </div>
       )}
       <Pager base="/community-gallery" filters={filters} total={total} />
