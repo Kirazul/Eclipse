@@ -167,11 +167,15 @@ export async function removeSetPicture(setId: string, path: string) {
   return r;
 }
 
-/** Sets the visitor's vote on a look, on or off. A second click takes the vote back. */
+/**
+ * Sets the visitor's vote on a look, on or off. A second click takes the vote back.
+ * Nothing is revalidated: a revalidating action re-renders the page it was called from,
+ * and a Trending or Top list would reshuffle under the visitor's cursor. The button shows
+ * the new count itself, and every page reads the session cookie, so each load is fresh
+ * and the new order shows on the next one.
+ */
 export async function voteOutfit(id: string, up: boolean) {
-  const r = await repository.vote(id, up === true);
-  if (r.ok) revalidateHub();
-  return r;
+  return repository.vote(id, up === true);
 }
 
 /** Which of the looks on a page the visitor voted for, so their buttons show it. */
