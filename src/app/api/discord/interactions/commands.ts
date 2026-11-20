@@ -2,13 +2,14 @@ import "server-only";
 import { repository } from "@/lib/data";
 import type { OutfitPost, SearchEntry } from "@/lib/data/types";
 import { AMBER, NO_MENTIONS, codeBlock, plain } from "@/lib/discord";
-import { HELP } from "@/lib/help";
+import { HELP_IDS } from "@/lib/help";
 import { codeIn } from "@/lib/showcase-post";
 import { siteUrl } from "@/lib/site";
 import { addToWardrobe } from "./add-to-wardrobe";
 import { decodeReply } from "./decode";
 import { itemAnswer, suggestItems } from "./item";
 import { MESSAGE_COMMAND, say, type CommandData, type Interaction, type Reply } from "./reply";
+import { translator, type T } from "./t";
 
 export { EPHEMERAL, type Interaction, type Reply } from "./reply";
 
@@ -31,13 +32,13 @@ export function lookId(text: string): string | null {
   return /^[\w-]{1,64}$/.test(t) ? t : null;
 }
 
-function lookReply(post: OutfitPost): Reply {
+function lookReply(post: OutfitPost, t: T): Reply {
   const url = `${siteUrl}/community-gallery/${post.id}`;
   const facts = [
-    post.author ? `by ${plain(post.author)}` : null,
-    post.upvotes != null ? `${post.upvotes.toLocaleString("en-US")} upvotes` : null,
+    post.author ? t("bot.look.by", { author: plain(post.author) }) : null,
+    post.upvotes != null ? t("bot.look.upvotes", { count: post.upvotes }) : null,
   ].filter(Boolean);
-  const code = codeBlock(post.code) ?? "Copy its code from the Community Gallery.";
+  const code = codeBlock(post.code) ?? t("bot.look.copyOnSite");
   return {
     embeds: [{
       title: post.title.slice(0, 256),
@@ -45,33 +46,33 @@ function lookReply(post: OutfitPost): Reply {
       description: [facts.join(" · "), code].filter(Boolean).join("\n"),
       color: AMBER,
       ...(post.gallery.length ? { image: { url: `${url}/cover` } } : {}),
-      footer: { text: "Wear it with Eclipse" },
+      footer: { text: t("bot.wearIt") },
     }],
-    components: [{ type: 1, components: [{ type: 2, style: 5, label: "Open in the Community Gallery", url }] }],
+    components: [{ type: 1, components: [{ type: 2, style: 5, label: t("bot.look.open"), url }] }],
     allowed_mentions: NO_MENTIONS,
   };
 }
 
 const RESULTS = 5;
 
-async function searchReply(query: string): Promise<Reply> {
+async function searchReply(query: string, t: T): Promise<Reply> {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-  if (!words.length) return say("Type a few words from a look's title or its creator's name.");
+  if (!words.length) return say(t("bot.search.empty"));
   const matches = (await repository.searchIndex()).filter((entry) => {
     const text = `${entry.title} ${entry.author ?? ""}`.toLowerCase();
     return words.every((w) => text.includes(w));
   });
-  if (!matches.length) return say(`No looks match “${query.slice(0, 100)}”.`);
+  if (!matches.length) return say(t("bot.search.none", { query: query.slice(0, 100) }));
   const lines = matches.slice(0, RESULTS).map((entry) => {
-    const by = entry.author ? ` by ${plain(entry.author)}` : "";
+    const by = entry.author ? t("bot.search.by", { author: plain(entry.author) }) : "";
     return `[${plain(entry.title)}](${siteUrl}/community-gallery/${entry.id})${by}`;
   });
   const more = matches.length > RESULTS
-    ? `\n[See all ${matches.length.toLocaleString("en-US")} in the Community Gallery](${siteUrl}/community-gallery?q=${encodeURIComponent(query)})`
+    ? `\n[${t("bot.search.seeAll", { count: matches.length })}](${siteUrl}/community-gallery?q=${encodeURIComponent(query)})`
     : "";
   return {
     embeds: [{
-      title: `Looks matching “${query.slice(0, 100)}”`,
+      title: t("bot.search.title", { query: query.slice(0, 100) }),
       description: lines.join("\n") + more,
       color: AMBER,
     }],
@@ -80,16 +81,16 @@ async function searchReply(query: string): Promise<Reply> {
 }
 
 /** /help: the guide's list of common fixes, for everyone in the channel to read. */
-function helpReply(): Reply {
+function helpReply(t: T): Reply {
   const url = `${siteUrl}/guide#help`;
   return {
     embeds: [{
-      title: "Common fixes",
-      description: HELP.map((h) => `**${h.question}**\n${h.answer}`).join("\n\n"),
+      title: t("bot.help.title"),
+      description: HELP_IDS.map((id) => `**${t(`help.${id}.question`)}**\n${t(`help.${id}.answer`)}`).join("\n\n"),
       color: AMBER,
-      footer: { text: "Still stuck? Post in the bug reports channel." },
+      footer: { text: t("bot.help.footer") },
     }],
-    components: [{ type: 1, components: [{ type: 2, style: 5, label: "Open the guide", url }] }],
+    components: [{ type: 1, components: [{ type: 2, style: 5, label: t("bot.help.open"), url }] }],
     allowed_mentions: NO_MENTIONS,
   };
 }
@@ -114,29 +115,29 @@ export const isQuiet = (data: CommandData) => data.type === MESSAGE_COMMAND;
 /** Answers that need no database, sent straight back. Null when the command needs one. */
 export function quickReply(interaction: Interaction): Reply | null {
   const data = interaction.data;
-  if (!data) return say("Discord sent no command.");
-  if (data.name === "look" && !lookId(option(data, "look"))) {
-    return say("Paste a look's link from the Community Gallery, or its id.");
-  }
-  if (data.name === "decode") return decodeReply(option(data, "code"), { quiet: false });
-  if (data.name === "item") return itemAnswer(option(data, "name"));
-  if (data.name === "help") return helpReply();
+  const t = translator(interaction.locale);
+  if (!data) return say(t("bot.noCommand"));
+  if (data.name === "look" && !lookId(option(data, "look"))) return say(t("bot.look.pasteLink"));
+  if (data.name === "decode") return decodeReply(option(data, "code"), { quiet: false, t });
+  if (data.name === "item") return itemAnswer(option(data, "name"), t);
+  if (data.name === "help") return helpReply(t);
   if (data.name === DECODE_MESSAGE) {
     const code = codeIn(target(data)?.content ?? "");
-    return code ? decodeReply(code, { quiet: true }) : say("That message holds no Eclipse code.");
+    return code ? decodeReply(code, { quiet: true, t }) : say(t("bot.decode.noCode"));
   }
-  if (!["look", ...SEARCH, ...ADD_TO_GALLERY].includes(data.name)) return say("That command is not part of Eclipse anymore.");
+  if (!["look", ...SEARCH, ...ADD_TO_GALLERY].includes(data.name)) return say(t("bot.gone"));
   return null;
 }
 
 /** The full answer, for a command quickReply let through. */
 export async function answer(interaction: Interaction): Promise<Reply> {
   const data = interaction.data!;
-  if (ADD_TO_GALLERY.includes(data.name)) return addToWardrobe(interaction);
-  if (SEARCH.includes(data.name)) return searchReply(option(data, "search"));
+  const t = translator(interaction.locale);
+  if (ADD_TO_GALLERY.includes(data.name)) return addToWardrobe(interaction, t);
+  if (SEARCH.includes(data.name)) return searchReply(option(data, "search"), t);
   const id = lookId(option(data, "look"));
   const post = id ? await repository.getOutfit(id) : null;
-  return post ? lookReply(post) : say("No look in the Community Gallery has that link.");
+  return post ? lookReply(post, t) : say(t("bot.look.notFound"));
 }
 
 let index: { at: number; entries: SearchEntry[] } | null = null;
@@ -153,10 +154,11 @@ const CHOICES = 25;
 const MAX_CHOICE = 100;
 
 /** Suggestions for what is typed so far: Discord shows the name and sends the id. */
-export async function suggest(data: CommandData): Promise<{ name: string; value: string }[]> {
+export async function suggest(data: CommandData, locale?: string): Promise<{ name: string; value: string }[]> {
   const typed = data.options?.find((o) => o.focused)?.value;
   if (typeof typed !== "string") return [];
-  if (data.name === "item") return suggestItems(typed);
+  const t = translator(locale);
+  if (data.name === "item") return suggestItems(typed, t);
   if (data.name !== "look") return [];
   const words = typed.toLowerCase().split(/\s+/).filter(Boolean);
   return (await searchList())
@@ -166,7 +168,7 @@ export async function suggest(data: CommandData): Promise<{ name: string; value:
     })
     .slice(0, CHOICES)
     .map((entry) => {
-      const name = `${entry.title}${entry.author ? ` by ${entry.author}` : ""}`;
+      const name = `${entry.title}${entry.author ? t("bot.search.by", { author: entry.author }) : ""}`;
       return { name: name.length > MAX_CHOICE ? `${name.slice(0, MAX_CHOICE - 1)}…` : name, value: entry.id };
     });
 }

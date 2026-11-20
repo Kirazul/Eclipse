@@ -1,6 +1,7 @@
 import { after } from "next/server";
 import { EPHEMERAL, answer, isQuiet, quickReply, suggest, timing, type Interaction, type Reply } from "./commands";
 import { isModeration, moderate, opensMessage, type ClickAnswer } from "./moderate";
+import { translator } from "./t";
 import { verifyDiscord } from "./verify";
 
 // Discord's Interactions Endpoint URL for the Eclipse app. Discord POSTs each command,
@@ -43,7 +44,9 @@ async function finish(interaction: Interaction, reply: Reply) {
   }
 }
 
-const FAILED: Reply = { content: "Eclipse could not answer that. Try again.", allowed_mentions: { parse: [] } };
+/** The answer when something broke, in the asker's language. */
+const failed = (interaction: Interaction): Reply =>
+  ({ content: translator(interaction.locale)("bot.failed"), allowed_mentions: { parse: [] } });
 
 /** A private message after the fact, for a slow click whose answer is not a change to its message. */
 async function followUp(interaction: Interaction, reply: Reply) {
@@ -58,13 +61,13 @@ async function followUp(interaction: Interaction, reply: Reply) {
 /** A button on a report alert. Same three seconds, same "thinking" when slower. */
 async function click(interaction: Interaction): Promise<Response> {
   const id = interaction.data?.custom_id ?? "";
-  const failed: ClickAnswer = { type: MESSAGE, data: { ...FAILED, flags: EPHEMERAL } };
+  const broke: ClickAnswer = { type: MESSAGE, data: { ...failed(interaction), flags: EPHEMERAL } };
   const work = isModeration(id)
     ? moderate(interaction).catch((error) => {
       console.error("A Discord button failed:", error);
-      return failed;
+      return broke;
     })
-    : Promise.resolve(failed);
+    : Promise.resolve(broke);
   const inTime = await Promise.race([work, sleep(timing.inlineMs).then(() => null)]);
   if (inTime) return Response.json(inTime);
 
@@ -96,7 +99,7 @@ export async function POST(request: Request) {
   // Suggestions cannot wait for a "thinking" message: none in time is better than late.
   if (interaction.type === AUTOCOMPLETE && interaction.data) {
     const none = sleep(timing.inlineMs).then(() => []);
-    const choices = await Promise.race([suggest(interaction.data).catch(() => []), none]);
+    const choices = await Promise.race([suggest(interaction.data, interaction.locale).catch(() => []), none]);
     return Response.json({ type: CHOICES, data: { choices } });
   }
   if (interaction.type === CLICK && interaction.data?.custom_id) return click(interaction);
@@ -105,10 +108,10 @@ export async function POST(request: Request) {
   const quick = quickReply(interaction);
   if (quick) return Response.json({ type: MESSAGE, data: quick });
 
-  // A failure becomes the FAILED answer, so the work never rejects unhandled.
+  // A failure becomes the failed answer, so the work never rejects unhandled.
   const work = answer(interaction).catch((error) => {
     console.error("A Discord command failed:", error);
-    return FAILED;
+    return failed(interaction);
   });
   const inTime = await Promise.race([work, sleep(timing.inlineMs).then(() => null)]);
   if (inTime) return Response.json({ type: MESSAGE, data: inTime });

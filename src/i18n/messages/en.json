@@ -1,0 +1,124 @@
+{
+  "domain": {
+    "slot": {
+      "Head": "Head", "Neck": "Neck", "Shoulders": "Shoulders", "Shirt": "Shirt", "Chest": "Chest",
+      "Waist": "Waist", "Legs": "Legs", "Feet": "Feet", "Wrists": "Wrists", "Hands": "Hands",
+      "Ring 1": "Ring 1", "Ring 2": "Ring 2", "Trinket 1": "Trinket 1", "Trinket 2": "Trinket 2",
+      "Back": "Back", "Main Hand": "Main Hand", "Off Hand": "Off Hand", "Ranged": "Ranged", "Tabard": "Tabard",
+      "One-Hand": "One-Hand", "Two-Hand": "Two-Hand"
+    },
+    "class": {
+      "Death Knight": "Death Knight", "Druid": "Druid", "Hunter": "Hunter", "Mage": "Mage", "Paladin": "Paladin",
+      "Priest": "Priest", "Rogue": "Rogue", "Shaman": "Shaman", "Warlock": "Warlock", "Warrior": "Warrior"
+    },
+    "armor": { "cloth": "Cloth", "leather": "Leather", "mail": "Mail", "plate": "Plate" },
+    "category": {
+      "Armor": "Armor", "Race morph": "Race morph", "Creature morph": "Creature morph",
+      "Cosmetics": "Cosmetics", "Mounted": "Mounted"
+    },
+    "sort": { "trending": "Trending", "newest": "Newest", "top": "Top rated" },
+    "race": {
+      "human": "Human", "orc": "Orc", "dwarf": "Dwarf", "nightelf": "Night Elf", "undead": "Forsaken",
+      "tauren": "Tauren", "gnome": "Gnome", "troll": "Troll", "goblin": "Goblin", "bloodelf": "Blood Elf",
+      "draenei": "Draenei", "worgen": "Worgen", "gilnean": "Worgen (Gilnean)", "pandaren": "Pandaren",
+      "nightborne": "Nightborne", "highmountain": "Highmountain Tauren", "voidelf": "Void Elf",
+      "lightforged": "Lightforged Draenei", "zandalari": "Zandalari Troll", "kultiran": "Kul Tiran",
+      "darkiron": "Dark Iron Dwarf", "vulpera": "Vulpera", "maghar": "Mag'har Orc", "mechagnome": "Mechagnome",
+      "dracthyr": "Dracthyr", "visage": "Dracthyr (Visage)", "earthen": "Earthen", "haranir": "Haranir",
+      "orcupright": "Orc (upright)", "magharupright": "Mag'har (upright)"
+    },
+    "sex": { "Male": "male", "Female": "female" },
+    "quality": {
+      "Poor": "Poor", "Common": "Common", "Uncommon": "Uncommon", "Rare": "Rare", "Epic": "Epic",
+      "Legendary": "Legendary", "Artifact": "Artifact", "Heirloom": "Heirloom"
+    }
+  },
+  "help": {
+    "f2": {
+      "question": "F2 does nothing",
+      "answer": "Eclipse opens once you are in the world, not at the login or character screen. Check that `dinput8.dll` sits right next to `Wow.exe`, not in a folder of its own. If you changed the key in Eclipse's settings, press that one."
+    },
+    "crash": {
+      "question": "The game crashes while Eclipse loads, or closes as you enter the world",
+      "answer": "Get the latest Eclipse, which fixed most of these. If it still happens, add `SET dbCompress \"0\"` to `WTF/Config.wtf` in your game folder."
+    },
+    "missing": {
+      "question": "The HD font or some Incarnations are missing",
+      "answer": "Those need the `Eclipse` folder from Eclipse.zip, next to `Wow.exe` as well. `dinput8.dll` runs on its own, but with fewer features."
+    },
+    "names": {
+      "question": "Pieces show file names instead of their real names",
+      "answer": "Real names arrive from the server a moment after a piece first shows. Turn on Settings > Wardrobe > Item caching to load them ahead of time. To find one piece, use `/item` in the Eclipse Discord: it gives the id that the wardrobe's search finds it by."
+    }
+  },
+  "bot": {
+    "failed": "Eclipse could not answer that. Try again.",
+    "noCommand": "Discord sent no command.",
+    "gone": "That command is not part of Eclipse anymore.",
+    "wearIt": "Wear it with Eclipse",
+    "look": {
+      "pasteLink": "Paste a look's link from the Community Gallery, or its id.",
+      "notFound": "No look in the Community Gallery has that link.",
+      "by": "by {author}",
+      "upvotes": "{count, plural, one {# upvote} other {# upvotes}}",
+      "copyOnSite": "Copy its code from the Community Gallery.",
+      "open": "Open in the Community Gallery"
+    },
+    "search": {
+      "empty": "Type a few words from a look's title or its creator's name.",
+      "none": "No looks match “{query}”.",
+      "title": "Looks matching “{query}”",
+      "by": " by {author}",
+      "seeAll": "See all {count} in the Community Gallery"
+    },
+    "help": {
+      "title": "Common fixes",
+      "footer": "Still stuck? Post in the bug reports channel.",
+      "open": "Open the guide"
+    },
+    "decode": {
+      "noCode": "That message holds no Eclipse code.",
+      "title": "What this code wears",
+      "race": "Race",
+      "morph": "Morph",
+      "hidden": "hidden",
+      "item": "item {id}",
+      "display": "display {id}",
+      "enchant": "{hand} enchant",
+      "enchantId": "enchant {id}",
+      "mount": "Mount",
+      "flyingMount": "Flying mount",
+      "also": "Also",
+      "scale": "scale {scale}",
+      "colours": "{count, plural, one {# colour change} other {# colour changes}}",
+      "tints": "{count, plural, one {# recoloured piece} other {# recoloured pieces}}",
+      "cosmetics": "{count, plural, one {# 3D effect} other {# 3D effects}}",
+      "nothing": "This code changes nothing on its own.",
+      "open": "Open in Loadouts"
+    },
+    "item": {
+      "empty": "Type a piece's name, or pick one from the suggestions.",
+      "noId": "No piece in Eclipse has the id {id}.",
+      "noName": "No piece in Eclipse is called “{name}”.",
+      "slot": "Slot",
+      "quality": "Quality",
+      "inEclipse": "In Eclipse",
+      "searchFor": "type `{id}` in the wardrobe's search",
+      "matching": "Pieces matching “{name}”",
+      "more": "…and {count} more. Add a word to narrow it down.",
+      "many": "…and many more. Add a word to narrow it down.",
+      "howTo": "Type an id in Eclipse's wardrobe search, or pick one from /item's suggestions."
+    },
+    "add": {
+      "already": "This look is already in the Community Gallery: {url}",
+      "off": "Adding looks from Discord is not switched on yet.",
+      "noPost": "Discord did not send the post. Try again.",
+      "wrongChannel": "Only posts in {channel} can be added to the Community Gallery.",
+      "notYours": "Only the player who posted this, or a moderator, can add it.",
+      "noCode": "This post has no Eclipse code to add.",
+      "cannot": "This post cannot be added: {reason}.",
+      "badShot": "A screenshot in this post could not be read. Try again.",
+      "added": "Added to the Community Gallery: {url}"
+    }
+  }
+}

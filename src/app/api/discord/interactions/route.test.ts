@@ -418,3 +418,28 @@ describe("a message's right-click menu", () => {
     expect(edits[0].body.content).toBe("Added");
   });
 });
+
+describe("answering in the asker's language", () => {
+  const inRussian = (payload: ReturnType<typeof command>) => ({ ...payload, locale: "ru" });
+
+  it("answers /help in Russian for a Russian Discord, from the same list", async () => {
+    const reply = await answered(inRussian(command("help", {})));
+    const [embed] = reply.embeds as { title: string; description: string }[];
+    expect(embed.title).toBe("Частые проблемы");
+    expect(embed.description).toContain("F2 ничего не делает");
+    expect(embed.description).toContain("`dinput8.dll`");
+  });
+
+  it("names the slots in Russian, and keeps the piece's own name", async () => {
+    const code = encodeOutfit({ ...emptyOutfit(), slots: { [SLOT_NAMES.indexOf("Main Hand")]: 420 } });
+    const reply = await answered(inRussian(command("decode", { code })));
+    const [embed] = reply.embeds as Record<string, string>[];
+    expect(embed.description).toContain("Правая рука");
+    expect(embed.description).toContain("Simple Spear");
+  });
+
+  it("falls back to English for a language the site does not have", async () => {
+    const reply = await answered({ ...command("help", {}), locale: "de" });
+    expect((reply.embeds as { title: string }[])[0].title).toBe("Common fixes");
+  });
+});

@@ -5,8 +5,9 @@
     "description": "Show a look from the Community Gallery",
     "integration_types": [0, 1],
     "contexts": [0, 1, 2],
+    "description_localizations": { "ru": "Показать образ из Галереи сообщества" },
     "options": [
-      { "name": "look", "type": 3, "required": true, "description": "Start typing its title or creator, or paste its link", "max_length": 200, "autocomplete": true }
+      { "name": "look", "type": 3, "required": true, "description": "Start typing its title or creator, or paste its link", "max_length": 200, "autocomplete": true, "description_localizations": { "ru": "Начните вводить название или автора, или вставьте ссылку" } }
     ]
   },
   {
@@ -15,8 +16,9 @@
     "description": "Search the Community Gallery by title or creator",
     "integration_types": [0, 1],
     "contexts": [0, 1, 2],
+    "description_localizations": { "ru": "Искать в Галерее сообщества по названию или автору" },
     "options": [
-      { "name": "search", "type": 3, "required": true, "description": "Words from a title or a creator's name", "max_length": 100 }
+      { "name": "search", "type": 3, "required": true, "description": "Words from a title or a creator's name", "max_length": 100, "description_localizations": { "ru": "Слова из названия или имени автора" } }
     ]
   },
   {
@@ -25,8 +27,9 @@
     "description": "Show what an Eclipse loadout code wears",
     "integration_types": [0, 1],
     "contexts": [0, 1, 2],
+    "description_localizations": { "ru": "Показать, что надето в коде образа Eclipse" },
     "options": [
-      { "name": "code", "type": 3, "required": true, "description": "The code, starting with ECA1:", "max_length": 6000 }
+      { "name": "code", "type": 3, "required": true, "description": "The code, starting with ECA1:", "max_length": 6000, "description_localizations": { "ru": "Код, начинающийся с ECA1:" } }
     ]
   },
   {
@@ -35,8 +38,9 @@
     "description": "Find a piece of armor or a weapon in Eclipse by name",
     "integration_types": [0, 1],
     "contexts": [0, 1, 2],
+    "description_localizations": { "ru": "Найти броню или оружие в Eclipse по названию" },
     "options": [
-      { "name": "name", "type": 3, "required": true, "description": "Start typing its name, then pick it", "max_length": 100, "autocomplete": true }
+      { "name": "name", "type": 3, "required": true, "description": "Start typing its name, then pick it", "max_length": 100, "autocomplete": true, "description_localizations": { "ru": "Начните вводить название, затем выберите" } }
     ]
   },
   {
@@ -44,18 +48,21 @@
     "type": 1,
     "description": "The fixes for Eclipse's most common problems",
     "integration_types": [0, 1],
-    "contexts": [0, 1, 2]
+    "contexts": [0, 1, 2],
+    "description_localizations": { "ru": "Решения самых частых проблем с Eclipse" }
   },
   {
     "name": "Decode Eclipse code",
     "type": 3,
     "integration_types": [0, 1],
-    "contexts": [0, 1, 2]
+    "contexts": [0, 1, 2],
+    "name_localizations": { "ru": "Расшифровать код Eclipse" }
   },
   {
     "name": "Add to Community Gallery",
     "type": 3,
     "integration_types": [0],
-    "contexts": [0]
+    "contexts": [0],
+    "name_localizations": { "ru": "Добавить в Галерею сообщества" }
   }
 ]
