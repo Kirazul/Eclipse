@@ -1,6 +1,7 @@
 import { repository } from "@/lib/data";
 import { AMBER, plain } from "@/lib/discord";
 import { crownLookOfTheWeek, syncCreators } from "@/lib/discord-roles";
+import { wearIt } from "@/lib/look-feed";
 import { siteUrl } from "@/lib/site";
 
 // Called by Vercel's scheduler (vercel.json crons) every Monday. It posts the look of
@@ -41,7 +42,10 @@ export async function GET(request: Request) {
       embeds: [{
         title: post.title.slice(0, 256),
         url,
-        description: `The most upvoted of the looks posted in the last seven days, with ${votes.toLocaleString("en-US")} upvotes${by}. Copy its code and wear it with Eclipse.`,
+        description: wearIt(
+          `The most upvoted of the looks posted in the last seven days, with ${votes.toLocaleString("en-US")} upvotes${by}.`,
+          post.code,
+        ),
         color: AMBER,
         ...(post.gallery.length ? { image: { url: `${url}/cover` } } : {}),
         footer: { text: "Look of the week" },

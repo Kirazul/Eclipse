@@ -59,6 +59,22 @@ describe("the Wardrobe feed in Discord", () => {
     expect(embed.image).toBeUndefined();
   });
 
+  it("shows the code in a block Discord gives a copy button", async () => {
+    await announceLook(post);
+    const [embed] = sent[0].body.embeds as Record<string, unknown>[];
+    expect(embed.description).toContain("```\nECA1:c2xvdCAwIDEK\n```");
+  });
+
+  it("sends a code too long to show, or one that would break out of its block, to the site", async () => {
+    for (const code of [`ECA1:${"A".repeat(2000)}`, "ECA1:```@everyone"]) {
+      sent.length = 0;
+      await announceLook({ ...post, code });
+      const [embed] = sent[0].body.embeds as Record<string, unknown>[];
+      expect(embed.description).not.toContain("```");
+      expect(embed.description).toContain("Community Gallery");
+    }
+  });
+
   it("sends nothing when no channel is set up", async () => {
     vi.stubEnv("DISCORD_FEED_WEBHOOK_URL", "");
     await announceLook(post);
