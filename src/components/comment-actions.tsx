@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Flag, MoreHorizontal, Trash2 } from "lucide-react";
 import { createContext, useContext, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -38,6 +39,7 @@ export function CommentActions({ id, outfitId, writerId, lookAuthorId }: {
   lookAuthorId: string | null;
 }) {
   const { account } = useViewer();
+  const t = useTranslations("comments");
   const [open, setOpen] = useState<"remove" | "report" | null>(null);
   if (!account) return null;
   const canRemove = account.moderator || account.id === writerId || account.id === lookAuthorId;
@@ -50,7 +52,7 @@ export function CommentActions({ id, outfitId, writerId, lookAuthorId }: {
       <DropdownMenu modal={false}>
         {/* Shown on hover or focus where there is a pointer, always on a touch screen. */}
         <DropdownMenuTrigger
-          aria-label="Comment options"
+          aria-label={t("options")}
           className="grid size-7 shrink-0 place-items-center rounded-full text-ink-faint opacity-0 transition hover:bg-surface-raised hover:text-ink focus-visible:opacity-100 group-hover/comment:opacity-100 data-[state=open]:bg-surface-raised data-[state=open]:text-ink data-[state=open]:opacity-100 [@media(hover:none)]:opacity-100"
         >
           <MoreHorizontal className="size-4" aria-hidden />
@@ -58,12 +60,12 @@ export function CommentActions({ id, outfitId, writerId, lookAuthorId }: {
         <DropdownMenuContent align="start" className="min-w-36">
           {canReport && (
             <DropdownMenuItem onSelect={() => setOpen("report")}>
-              <Flag aria-hidden />Report
+              <Flag aria-hidden />{t("report")}
             </DropdownMenuItem>
           )}
           {canRemove && (
             <DropdownMenuItem onSelect={() => setOpen("remove")} className="text-bad focus:text-bad">
-              <Trash2 aria-hidden />Remove
+              <Trash2 aria-hidden />{t("removeShort")}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -78,6 +80,7 @@ type DialogProps = { open: boolean; onOpenChange: (open: boolean) => void };
 
 /** Asks once: a removed comment is gone for everyone. */
 function RemoveComment({ id, outfitId, open, onOpenChange }: { id: string; outfitId: string } & DialogProps) {
+  const t = useTranslations("comments");
   const [removing, startRemoving] = useTransition();
 
   function remove() {
@@ -88,7 +91,7 @@ function RemoveComment({ id, outfitId, open, onOpenChange }: { id: string; outfi
         return;
       }
       onOpenChange(false);
-      toast.success("Comment removed");
+      toast.success(t("removed"));
     });
   }
 
@@ -96,11 +99,11 @@ function RemoveComment({ id, outfitId, open, onOpenChange }: { id: string; outfi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-5 border-line bg-surface p-6">
         <DialogHeader>
-          <DialogTitle>Remove this comment?</DialogTitle>
-          <DialogDescription>It is removed for everyone. This cannot be undone.</DialogDescription>
+          <DialogTitle>{t("removeTitle")}</DialogTitle>
+          <DialogDescription>{t("removeBody")}</DialogDescription>
         </DialogHeader>
         <button type="button" className="btn btn--primary btn--block" disabled={removing} onClick={remove}>
-          {removing ? "Removing" : "Remove comment"}
+          {removing ? t("removing") : t("remove")}
         </button>
       </DialogContent>
     </Dialog>
@@ -108,6 +111,9 @@ function RemoveComment({ id, outfitId, open, onOpenChange }: { id: string; outfi
 }
 
 function ReportComment({ id, open, onOpenChange }: { id: string } & DialogProps) {
+  const t = useTranslations("comments");
+  const tl = useTranslations("lookMenu");
+  const tr = useTranslations("commentReportReason");
   const [reason, setReason] = useState<CommentReportReason | null>(null);
   const [sending, startSending] = useTransition();
 
@@ -120,7 +126,7 @@ function ReportComment({ id, open, onOpenChange }: { id: string } & DialogProps)
         return;
       }
       onOpenChange(false);
-      toast.success("Thanks. A moderator will take a look.");
+      toast.success(tl("reported"));
     });
   }
 
@@ -128,20 +134,20 @@ function ReportComment({ id, open, onOpenChange }: { id: string } & DialogProps)
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-5 border-line bg-surface p-6">
         <DialogHeader>
-          <DialogTitle>Report this comment?</DialogTitle>
-          <DialogDescription>Moderators see every report and decide whether the comment stays.</DialogDescription>
+          <DialogTitle>{t("reportTitle")}</DialogTitle>
+          <DialogDescription>{t("reportBody")}</DialogDescription>
         </DialogHeader>
         <fieldset className="flex flex-col gap-2">
-          <legend className="sr-only">Reason</legend>
-          {(Object.entries(COMMENT_REPORT_REASONS) as [CommentReportReason, string][]).map(([key, label]) => (
+          <legend className="sr-only">{tl("reason")}</legend>
+          {(Object.keys(COMMENT_REPORT_REASONS) as CommentReportReason[]).map((key) => (
             <label key={key} className="flex cursor-pointer items-center gap-2 text-sm text-ink-dim has-checked:text-ink">
               <input type="radio" name="comment-reason" value={key} checked={reason === key} onChange={() => setReason(key)} />
-              {label}
+              {tr(key)}
             </label>
           ))}
         </fieldset>
         <button type="button" className="btn btn--primary btn--block" disabled={!reason || sending} onClick={send}>
-          {sending ? "Sending" : "Send report"}
+          {sending ? tl("sending") : tl("send")}
         </button>
       </DialogContent>
     </Dialog>

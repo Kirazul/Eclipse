@@ -33,7 +33,7 @@
   --info: #619eeb; /* kBlue */
 
   --serif: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
-  --sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --sans: var(--font-inter-cyrillic), var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
 
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);

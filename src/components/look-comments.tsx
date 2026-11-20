@@ -1,4 +1,6 @@
 import { BadgeCheck, MessageCircle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { CommentActions, CommentsViewer } from "@/components/comment-actions";
@@ -17,6 +19,9 @@ function Face({ name, avatar }: { name: string | null; avatar: string | null }) 
 /** A social app's comment: the name and words in a bubble, when and what to do under it. */
 function Comment({ comment, lookAuthorId, now }: { comment: LookComment; lookAuthorId: string | null; now: number }) {
   const { author, authorId } = comment;
+  const t = useTranslations("comments");
+  const locale = useLocale();
+  const tl = useTranslations("look");
   return (
     <li id={`comment-${comment.id}`} className="group/comment flex scroll-mt-4 gap-2.5">
       <Face name={author} avatar={comment.authorAvatar} />
@@ -27,11 +32,11 @@ function Comment({ comment, lookAuthorId, now }: { comment: LookComment; lookAut
               {author ? (
                 <Link href={`/creators/${authorId}`} className="font-medium text-ink underline-offset-2 hover:underline">{author}</Link>
               ) : (
-                <span className="text-ink-dim">Someone</span>
+                <span className="text-ink-dim">{t("someone")}</span>
               )}
-              {comment.authorVerified && <BadgeCheck className="size-3.5 text-amber" strokeWidth={1.5} aria-label="Verified" />}
+              {comment.authorVerified && <BadgeCheck className="size-3.5 text-amber" strokeWidth={1.5} aria-label={tl("verified")} />}
               {authorId === lookAuthorId && (
-                <span className="rounded-full border border-amber/40 px-1.5 text-[0.65rem] leading-4 text-amber">Author</span>
+                <span className="rounded-full border border-amber/40 px-1.5 text-[0.65rem] leading-4 text-amber">{t("author")}</span>
               )}
             </p>
             <p className="text-sm leading-snug break-words whitespace-pre-wrap text-ink-dim">{comment.body}</p>
@@ -39,7 +44,7 @@ function Comment({ comment, lookAuthorId, now }: { comment: LookComment; lookAut
           <CommentActions id={comment.id} outfitId={comment.outfitId} writerId={authorId} lookAuthorId={lookAuthorId} />
         </div>
         <time dateTime={comment.createdAt} title={new Date(comment.createdAt).toUTCString()} className="px-3 text-xs text-ink-faint">
-          {ago(comment.createdAt, now)}
+          {ago(comment.createdAt, now, locale)}
         </time>
       </div>
     </li>
@@ -56,6 +61,8 @@ interface Caption {
 
 /** The author's words at the head of the conversation: no bubble, the name leading the text. */
 function CaptionEntry({ caption, authorId, now }: { caption: Caption; authorId: string | null; now: number }) {
+  const tl = useTranslations("look");
+  const locale = useLocale();
   return (
     <div className="flex gap-2.5 border-b border-line py-4">
       <Face name={caption.author} avatar={caption.avatar} />
@@ -68,11 +75,11 @@ function CaptionEntry({ caption, authorId, now }: { caption: Caption; authorId: 
           )}
           {/* A look from the Discord showcase: its player has no page here yet. */}
           {caption.author && !authorId && <span className="mr-1.5 font-medium text-ink">{caption.author}</span>}
-          {caption.verified && <BadgeCheck className="mr-1.5 inline size-3.5 align-[-2px] text-amber" strokeWidth={1.5} aria-label="Verified" />}
+          {caption.verified && <BadgeCheck className="mr-1.5 inline size-3.5 align-[-2px] text-amber" strokeWidth={1.5} aria-label={tl("verified")} />}
           {caption.body}
         </p>
         {caption.createdAt && (
-          <time dateTime={caption.createdAt} className="text-xs text-ink-faint">{ago(caption.createdAt, now)}</time>
+          <time dateTime={caption.createdAt} className="text-xs text-ink-faint">{ago(caption.createdAt, now, locale)}</time>
         )}
       </div>
     </div>
@@ -91,6 +98,7 @@ export async function LookComments({ outfitId, lookAuthorId, caption }: {
   caption: Caption | null;
 }) {
   const comments = await repository.listComments(outfitId);
+  const t = await getTranslations("comments");
   const now = Date.now();
 
   return (
@@ -100,7 +108,7 @@ export async function LookComments({ outfitId, lookAuthorId, caption }: {
       className="flex max-h-[36rem] scroll-mt-24 flex-col rounded-lg border border-line bg-surface lg:absolute lg:inset-0 lg:max-h-none"
     >
       <h2 id="comments-heading" className="flex items-baseline gap-2 border-b border-line px-4 py-3 font-sans text-sm font-medium text-ink">
-        Comments
+        {t("title")}
         {comments.length > 0 && <span className="nums text-xs font-normal text-ink-faint">{comments.length}</span>}
       </h2>
       <CommentsViewer>
@@ -111,12 +119,12 @@ export async function LookComments({ outfitId, lookAuthorId, caption }: {
               {comments.map((c) => <Comment key={c.id} comment={c} lookAuthorId={lookAuthorId} now={now} />)}
             </ol>
           ) : caption ? (
-            <p className="py-4 text-center text-xs text-ink-faint">No comments yet. Be the first to say what you think.</p>
+            <p className="py-4 text-center text-xs text-ink-faint">{t("noneYetBeFirst")}</p>
           ) : (
             <div className="flex h-full min-h-40 flex-col items-center justify-center gap-2 py-8 text-center">
               <MessageCircle className="size-6 text-ink-faint" strokeWidth={1.5} aria-hidden />
-              <p className="text-sm text-ink-dim">No comments yet</p>
-              <p className="text-xs text-ink-faint">Be the first to say what you think.</p>
+              <p className="text-sm text-ink-dim">{t("noneYet")}</p>
+              <p className="text-xs text-ink-faint">{t("beFirst")}</p>
             </div>
           )}
         </CommentScroller>

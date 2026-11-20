@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { term } from "@/i18n/terms";
 import { useStore } from "@nanostores/react";
 import { $customization, $look, $manifest } from "@eclipse/engine/stores";
 import { ImageDown } from "lucide-react";
@@ -27,7 +29,7 @@ const RIGHT = VISIBLE_SLOTS.slice(7);
 const OWN_RACE = "own";
 const SEXES = ["Male", "Female"];
 /** Races in the order a person looks for them, by name. */
-const RACES = Object.entries(RACE_LABEL).sort(([, a], [, b]) => a.localeCompare(b));
+const capitalise = (word: string) => word.charAt(0).toUpperCase() + word.slice(1);
 
 /** "vulpera-female" -> race key and gender. */
 function splitBody(id: string) {
@@ -45,14 +47,17 @@ function Piece({ slot, rack, side, active, onChoose }: {
   active: boolean;
   onChoose: (slot: number) => void;
 }) {
+  const t = useTranslations("dressing");
+  const tw = useTranslations();
   const piece = rack[slot];
   const hidden = piece === null;
-  const name = piece === undefined ? "Your own gear" : hidden ? "Hidden" : piece.name;
+  const name = piece === undefined ? t("ownGear") : hidden ? tw("pieces.hidden") : piece.name;
+  const slotName = term(tw, "slot", SLOT_NAMES[slot]);
   return (
     <li>
       <button
         type="button"
-        aria-label={`Choose ${SLOT_NAMES[slot]}`}
+        aria-label={t("choose", { slot: slotName })}
         aria-pressed={active}
         onClick={() => onChoose(slot)}
         className={cn("piece w-full", side === "left" ? "text-left" : "piece--right", active && "bg-surface-high")}
@@ -65,7 +70,7 @@ function Piece({ slot, rack, side, active, onChoose }: {
           >
             {name}
           </span>
-          <span className="piece__slot block">{SLOT_NAMES[slot]}</span>
+          <span className="piece__slot block">{slotName}</span>
         </span>
       </button>
     </li>
@@ -86,7 +91,14 @@ export function DressingRoom({ itemCount, start, from = null, canPublish = false
 }) {
   const [rack, setRack] = useState<Rack>(start?.pieces ?? {});
   const [active, setActive] = useState<number>(VISIBLE_SLOTS[0]);
+  const t = useTranslations("dressing");
+  const tw = useTranslations();
+  // Races by name in the reader's language, sorted as that language sorts them.
+  const races = Object.keys(RACE_LABEL)
+    .map((key) => [key, term(tw, "race", key, RACE_LABEL[key])] as const)
+    .sort(([, a], [, b]) => a.localeCompare(b));
   const [query, setQuery] = useState("");
+  const activeName = term(tw, "slot", SLOT_NAMES[active]);
   // Results carry their slot: until the next answer lands, the last slot's items
   // must not be offered for this one, or a click would dress the wrong slot.
   const [found, setFound] = useState<{ slot: number; hits: ItemHit[] } | null>(null);
@@ -166,7 +178,7 @@ export function DressingRoom({ itemCount, start, from = null, canPublish = false
   const worn = Object.fromEntries(Object.entries(rack).flatMap(([slot, piece]) => (piece ? [[slot, piece.display]] : [])));
 
   return (
-    <section className="studio" aria-label="Dressing room">
+    <section className="studio" aria-label={t("label")}>
       <div className="studio__scene" style={{ backgroundImage: `url(${backdropFor("dressing-room")})` }} aria-hidden />
       <div className="studio__grid pt-5">
         <ul className="flex flex-col gap-1.5">
@@ -178,8 +190,8 @@ export function DressingRoom({ itemCount, start, from = null, canPublish = false
             <button
               type="button"
               className="pill bg-surface/90 px-2.5"
-              aria-label="Save an image"
-              title="Save an image"
+              aria-label={t("saveImage")}
+              title={t("saveImage")}
               disabled={!engine}
               onClick={() => void engine?.exportPNG(2, true)}
             >
@@ -192,32 +204,32 @@ export function DressingRoom({ itemCount, start, from = null, canPublish = false
         </ul>
       </div>
       <Tabs defaultValue="pieces" className="mx-5 mb-4 gap-2">
-        <TabsList aria-label="What to change">
-          <TabsTrigger value="pieces">Pieces</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
+        <TabsList aria-label={t("whatToChange")}>
+          <TabsTrigger value="pieces">{t("pieces")}</TabsTrigger>
+          <TabsTrigger value="appearance">{t("appearance")}</TabsTrigger>
         </TabsList>
         <TabsContent value="appearance" className="rounded-md border border-line bg-surface/85 p-3">
           {race === OWN_RACE
-            ? <p className="text-sm text-ink-dim">Choose a race below to change its face, hair and skin.</p>
+            ? <p className="text-sm text-ink-dim">{t("chooseRace")}</p>
             : <AppearancePanel onBody={toBody} />}
         </TabsContent>
         <TabsContent value="pieces" forceMount className="data-[state=inactive]:hidden">
       <div ref={search} className="flex scroll-mt-20 flex-col gap-2 rounded-md border border-line bg-surface/85 p-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg">{SLOT_NAMES[active]}</h2>
+          <h2 className="text-lg">{activeName}</h2>
           <div className="flex gap-3 text-xs text-ink-dim">
-            <button type="button" onClick={() => wear(null)} className="underline underline-offset-2 hover:text-ink">Hide slot</button>
-            <button type="button" onClick={clear} disabled={!(active in rack)} className="underline underline-offset-2 enabled:hover:text-ink disabled:no-underline disabled:opacity-50">Clear</button>
+            <button type="button" onClick={() => wear(null)} className="underline underline-offset-2 hover:text-ink">{t("hideSlot")}</button>
+            <button type="button" onClick={clear} disabled={!(active in rack)} className="underline underline-offset-2 enabled:hover:text-ink disabled:no-underline disabled:opacity-50">{t("clear")}</button>
           </div>
         </div>
         <Input
           value={query}
-          aria-label={`Search ${SLOT_NAMES[active]} items`}
-          placeholder={`Search ${itemCount.toLocaleString("en-US")} items`}
+          aria-label={t("searchSlot", { slot: activeName })}
+          placeholder={t("searchCount", { count: itemCount })}
           onChange={(e) => setQuery(e.target.value)}
         />
-        {failed && <p role="alert" className="text-sm text-ink-dim">Could not load items. Try again in a moment.</p>}
-        {hits && !hits.length && <p className="text-sm text-ink-dim">Nothing by that name fits this slot.</p>}
+        {failed && <p role="alert" className="text-sm text-ink-dim">{t("loadFailed")}</p>}
+        {hits && !hits.length && <p className="text-sm text-ink-dim">{t("noFit")}</p>}
         {hits && (
           <ul className="grid max-h-72 grid-cols-1 gap-0.5 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3">
             {hits.map((item) => (
@@ -240,39 +252,42 @@ export function DressingRoom({ itemCount, start, from = null, canPublish = false
       </Tabs>
       <div className="flex flex-wrap items-center gap-3 border-t border-line px-5 py-3">
         <Select value={race} onValueChange={setRace}>
-          <SelectTrigger size="sm" aria-label="Race" className="min-w-44 rounded-full bg-surface">
+          <SelectTrigger size="sm" aria-label={t("race")} className="min-w-44 rounded-full bg-surface">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={OWN_RACE}>Your own race</SelectItem>
-            {RACES.map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}
+            <SelectItem value={OWN_RACE}>{t("ownRace")}</SelectItem>
+            {races.map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}
           </SelectContent>
         </Select>
         {race !== OWN_RACE && (
-          <div className="flex gap-1.5" role="group" aria-label="Sex">
+          <div className="flex gap-1.5" role="group" aria-label={t("sex")}>
             {SEXES.map((label, value) => (
-              <button key={label} type="button" aria-pressed={gender === value} onClick={() => setGender(value)} className="pill">{label}</button>
+              <button key={label} type="button" aria-pressed={gender === value} onClick={() => setGender(value)} className="pill">
+                {capitalise(term(tw, "sex", label))}
+              </button>
             ))}
           </div>
         )}
         <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
           {code && canPublish && (
-            <Link href={publishHref(code, from)} className="pill">Publish this look</Link>
+            <Link href={publishHref(code, from)} className="pill">{t("publish")}</Link>
           )}
           {code
             ? <CopyButton code={code} />
-            : <p className="text-sm text-ink-dim">Choose a piece to get a code.</p>}
+            : <p className="text-sm text-ink-dim">{t("choosePiece")}</p>}
         </div>
       </div>
       <p className="flex flex-wrap justify-between gap-x-4 gap-y-1 px-5 pb-4 text-[0.7rem] text-ink-faint">
         <span>
-          The preview draws the current game&apos;s models, and &quot;Your own race&quot; shows a human. A game without HD models or the race pack shows a simpler body of a close race. Import the code in the game to see it on your character. To publish a look, paste its code into{" "}
-          <Link href="/loadouts" className="underline underline-offset-2 hover:text-ink-dim">Import</Link>.
+          {t.rich("footnote", {
+            import: (c) => <Link href="/loadouts" className="underline underline-offset-2 hover:text-ink-dim">{c}</Link>,
+          })}
         </span>
         <span>
-          Scene and rings:{" "}
-          <a href={NARCISSUS_URL} target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-ink-dim">Narcissus</a>{" "}
-          by Peterodox, CC BY-NC-SA 4.0
+          {tw.rich("look.credit", {
+            narcissus: (c) => <a href={NARCISSUS_URL} target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-ink-dim">{c}</a>,
+          })}
         </span>
       </p>
     </section>

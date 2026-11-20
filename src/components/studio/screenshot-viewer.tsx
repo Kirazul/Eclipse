@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, Minus, Plus, X } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { useEffect, useRef, useState } from "react";
@@ -21,6 +22,7 @@ export function ScreenshotViewer({ images, index, onIndex, title, open, onOpenCh
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslations("shots");
   const [view, setView] = useState<View>(UNZOOMED);
   const stage = useRef<HTMLDivElement | null>(null);
   // Radix mounts the portal a render after `open`, so the wheel listener waits for the element.
@@ -137,14 +139,14 @@ export function ScreenshotViewer({ images, index, onIndex, title, open, onOpenCh
               {count > 1 ? `${index + 1} / ${count}` : title}
             </p>
             <div className="pointer-events-auto flex items-center gap-2">
-              <button type="button" className={BUTTON} aria-label="Zoom out" disabled={view.scale <= 1} onClick={() => zoomCentre(1 / 1.5)}>
+              <button type="button" className={BUTTON} aria-label={t("zoomOut")} disabled={view.scale <= 1} onClick={() => zoomCentre(1 / 1.5)}>
                 <Minus className="size-4" aria-hidden />
               </button>
               <span className="nums w-11 text-center text-xs text-white/80">{Math.round(view.scale * 100)}%</span>
-              <button type="button" className={BUTTON} aria-label="Zoom in" disabled={view.scale >= MAX_ZOOM} onClick={() => zoomCentre(1.5)}>
+              <button type="button" className={BUTTON} aria-label={t("zoomIn")} disabled={view.scale >= MAX_ZOOM} onClick={() => zoomCentre(1.5)}>
                 <Plus className="size-4" aria-hidden />
               </button>
-              <DialogPrimitive.Close className={`${BUTTON} ml-2`} aria-label="Close">
+              <DialogPrimitive.Close className={`${BUTTON} ml-2`} aria-label={t("close")}>
                 <X className="size-4" aria-hidden />
               </DialogPrimitive.Close>
             </div>
@@ -152,10 +154,10 @@ export function ScreenshotViewer({ images, index, onIndex, title, open, onOpenCh
 
           {count > 1 && (
             <>
-              <button type="button" aria-label="Previous screenshot" onClick={() => step(-1)} className={`${BUTTON} absolute top-1/2 left-3 -translate-y-1/2`}>
+              <button type="button" aria-label={t("previous")} onClick={() => step(-1)} className={`${BUTTON} absolute top-1/2 left-3 -translate-y-1/2`}>
                 <ChevronLeft className="size-5" aria-hidden />
               </button>
-              <button type="button" aria-label="Next screenshot" onClick={() => step(1)} className={`${BUTTON} absolute top-1/2 right-3 -translate-y-1/2`}>
+              <button type="button" aria-label={t("next")} onClick={() => step(1)} className={`${BUTTON} absolute top-1/2 right-3 -translate-y-1/2`}>
                 <ChevronRight className="size-5" aria-hidden />
               </button>
             </>

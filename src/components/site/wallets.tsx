@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Icon, type IconId } from "@/components/site/icons";
 import wallets from "@/data/wallets.json";
@@ -12,6 +13,7 @@ type Wallet = (typeof wallets)[number];
 const CONFIRM_MS = 1800;
 
 function CopyAddress({ wallet }: { wallet: Wallet }) {
+  const t = useTranslations("support");
   const [done, setDone] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -22,17 +24,17 @@ function CopyAddress({ wallet }: { wallet: Wallet }) {
       className={`copy ${done ? "is-done" : ""}`}
       onClick={async () => {
         if (!(await copyText(wallet.address))) {
-          toast.error("Select the address to copy it");
+          toast.error(t("selectToCopy"));
           return;
         }
         setDone(true);
-        toast.success(`${wallet.ticker} address copied`);
+        toast.success(t("copied", { ticker: wallet.ticker }));
         clearTimeout(timer.current);
         timer.current = setTimeout(() => setDone(false), CONFIRM_MS);
       }}
     >
       <Icon id={done ? "i-check" : "i-copy"} />
-      <span>{done ? "Copied" : "Copy address"}</span>
+      <span>{done ? t("copiedShort") : t("copy")}</span>
     </button>
   );
 }
@@ -44,11 +46,13 @@ function Address({ value }: { value: string }) {
 }
 
 function Qr({ wallet }: { wallet: Wallet }) {
-  return <Image src={`/assets/img/qr-${wallet.id}.svg`} alt={`QR code for the ${wallet.coin} address`} width={320} height={320} unoptimized loading="lazy" />;
+  const t = useTranslations("support");
+  return <Image src={`/assets/img/qr-${wallet.id}.svg`} alt={t("qr", { coin: wallet.coin })} width={320} height={320} unoptimized loading="lazy" />;
 }
 
 /** One wallet at a time: the dialog always, the page on phones. */
 export function WalletPicker({ title }: { title: string }) {
+  const t = useTranslations("support");
   const [selected, setSelected] = useState(0);
   const tabs = useRef<HTMLDivElement>(null);
   const wallet = wallets[selected];
@@ -83,7 +87,7 @@ export function WalletPicker({ title }: { title: string }) {
       <div className="wpanel" role="tabpanel">
         <div className="wallet__qr"><Qr wallet={wallet} /></div>
         <div className="wpanel__side">
-          <p className="wpanel__net"><strong>{wallet.coin}</strong> on {wallet.network}</p>
+          <p className="wpanel__net">{t.rich("network", { coin: wallet.coin, network: wallet.network, strong: (c) => <strong>{c}</strong> })}</p>
           <code className="wallet__addr"><Address value={wallet.address} /></code>
           <CopyAddress wallet={wallet} />
         </div>
@@ -93,6 +97,7 @@ export function WalletPicker({ title }: { title: string }) {
 }
 
 export function WalletSection() {
+  const t = useTranslations("support");
   return (
     <div>
       <div className="wallets__cards">
@@ -112,7 +117,7 @@ export function WalletSection() {
         ))}
       </div>
       <div className="wallets__pick panel">
-        <WalletPicker title="Send crypto" />
+        <WalletPicker title={t("sendCrypto")} />
       </div>
     </div>
   );

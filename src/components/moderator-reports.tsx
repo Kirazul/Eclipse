@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Flag } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ import { useAccount } from "@/lib/use-account";
  * the Delete button. Only fetched for moderators, so visitors cost no request.
  */
 export function ModeratorReports({ id }: { id: string }) {
+  const t = useTranslations("moderation");
   const [account] = useAccount();
   const [open, setOpen] = useState<ReportedLook | null>(null);
   const [dismissing, start] = useTransition();
@@ -50,11 +52,11 @@ export function ModeratorReports({ id }: { id: string }) {
               return;
             }
             setOpen(null);
-            toast.success("Reports dismissed. The look stays up.");
+            toast.success(t("dismissed"));
           })
         }
       >
-        {dismissing ? "Dismissing" : "Dismiss reports"}
+        {dismissing ? t("dismissing") : t("dismiss")}
       </button>
     </div>
   );

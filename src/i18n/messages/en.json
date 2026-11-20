@@ -1,36 +1,103 @@
 {
   "domain": {
     "slot": {
-      "Head": "Head", "Neck": "Neck", "Shoulders": "Shoulders", "Shirt": "Shirt", "Chest": "Chest",
-      "Waist": "Waist", "Legs": "Legs", "Feet": "Feet", "Wrists": "Wrists", "Hands": "Hands",
-      "Ring 1": "Ring 1", "Ring 2": "Ring 2", "Trinket 1": "Trinket 1", "Trinket 2": "Trinket 2",
-      "Back": "Back", "Main Hand": "Main Hand", "Off Hand": "Off Hand", "Ranged": "Ranged", "Tabard": "Tabard",
-      "One-Hand": "One-Hand", "Two-Hand": "Two-Hand"
+      "Head": "Head",
+      "Neck": "Neck",
+      "Shoulders": "Shoulders",
+      "Shirt": "Shirt",
+      "Chest": "Chest",
+      "Waist": "Waist",
+      "Legs": "Legs",
+      "Feet": "Feet",
+      "Wrists": "Wrists",
+      "Hands": "Hands",
+      "Ring 1": "Ring 1",
+      "Ring 2": "Ring 2",
+      "Trinket 1": "Trinket 1",
+      "Trinket 2": "Trinket 2",
+      "Back": "Back",
+      "Main Hand": "Main Hand",
+      "Off Hand": "Off Hand",
+      "Ranged": "Ranged",
+      "Tabard": "Tabard",
+      "One-Hand": "One-Hand",
+      "Two-Hand": "Two-Hand"
     },
     "class": {
-      "Death Knight": "Death Knight", "Druid": "Druid", "Hunter": "Hunter", "Mage": "Mage", "Paladin": "Paladin",
-      "Priest": "Priest", "Rogue": "Rogue", "Shaman": "Shaman", "Warlock": "Warlock", "Warrior": "Warrior"
+      "Death Knight": "Death Knight",
+      "Druid": "Druid",
+      "Hunter": "Hunter",
+      "Mage": "Mage",
+      "Paladin": "Paladin",
+      "Priest": "Priest",
+      "Rogue": "Rogue",
+      "Shaman": "Shaman",
+      "Warlock": "Warlock",
+      "Warrior": "Warrior"
     },
-    "armor": { "cloth": "Cloth", "leather": "Leather", "mail": "Mail", "plate": "Plate" },
+    "armor": {
+      "cloth": "Cloth",
+      "leather": "Leather",
+      "mail": "Mail",
+      "plate": "Plate"
+    },
     "category": {
-      "Armor": "Armor", "Race morph": "Race morph", "Creature morph": "Creature morph",
-      "Cosmetics": "Cosmetics", "Mounted": "Mounted"
+      "Armor": "Armor",
+      "Race morph": "Race morph",
+      "Creature morph": "Creature morph",
+      "Cosmetics": "Cosmetics",
+      "Mounted": "Mounted"
     },
-    "sort": { "trending": "Trending", "newest": "Newest", "top": "Top rated" },
+    "sort": {
+      "trending": "Trending",
+      "newest": "Newest",
+      "top": "Top rated"
+    },
     "race": {
-      "human": "Human", "orc": "Orc", "dwarf": "Dwarf", "nightelf": "Night Elf", "undead": "Forsaken",
-      "tauren": "Tauren", "gnome": "Gnome", "troll": "Troll", "goblin": "Goblin", "bloodelf": "Blood Elf",
-      "draenei": "Draenei", "worgen": "Worgen", "gilnean": "Worgen (Gilnean)", "pandaren": "Pandaren",
-      "nightborne": "Nightborne", "highmountain": "Highmountain Tauren", "voidelf": "Void Elf",
-      "lightforged": "Lightforged Draenei", "zandalari": "Zandalari Troll", "kultiran": "Kul Tiran",
-      "darkiron": "Dark Iron Dwarf", "vulpera": "Vulpera", "maghar": "Mag'har Orc", "mechagnome": "Mechagnome",
-      "dracthyr": "Dracthyr", "visage": "Dracthyr (Visage)", "earthen": "Earthen", "haranir": "Haranir",
-      "orcupright": "Orc (upright)", "magharupright": "Mag'har (upright)"
+      "human": "Human",
+      "orc": "Orc",
+      "dwarf": "Dwarf",
+      "nightelf": "Night Elf",
+      "undead": "Forsaken",
+      "tauren": "Tauren",
+      "gnome": "Gnome",
+      "troll": "Troll",
+      "goblin": "Goblin",
+      "bloodelf": "Blood Elf",
+      "draenei": "Draenei",
+      "worgen": "Worgen",
+      "gilnean": "Worgen (Gilnean)",
+      "pandaren": "Pandaren",
+      "nightborne": "Nightborne",
+      "highmountain": "Highmountain Tauren",
+      "voidelf": "Void Elf",
+      "lightforged": "Lightforged Draenei",
+      "zandalari": "Zandalari Troll",
+      "kultiran": "Kul Tiran",
+      "darkiron": "Dark Iron Dwarf",
+      "vulpera": "Vulpera",
+      "maghar": "Mag'har Orc",
+      "mechagnome": "Mechagnome",
+      "dracthyr": "Dracthyr",
+      "visage": "Dracthyr (Visage)",
+      "earthen": "Earthen",
+      "haranir": "Haranir",
+      "orcupright": "Orc (upright)",
+      "magharupright": "Mag'har (upright)"
     },
-    "sex": { "Male": "male", "Female": "female" },
+    "sex": {
+      "Male": "male",
+      "Female": "female"
+    },
     "quality": {
-      "Poor": "Poor", "Common": "Common", "Uncommon": "Uncommon", "Rare": "Rare", "Epic": "Epic",
-      "Legendary": "Legendary", "Artifact": "Artifact", "Heirloom": "Heirloom"
+      "Poor": "Poor",
+      "Common": "Common",
+      "Uncommon": "Uncommon",
+      "Rare": "Rare",
+      "Epic": "Epic",
+      "Legendary": "Legendary",
+      "Artifact": "Artifact",
+      "Heirloom": "Heirloom"
     }
   },
   "help": {
@@ -120,5 +187,706 @@
       "badShot": "A screenshot in this post could not be read. Try again.",
       "added": "Added to the Community Gallery: {url}"
     }
+  },
+  "layout": {
+    "skip": "Skip to content"
+  },
+  "language": {
+    "label": "Language",
+    "switchTo": "Switch to {language}"
+  },
+  "nav": {
+    "gallery": "Community Gallery",
+    "loadouts": "Loadouts",
+    "dressingRoom": "Dressing room",
+    "home": "Eclipse home",
+    "primary": "Primary",
+    "mobile": "Mobile",
+    "download": "Download",
+    "downloadLabel": "Download Eclipse",
+    "openMenu": "Open the menu",
+    "siteNavigation": "Site navigation",
+    "support": "Support"
+  },
+  "auth": {
+    "signedIn": "You're signed in",
+    "failed": "Sign-in did not finish. Try again.",
+    "cancelled": "Sign-in was cancelled."
+  },
+  "footer": {
+    "label": "Footer",
+    "features": "Features",
+    "guide": "Setup guide",
+    "privacy": "Privacy",
+    "legal": "Eclipse is a free fan project and is not affiliated with Blizzard Entertainment. World of Warcraft and the artwork shown are property of Blizzard Entertainment, Inc. Studio backdrops and item rings are from <narcissus>Narcissus</narcissus> by Peterodox (CC BY-NC-SA 4.0)."
+  },
+  "site": {
+    "title": "Eclipse - A free wardrobe for World of Warcraft 3.3.5a",
+    "description": "Eclipse is a free overlay for the World of Warcraft 3.3.5a client. Every appearance, mount, spell and title in the game, on your own character.",
+    "ogDescription": "Every appearance, mount, spell and title in the game, on your own character. Free, for the 3.3.5a client."
+  },
+  "account": {
+    "menuLabel": "Your account",
+    "chooseName": "Choose a name",
+    "noName": "No name yet",
+    "signedInWith": "Signed in with {provider}",
+    "moderator": "Moderator",
+    "profile": "Your profile",
+    "bookmarks": "Bookmarks",
+    "loadouts": "Loadouts",
+    "reports": "Reports",
+    "settings": "Settings",
+    "support": "Support Eclipse",
+    "discord": "Join the Discord",
+    "signOut": "Sign out"
+  },
+  "signIn": {
+    "button": "Sign in",
+    "discord": "Continue with Discord",
+    "title": "Sign in to Eclipse",
+    "description": "Publish your looks, upload screenshots and vote."
+  },
+  "settings": {
+    "saved": "Name saved",
+    "chooseTitle": "Choose your public name",
+    "title": "Settings",
+    "chooseDescription": "It appears on the looks you publish. Use your Discord name if you have one, so people recognize you.",
+    "description": "This name appears on the looks you publish.",
+    "nameLabel": "Public name",
+    "saving": "Saving",
+    "save": "Save name",
+    "deleteAccount": "To delete your account, ask us on <discord>Discord</discord>."
+  },
+  "search": {
+    "title": "Search Eclipse",
+    "description": "Find an outfit, a creator or a page",
+    "placeholder": "Search outfits, creators and pages",
+    "empty": "Nothing matches that.",
+    "pages": "Pages",
+    "creators": "Creators",
+    "outfits": "Outfits",
+    "verified": "Verified",
+    "looks": "{count, plural, one {# look} other {# looks}}",
+    "button": "Search",
+    "buttonTitle": "Search (Ctrl K)",
+    "page": {
+      "gallery": "Community Gallery",
+      "pictures": "Looks with pictures",
+      "import": "Import a code",
+      "dressingRoom": "Dressing room",
+      "mounts": "Mounts",
+      "guide": "Setup guide",
+      "features": "Features",
+      "download": "Download Eclipse"
+    }
+  },
+  "support": {
+    "title": "Eclipse is free",
+    "lead": "It has no price and it never will. If it has earned a place in your game, you can help keep it going.",
+    "orCrypto": "Or send crypto",
+    "sendCrypto": "Send crypto",
+    "continue": "Continue to Eclipse",
+    "donate": "Donate",
+    "kofi": "Support development",
+    "kofiLabel": "Support on Ko-fi",
+    "kofiNote": "Keep the project going",
+    "star": "Star on GitHub",
+    "starLabel": "Star the repository",
+    "starNote": "Free, and it helps others find Eclipse",
+    "discordLabel": "Join the Discord",
+    "discordNote": "Updates, help and showcases",
+    "selectToCopy": "Select the address to copy it",
+    "copied": "{ticker} address copied",
+    "copiedShort": "Copied",
+    "copy": "Copy address",
+    "qr": "QR code for the {coin} address",
+    "network": "<strong>{coin}</strong> on {network}"
+  },
+  "landing": {
+    "members": "{count, plural, one {# member} other {# members}}",
+    "headline": "A wardrobe for <flow>World of Warcraft</flow>",
+    "lead": "Every appearance, mount, spell and title in the game, on your own character. Share a look as a code, or find one in the <gallery>Community Gallery</gallery>.",
+    "download": "Download Eclipse",
+    "browse": "Browse the Community Gallery",
+    "discord": "Join the Discord",
+    "more": "See everything it does",
+    "featuresTitle": "Everything in one overlay",
+    "featuresLead": "Press <kbd>F2</kbd> in game to open it. The key can be changed in Settings.",
+    "downloadTitle": "Download Eclipse",
+    "downloadLead": "Includes the retail asset pack: items, mounts, fonts, effects and spells.",
+    "downloadZip": "Download Eclipse.zip",
+    "extract": "Extract",
+    "extractBody": "Unzip <code>Eclipse.zip</code> anywhere.",
+    "copy": "Copy",
+    "copyBody": "Place <code>dinput8.dll</code> and the <code>Eclipse</code> folder next to <code>Wow.exe</code>.",
+    "play": "Play",
+    "playBody": "Start the game, enter the world and press <kbd>F2</kbd>.",
+    "supportTitle": "Eclipse is free",
+    "supportLead": "There is no price and there never will be. If it has earned a place in your game, you can help keep it going."
+  },
+  "features": {
+    "Wardrobe": {
+      "title": "Wardrobe",
+      "body": "Every item appearance and set in the game, previewed on your character before you wear it."
+    },
+    "Customization": {
+      "title": "Customization",
+      "body": "Race, sex, skin, hair and face, with custom colours for skin, hair and eyes."
+    },
+    "Mounts": {
+      "title": "Mounts",
+      "body": "Every mount, shown at full size. Browse the list or let the randomizer choose."
+    },
+    "Creature morph": {
+      "title": "Creature morph",
+      "body": "Take the form of any creature the client can render."
+    },
+    "Enchants": {
+      "title": "Enchants",
+      "body": "Any enchant effect on either weapon, and a colour of your choice for each weapon slot."
+    },
+    "Incarnations": {
+      "title": "Incarnations",
+      "body": "Druid forms, warlock demons, hunter pets, ammunition and hearthstones."
+    },
+    "Spell visuals": {
+      "title": "Spell visuals",
+      "body": "Give any of your spells or auras the visuals of another, and recolour them."
+    },
+    "Procs": {
+      "title": "Procs",
+      "body": "Change how an aura looks, or how a spell looks while an aura is active."
+    },
+    "Optimize": {
+      "title": "Optimize",
+      "body": "Hide other players’ spell effects in raids for a higher frame rate. Boss mechanics are always shown."
+    },
+    "Titles": {
+      "title": "Titles",
+      "body": "Any title on your name, or text of your own, in the colours you choose."
+    },
+    "Effects": {
+      "title": "Effects",
+      "body": "3D models such as wings and capes, attached to your character and animated."
+    },
+    "Colour": {
+      "title": "Colour",
+      "body": "Recolour units and the world around you, and outline units by type."
+    },
+    "World": {
+      "title": "World",
+      "body": "Time of day, weather, sky, fog, draw distance and field of view."
+    },
+    "Font": {
+      "title": "Font",
+      "body": "Sharp text at any resolution, and restyled floating combat text."
+    },
+    "Loadouts": {
+      "title": "Loadouts",
+      "body": "Save complete looks, share them as a code, and assign one to each specialization."
+    },
+    "Multiplayer": {
+      "title": "Multiplayer",
+      "body": "Other Eclipse users see your look, and you see theirs. You choose what is shared."
+    }
+  },
+  "home": {
+    "featured": "From the Community Gallery",
+    "community": "Looks the community has dressed, every one a code away from your character.",
+    "sets": "Real item sets from the game, every one a code away from your character.",
+    "open": "Open the Community Gallery"
+  },
+  "week": {
+    "title": "Look of the week",
+    "lead": "The most upvoted of the looks posted in the last seven days, with {votes, plural, one {# vote} other {# votes}}",
+    "by": ", by <creator>{author}</creator>",
+    "open": "Open the look"
+  },
+  "hub": {
+    "loadouts": "Loadouts",
+    "loadoutsBlurb": "Import a code to see what it holds, and keep the loadouts saved in your game backed up here, private to you.",
+    "dressingRoom": "Dressing room",
+    "dressingRoomBlurb": "Choose a piece for each slot, copy the code, then use Import on the Loadout page in the game.",
+    "mounts": "Mounts",
+    "mountsBlurb": "Every mount in the current game, animated, in each of its colours. Open one to see it move, or put a rider on it.",
+    "flying": "A flying mount.",
+    "ground": "A ground mount.",
+    "yourSet": "Your set",
+    "signInForSets": "Sign in to see the sets your game backed up.",
+    "privateSet": "Only you can see this set. Publish it below to share it with everyone.",
+    "publish": "Publish a look",
+    "builtin": "These are the game's own item sets and one look saved in Eclipse, each a code you can wear today. Community publishing is not open yet, so nothing here has an author or votes.",
+    "noBookmarks": "No bookmarks match. Use the bookmark button on any look to keep it here, or <gallery>browse the Community Gallery</gallery>.",
+    "noArmor": "Nothing matches. Only armor sets are listed until community publishing opens, so try clearing a filter.",
+    "nothingYet": "Nothing here yet. Clear a filter, or <publish>publish the first look</publish>.",
+    "pages": "Pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "views": "Dressing room views"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This page does not exist. Everything Eclipse has starts from the home page or the Community Gallery.",
+    "home": "Back to Eclipse",
+    "gallery": "Go to the Community Gallery"
+  },
+  "error": {
+    "title": "That page broke",
+    "body": "Your clipboard and the codes you copied are fine. Try the page again.",
+    "retry": "Try again"
+  },
+  "loading": {
+    "look": "Loading the look",
+    "gallery": "Loading the Community Gallery",
+    "creator": "Loading the creator",
+    "loadouts": "Loading your loadouts",
+    "loadout": "Loading the loadout"
+  },
+  "guide": {
+    "title": "Setup",
+    "lead": "About two minutes. There is no installer, and nothing is written to the game's own files.",
+    "steps": {
+      "files": {
+        "title": "Put the files beside Wow.exe",
+        "body": "Copy dinput8.dll and the Eclipse folder into your World of Warcraft 3.3.5a folder (build 12340), next to Wow.exe."
+      },
+      "start": {
+        "title": "Start the game and press F2",
+        "body": "F2 opens the overlay. You can change the key in its settings."
+      },
+      "wear": {
+        "title": "Wear a look from the Community Gallery",
+        "body": "Copy a code here, open the Loadout page, and press Import. It lights up when your clipboard holds a code, wears the look, and keeps it with your loadouts as Imported."
+      },
+      "color": {
+        "title": "Color a place",
+        "body": "Copy a world code from another player, open Colors > World, and press Import. The game jumps to the place the code names."
+      },
+      "share": {
+        "title": "Share yours",
+        "body": "Share on the Loadout page, or on any styled place in Colors > World, copies a code. Paste it into Import, on the Loadouts page of the Dressing room, to see what it holds."
+      }
+    },
+    "syncTitle": "See other players' looks",
+    "syncBody": "Turn on the switch on the Multiplayer page. Players with Eclipse on the same realm then see each other's looks through the Eclipse relay. Players without it see your real gear.",
+    "carries": "What the relay carries",
+    "travels": {
+      "slots": "Your item slots, including slots you hid",
+      "sheathe": "Sheathe positions and weapon glows",
+      "morph": "Creature morph, mount and scale",
+      "race": "Race, sex and appearance",
+      "colours": "Your character colours"
+    },
+    "notCarried": "It carries no position, movement, combat or chat. The switches on that page choose which parts of your look travel.",
+    "helpTitle": "If something goes wrong",
+    "stuck": "Still stuck? <discord>Ask in the Eclipse Discord</discord>, in the bug reports channel.",
+    "removeTitle": "Remove it",
+    "removeBody": "Delete dinput8.dll and the Eclipse folder. The game goes back to how it was.",
+    "browse": "Browse the Community Gallery"
+  },
+  "privacy": {
+    "title": "Privacy",
+    "lead": "What this website stores, what is public, and how to remove it. Last updated {date}.",
+    "questions": "Questions",
+    "contact": "Eclipse is a free fan project. Ask us anything about this page on <discord>Discord</discord>. If this page changes, the date above changes with it. It covers this website; for the game overlay, see the <guide>setup guide</guide>.",
+    "sections": {
+      "visiting": {
+        "title": "If you only visit",
+        "points": {
+          "p1": "You do not need an account. The site has no ads, no analytics and no tracking cookies.",
+          "p2": "Our hosting provider handles each request, and that includes your IP address and browser details.",
+          "p3": "When you copy a look's code, we count it once per visitor. We keep only a scrambled fingerprint of your IP address, browser and that look, which cannot be turned back into your address.",
+          "p4": "The site remembers that you have seen the support message, in your browser only, until you close the tab."
+        }
+      },
+      "account": {
+        "title": "If you sign in",
+        "points": {
+          "p1": "You sign in with Discord. We never see your password.",
+          "p2": "Discord gives us your email address, your name or username, your profile picture and an account ID. These stay private.",
+          "p3": "Your profile picture appears only to you, in your account menu.",
+          "p4": "Your Discord username is your public name until you change it.",
+          "p5": "Cookies keep you signed in and return you to the page you were on."
+        }
+      },
+      "game": {
+        "title": "If you link your game",
+        "points": {
+          "p1": "Linking is optional. A linked game copies your saved loadouts here so you can see them, restore them on another PC and send looks to them.",
+          "p2": "We store each loadout's name, icon and code, and the character and realm that last synced, with the time. These stay private to your account.",
+          "p3": "A loadout becomes public only if you publish it yourself."
+        }
+      },
+      "updates": {
+        "title": "Update checks",
+        "points": {
+          "p1": "Once each launch, the game overlay asks this site whether a newer Eclipse is out, linked or not. It sends only its version number."
+        }
+      },
+      "public": {
+        "title": "What is public",
+        "points": {
+          "p1": "Your public name, and any look you publish with its title, code, tags and screenshots. Anyone can see these without an account.",
+          "p2": "How many votes and copies a look has. Which looks you voted for or copied stays private.",
+          "p3": "Your bookmarks, which only you can see.",
+          "p4": "Any report you send, with its reason. Only moderators see who reported a look.",
+          "p5": "Uploaded screenshots are compressed and their file details are removed, including any location data. Still, avoid uploading anything you would not want public, and remember a screenshot can show your character or account names."
+        }
+      },
+      "services": {
+        "title": "Who handles your data",
+        "points": {
+          "p1": "Service providers host the website and store accounts, looks and screenshots for us.",
+          "p2": "Discord handles signing in, under its own privacy policy.",
+          "p3": "When a look is reported, moderators get a message on Discord naming the look and the reason, but not who reported it.",
+          "p4": "Links to downloads, code and donations take you to other sites, which have their own policies.",
+          "p5": "We do not sell your data or use it for advertising."
+        }
+      },
+      "control": {
+        "title": "Your choices",
+        "points": {
+          "p1": "Change your public name at any time, from Settings in your account menu.",
+          "p2": "Delete any look you published, from the look's page. Its screenshots are deleted with it.",
+          "p3": "Unlink a game, or remove any of your saved loadouts, from Loadouts in your account menu.",
+          "p4": "To delete your whole account, ask us on Discord. We keep your data until you delete it or ask us to.",
+          "p5": "Remove a bookmark from the look's page.",
+          "p6": "Moderators can remove looks that break the community's rules, and review every report."
+        }
+      }
+    }
+  },
+  "look": {
+    "private": "Only you can see this look. It stays out of the Community Gallery until you set it to public.",
+    "by": "by <creator>{author}</creator>",
+    "byDiscord": "by <name>{author}</name>, shared on Discord",
+    "gameSet": "The game's own set",
+    "verified": "Verified",
+    "basedOn": "Based on <look>{title}</look>",
+    "basedOnBy": " by {author}",
+    "broken": "This look's code no longer decodes.",
+    "use": "Use this look",
+    "alsoInCode": "Also in this code",
+    "tags": "Tags",
+    "comments": "Comments",
+    "code": "Look code",
+    "credit": "Scene and rings: <narcissus>Narcissus</narcissus> by Peterodox, CC BY-NC-SA 4.0",
+    "metaPieces": "{count, plural, one {# piece} other {# pieces}}, including {names}. Copy the code and wear it with Eclipse.",
+    "metaPlain": "An Eclipse look. Copy the code and wear it in game.",
+    "metaTitle": "Outfit"
+  },
+  "lookMenu": {
+    "saved": "Saved. Find it under Bookmarks in your account menu.",
+    "unsaved": "Removed from your bookmarks",
+    "openIt": "Open it",
+    "nowPrivate": "Only you can see this look now",
+    "nowPublic": "Your look is back in the Community Gallery",
+    "more": "More options",
+    "unsave": "Remove from saved",
+    "save": "Save look",
+    "dressingRoom": "Open in Dressing room",
+    "setPublic": "Set to public",
+    "setPrivate": "Set to private",
+    "deleted": "Look deleted",
+    "deleteTitle": "Delete this look?",
+    "deleteBody": "It and its screenshots are removed for everyone. This cannot be undone.",
+    "deleting": "Deleting",
+    "delete": "Delete look",
+    "reported": "Thanks. A moderator will take a look.",
+    "reportTitle": "Report this look?",
+    "reportBody": "Moderators see every report and decide whether the look stays up.",
+    "reason": "Reason",
+    "sending": "Sending",
+    "send": "Send report"
+  },
+  "copy": {
+    "label": "Copy code",
+    "toast": "Code copied",
+    "hint": "Paste it with Import in the game.",
+    "refused": "The browser refused the clipboard. Select the code and copy it by hand.",
+    "copied": "Copied"
+  },
+  "sendToGame": {
+    "sent": "Sent as \"{name}\"",
+    "sentHint": "It arrives with your next sync. Press Sync now in Eclipse to get it sooner.",
+    "savedToSets": "Saved to your sets as \"{name}\"",
+    "linkHint": "Link your game to get it there.",
+    "button": "Send to game"
+  },
+  "reportReason": {
+    "spam": "Spam or advertising",
+    "offensive": "Offensive title or screenshot",
+    "stolen": "Someone else's look, reposted",
+    "broken": "Not a real look, or the code is broken",
+    "other": "Something else"
+  },
+  "commentReportReason": {
+    "spam": "Spam or advertising",
+    "offensive": "Offensive or abusive",
+    "other": "Something else"
+  },
+  "comments": {
+    "someone": "Someone",
+    "author": "Author",
+    "title": "Comments",
+    "noneYet": "No comments yet",
+    "beFirst": "Be the first to say what you think.",
+    "noneYetBeFirst": "No comments yet. Be the first to say what you think.",
+    "signInPrompt": "Sign in to join the conversation.",
+    "signInTitle": "Sign in to comment",
+    "signInBody": "Comment, publish your looks and vote.",
+    "write": "Write a comment",
+    "commentAs": "Comment as {name}",
+    "post": "Post comment",
+    "options": "Comment options",
+    "removed": "Comment removed",
+    "removeTitle": "Remove this comment?",
+    "removeBody": "It is removed for everyone. This cannot be undone.",
+    "removing": "Removing",
+    "remove": "Remove comment",
+    "reportTitle": "Report this comment?",
+    "reportBody": "Moderators see every report and decide whether the comment stays.",
+    "dismissed": "Reports dismissed. The comment stays.",
+    "dismiss": "Dismiss",
+    "failed": "That did not work. Try again.",
+    "report": "Report",
+    "removeShort": "Remove"
+  },
+  "upvote": {
+    "label": "Upvote, {count, plural, one {# vote} other {# votes}}"
+  },
+  "pieces": {
+    "hidden": "Hidden",
+    "item": "Item {id}",
+    "everyLook": "Every look that wears {name}",
+    "noSlots": "This code leaves every slot to the wearer's own gear.",
+    "remove": "Remove {slot} from the code",
+    "onlyPieces": "This code holds pieces only. When a code carries a race or creature morph, a mount, enchant glows, colours or 3D effects, they are listed here.",
+    "raceMorph": "Race morph",
+    "creatureMorph": "Creature morph",
+    "display": "Display {id}",
+    "groundMount": "Ground mount",
+    "mount": "Mount",
+    "flyingMount": "Flying mount",
+    "enchant": "{hand} enchant",
+    "sheathed": "{hand} sheathed",
+    "scale": "Scale",
+    "colour": "{axis} colour",
+    "tints": "Recoloured pieces",
+    "cosmetics": "3D effects",
+    "title": "Pieces",
+    "enchantId": "Enchant {id}"
+  },
+  "sheathe": {
+    "Natural": "Natural",
+    "Back": "Back",
+    "Hip": "Hip",
+    "Hidden": "Hidden"
+  },
+  "colourAxis": {
+    "Skin": "Skin",
+    "Hair": "Hair",
+    "Eyes": "Eyes",
+    "Death knight eyes": "Death knight eyes",
+    "Tattoo": "Tattoo"
+  },
+  "shots": {
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "close": "Close",
+    "previous": "Previous screenshot",
+    "next": "Next screenshot",
+    "of": "Screenshots of {title}",
+    "nth": "{title}, screenshot {index} of {count}",
+    "one": "{title}, screenshot",
+    "fullScreen": "View full screen and zoom",
+    "show": "Show screenshot {index}",
+    "loading3d": "Loading the 3D preview",
+    "advice": "The screenshots show it as the game draws it.",
+    "showShots": "Show screenshots",
+    "noShot": "No screenshot from the game yet. The code works in game.",
+    "noShotNo3d": "No screenshot from the game yet, and these pieces are not in the 3D preview. The code still works in game.",
+    "show3d": "Show 3D preview",
+    "incomplete": "Some pieces are not in the 3D preview yet.",
+    "dressing": "Dressing the character…",
+    "failed": "The preview could not load. The code still works."
+  },
+  "creator": {
+    "metaTitle": "Creator",
+    "title": "{name}'s looks",
+    "description": "{count, plural, one {# look} other {# looks}} by {name} for World of Warcraft 3.3.5a. Copy any of them and wear it with Eclipse.",
+    "joined": "Joined {date}",
+    "copyLink": "Copy profile link",
+    "linkCopied": "Link copied",
+    "linkHint": "Anyone with it can see {name}'s public looks.",
+    "looks": "<b>{count}</b> {count, plural, one {look} other {looks}}",
+    "upvotes": "<b>{count}</b> {count, plural, one {upvote} other {upvotes}}",
+    "classes": "<b>{count}</b> {count, plural, one {class} other {classes}}",
+    "byClass": "{name}'s looks by class",
+    "weekly": "<look>{title}</look> is this week's Look of the Week.",
+    "topLook": "Top look",
+    "classLooks": "{class} looks",
+    "allLooks": "Looks",
+    "sort": "Sort",
+    "newest": "Newest",
+    "mostUpvoted": "Most upvoted",
+    "privateHere": "Only you see your private looks here.",
+    "noneOfClass": "{name} has not published a {class} look yet.",
+    "none": "{name} has not published a look yet.",
+    "upvoteCount": "{count, plural, one {# upvote} other {# upvotes}}"
+  },
+  "loadouts": {
+    "import": "Import",
+    "importLead": "Paste an ECA1: loadout or an ECW1: world code to see what it holds{live, select, true {, edit it, or publish it with your screenshots} other { and edit it}}. Use Share in the game to get one.",
+    "waiting": "Waiting for its first sync",
+    "synced": "Synced {when}",
+    "linked": "Linked {when}",
+    "pictures": "{count, plural, one {# picture} other {# pictures}} from your game",
+    "pictureAlt": "{name}, picture {index}",
+    "ready": "Ready to publish",
+    "readyLead": "Pictures your game sent wait here, private to you, until you publish their look to the Community Gallery.",
+    "publish": "Publish",
+    "published": "Your Published Loadouts",
+    "seeAll": "See all {count}",
+    "noneYet": "You haven't published a look yet. Open one of your loadouts below to publish it.",
+    "open": "Open {name}",
+    "updated": "Updated {when}",
+    "signInNote": "Sign in to see the loadouts saved in your game.",
+    "yours": "Your loadouts",
+    "notOpen": "Loadouts are not open yet: the community database is not connected.",
+    "games": "Linked games",
+    "gamesLead": "Link your game to back up your loadouts, restore them on another PC and send looks from this site straight into the game.",
+    "empty": "Nothing here yet. Loadouts you save in a linked game appear here, and so do looks you send from the <gallery>Community Gallery</gallery>."
+  },
+  "gameSync": {
+    "link": "Link a game",
+    "step1": "In the game, open Eclipse and go to Settings.",
+    "step2": "Under Website, paste this code and press Link.",
+    "once": "It works once and lasts ten minutes. Only enter it in your own game.",
+    "pasteHint": "Paste it under Website in Eclipse's Settings.",
+    "unlinked": "Game unlinked",
+    "unlinkedHint": "Your loadouts stay here. It keeps its own copies.",
+    "unlink": "Unlink",
+    "remove": "Remove {name}",
+    "more": "More options for {name}",
+    "moreShort": "More options",
+    "publish": "Publish",
+    "removeShort": "Remove",
+    "removed": "Set removed",
+    "removeTitle": "Remove {name}?",
+    "removeBody": "It is also deleted from every linked game at its next sync.",
+    "keep": "Keep it"
+  },
+  "decoder": {
+    "notSet": "Not set",
+    "shotsLead": "Screenshots from the Showcase studio, at least one and up to {max}. The first is the cover.",
+    "fromGame": " The ones your game sent are already here.",
+    "shot": "Screenshot {index}",
+    "removeShot": "Remove screenshot {index}",
+    "upload": "Upload from this computer",
+    "published": "Published to the Community Gallery",
+    "publishedOpen": "Published. <open>Open it in the Community Gallery</open>",
+    "basedOn": "Based on <look>{title}</look>",
+    "basedOnBy": " by {author}",
+    "title": "Title",
+    "class": "Class",
+    "armor": "Armor",
+    "race": "Race",
+    "description": "Description <optional>(optional)</optional>",
+    "inspired": "What inspired it?",
+    "openIt": "Open it",
+    "publish": "Publish to the Community Gallery",
+    "pasteFirst": "Paste a loadout code above first.",
+    "addShot": "Add a screenshot to publish.",
+    "holds": "What the code holds",
+    "pieceCount": "{count, plural, one {# piece} other {# pieces}}",
+    "copyEdited": "Copy edited code",
+    "noPieces": "No pieces yet",
+    "noPiecesLead": "Paste a loadout code above and the pieces it holds are listed here.",
+    "placeCount": "{count, plural, one {# place} other {# places}}",
+    "worldHint": "Paste it with Import on Colors > World.",
+    "unknownPlace": "Unknown place {tag}",
+    "notInCatalogue": "Not in the catalogue: the game skips this one.",
+    "clipboardRefused": "The browser refused the clipboard. Paste into the box instead.",
+    "codeLabel": "Eclipse code",
+    "paste": "Paste from clipboard",
+    "reading": "Reading the code",
+    "valid": "Valid {kind, select, world {world} other {loadout}} code",
+    "publishLabel": "Publish",
+    "publishIt": "Publish it"
+  },
+  "preview": {
+    "notice": "The 3D preview is a close guide, not an exact match. Some pieces may not show up or may look a little different than in game.",
+    "tryInGame": "Try the code in game before you share it."
+  },
+  "set": {
+    "back": "Loadouts",
+    "pictures": "Pictures from your game",
+    "sent": "Your game sent {count, plural, one {1 picture} other {# pictures}} of this look. {count, plural, one {It is} other {They are}} already in the publish form: give the look a title and publish it.",
+    "pictureAlt": "Picture {index} from your game",
+    "goToForm": "Go to the publish form"
+  },
+  "dressing": {
+    "ownGear": "Your own gear",
+    "choose": "Choose {slot}",
+    "label": "Dressing room",
+    "saveImage": "Save an image",
+    "whatToChange": "What to change",
+    "pieces": "Pieces",
+    "appearance": "Appearance",
+    "chooseRace": "Choose a race below to change its face, hair and skin.",
+    "hideSlot": "Hide slot",
+    "clear": "Clear",
+    "searchSlot": "Search {slot} items",
+    "searchCount": "Search {count, plural, one {# item} other {# items}}",
+    "loadFailed": "Could not load items. Try again in a moment.",
+    "noFit": "Nothing by that name fits this slot.",
+    "race": "Race",
+    "ownRace": "Your own race",
+    "sex": "Sex",
+    "publish": "Publish this look",
+    "choosePiece": "Choose a piece to get a code.",
+    "footnote": "The preview draws the current game's models, and \"Your own race\" shows a human. A game without HD models or the race pack shows a simpler body of a close race. Import the code in the game to see it on your character. To publish a look, paste its code into <import>Import</import>."
+  },
+  "viewer": {
+    "previous": "Previous {name}",
+    "next": "Next {name}",
+    "onItsWay": "The character is still on its way.",
+    "nothing": "This body has nothing to change.",
+    "loadingChair": "Loading the barber's chair…",
+    "category": "Appearance category",
+    "animation": "Animation",
+    "searchAnimations": "Search animations",
+    "noAnimations": "No animations found."
+  },
+  "mounts": {
+    "all": "All",
+    "flying": "Flying",
+    "ground": "Ground",
+    "search": "Search mounts",
+    "searchCount": "Search {count, plural, one {# mount} other {# mounts}}",
+    "kind": "Kind",
+    "none": "No mount by that name.",
+    "colours": " · {count, plural, one {# colour} other {# colours}}",
+    "saddling": "Saddling up…",
+    "failed": "This mount could not load. Try again in a moment.",
+    "rider": "Show a rider",
+    "saveImage": "Save an image",
+    "colourList": "Colours",
+    "listFailed": "The mounts could not load right now. Try again in a moment.",
+    "allMounts": "← All mounts",
+    "metaTitle": "{name}: WoW mount in 3D",
+    "metaDescription": "{name} animated in 3D{count, plural, =1 {} other {, in all # of its colours}}."
+  },
+  "moderation": {
+    "title": "Reports",
+    "lead": "Reports never hide a look. Open one to dismiss its reports and keep it, or to delete it.",
+    "none": "No reports waiting.",
+    "comments": "Reported comments",
+    "noComments": "No reported comments.",
+    "dismissed": "Reports dismissed. The look stays up.",
+    "dismissing": "Dismissing",
+    "dismiss": "Dismiss reports"
   }
 }

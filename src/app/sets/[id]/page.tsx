@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -21,11 +22,13 @@ export const metadata: Metadata = {
 // Decoder brings the breakdown, editing and the publish form, and publishing from
 // here writes a new public look. The private set stays as it was.
 export default async function SetPage({ params }: Props) {
+  const t = await getTranslations("hub");
+  const ts = await getTranslations("set");
   // Signed out, the database refuses the read outright: ask for the sign-in instead.
   if (!(await repository.getAccount())) {
     return (
       <main id="main" className="wrap flex flex-col gap-6 py-10">
-        <HubTitle title="Your set" blurb="Sign in to see the sets your game backed up." />
+        <HubTitle title={t("yourSet")} blurb={t("signInForSets")} />
         {repository.live && (
           <div className="max-w-sm">
             <SignInOptions />
@@ -40,27 +43,26 @@ export default async function SetPage({ params }: Props) {
     <main id="main" className="wrap flex flex-col gap-6 py-10">
       <Link href="/loadouts" className="flex items-center gap-1.5 self-start text-sm text-ink-dim hover:text-ink">
         <ArrowLeft className="size-4" aria-hidden="true" />
-        Loadouts
+        {ts("back")}
       </Link>
       <div className="flex items-start justify-between gap-3">
-        <HubTitle title={set.name} blurb="Only you can see this set. Publish it below to share it with everyone." />
+        <HubTitle title={set.name} blurb={t("privateSet")} />
         <RemoveGameSet id={set.id} name={set.name} after="/loadouts" />
       </div>
       {set.gallery.length > 0 && (
         // What the studio sent, where the player lands: the form holding it is below the breakdown.
-        <section aria-label="Pictures from your game" className="flex flex-col gap-3 rounded-lg border border-amber/40 bg-amber/5 p-4">
+        <section aria-label={ts("pictures")} className="flex flex-col gap-3 rounded-lg border border-amber/40 bg-amber/5 p-4">
           <p className="text-sm text-ink">
-            Your game sent {set.gallery.length === 1 ? "1 picture" : `${set.gallery.length} pictures`} of this look.
-            {" "}{set.gallery.length === 1 ? "It is" : "They are"} already in the publish form: give the look a title and publish it.
+            {ts("sent", { count: set.gallery.length })}
           </p>
           <ul className="flex flex-wrap gap-2">
             {set.gallery.map((path, i) => (
               <li key={path} className="relative aspect-video w-40 overflow-hidden rounded-md border border-line">
-                <Image src={thumbOf(screenshotUrl(path))} alt={`Picture ${i + 1} from your game`} fill unoptimized sizes="10rem" className="object-cover" />
+                <Image src={thumbOf(screenshotUrl(path))} alt={ts("pictureAlt", { index: i + 1 })} fill unoptimized sizes="10rem" className="object-cover" />
               </li>
             ))}
           </ul>
-          <a href="#publish" className="pill self-start">Go to the publish form</a>
+          <a href="#publish" className="pill self-start">{ts("goToForm")}</a>
         </section>
       )}
       <Decoder initial={set.code} canPublish={repository.live} fromSet={{ id: set.id, gallery: set.gallery }} />

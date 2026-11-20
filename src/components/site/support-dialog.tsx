@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { SupportLinks } from "@/components/site/support-links";
@@ -17,6 +18,7 @@ export const openSupportDialog = () => window.dispatchEvent(new Event(OPEN_EVENT
  * browser, and the footer's Donate brings it back for anyone who wants it.
  */
 export function SupportDialog() {
+  const t = useTranslations("support");
   const ref = useRef<HTMLDialogElement>(null);
   const pathname = usePathname();
 
@@ -75,20 +77,21 @@ export function SupportDialog() {
     >
       <div className="modal__head">
         <Image src="/assets/img/logo-320.webp" width={56} height={56} alt="" unoptimized />
-        <h2 id="modal-title">Eclipse is free</h2>
-        <p>It has no price and it never will. If it has earned a place in your game, you can help keep it going.</p>
+        <h2 id="modal-title">{t("title")}</h2>
+        <p>{t("lead")}</p>
       </div>
       <div className="modal__links"><SupportLinks dialog /></div>
-      <div className="modal__crypto"><WalletPicker title="Or send crypto" /></div>
+      <div className="modal__crypto"><WalletPicker title={t("orCrypto")} /></div>
       <div className="modal__foot">
-        <button type="button" className="btn btn--primary btn--block" onClick={close}>Continue to Eclipse</button>
+        <button type="button" className="btn btn--primary btn--block" onClick={close}>{t("continue")}</button>
       </div>
     </dialog>
   );
 }
 
 export function DonateButton() {
+  const t = useTranslations("support");
   return (
-    <button type="button" className="linklike" onClick={openSupportDialog}>Donate</button>
+    <button type="button" className="linklike" onClick={openSupportDialog}>{t("donate")}</button>
   );
 }

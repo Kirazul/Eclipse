@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Info } from "lucide-react";
 
 /** Sets expectations for the 3D figure, wherever one is drawn: it is a guide, not the game. */
@@ -7,6 +8,7 @@ export function PreviewNotice({ advice, compact = false, className = "" }: {
   compact?: boolean;
   className?: string;
 }) {
+  const t = useTranslations("preview");
   return (
     <p
       role="note"
@@ -14,8 +16,7 @@ export function PreviewNotice({ advice, compact = false, className = "" }: {
     >
       <Info aria-hidden className={`shrink-0 text-ink-faint ${compact ? "mt-px size-3.5" : "mt-0.5 size-4"}`} />
       <span>
-        The 3D preview is a close guide, not an exact match. Some pieces may not show up or may look a little
-        different than in game.{advice && ` ${advice}`}
+        {t("notice")}{advice && ` ${advice}`}
       </span>
     </p>
   );

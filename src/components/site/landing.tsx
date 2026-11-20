@@ -1,4 +1,6 @@
 import { ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { preload } from "react-dom";
@@ -19,7 +21,8 @@ import { DISCORD_URL, dllUrl, downloadUrl } from "@/lib/site";
 /** Discord's own member count for the invite, or nothing when Discord does not say. */
 async function DiscordMembers() {
   const count = await discordMembers();
-  return count ? <span className="btn__count">{count.toLocaleString("en-US")} members</span> : null;
+  const t = await getTranslations("landing");
+  return count ? <span className="btn__count">{t("members", { count })}</span> : null;
 }
 
 /** The DLL on its own, offered only once Kirazul/Eclipse has a release to land on. */
@@ -38,29 +41,25 @@ export function Hero() {
   const art = { as: "image", type: "image/avif", fetchPriority: "high" } as const;
   preload("/assets/img/bg-wide-1920.avif", { ...art, media: "(min-aspect-ratio: 4/5)", imageSrcSet: wideArt("avif"), imageSizes: WIDE_SIZES });
   preload("/assets/img/bg-tall-960.avif", { ...art, media: TALL_MEDIA, imageSrcSet: tallArt("avif"), imageSizes: TALL_SIZES });
+  const t = useTranslations("landing");
 
   return (
     <section className="hero" id="top">
       <HeroStage />
       <div className="wrap hero__text">
-        <h1>
-          A wardrobe for <span className="flow-text">World of Warcraft</span>
-        </h1>
-        <p>
-          Every appearance, mount, spell and title in the game, on your own character. Share a look as a code, or
-          find one in the <Link href="/community-gallery">Community Gallery</Link>.
-        </p>
+        <h1>{t.rich("headline", { flow: (c) => <span className="flow-text">{c}</span> })}</h1>
+        <p>{t.rich("lead", { gallery: (c) => <Link href="/community-gallery">{c}</Link> })}</p>
         <div className="cta">
-          <a className="btn btn--primary" href="#download"><Icon id="i-download" /><span>Download Eclipse</span></a>
-          <Link className="btn btn--ghost" href="/community-gallery">Browse the Community Gallery</Link>
+          <a className="btn btn--primary" href="#download"><Icon id="i-download" /><span>{t("download")}</span></a>
+          <Link className="btn btn--ghost" href="/community-gallery">{t("browse")}</Link>
         </div>
         <a className="hero__community" href={DISCORD_URL} target="_blank" rel="noopener">
-          <Icon id="i-discord" /><span>Join the Discord</span>
+          <Icon id="i-discord" /><span>{t("discord")}</span>
           <Suspense fallback={null}><DiscordMembers /></Suspense>
         </a>
       </div>
       <div className="wrap hero__foot">
-        <a className="hero__more" href="#features" aria-label="See everything it does">
+        <a className="hero__more" href="#features" aria-label={t("more")}>
           <ChevronDown aria-hidden="true" />
         </a>
       </div>
@@ -69,18 +68,22 @@ export function Hero() {
 }
 
 export function Features({ live }: { live: boolean }) {
+  const t = useTranslations("landing");
+  const tf = useTranslations("features");
+  // FEATURES keeps the English title as each feature's key.
+  const text = (title: string, part: "title" | "body") => tf(`${title}.${part}` as never);
   return (
     <section className="section" id="features">
       <div className="wrap">
         <header className="section__head">
-          <h2>Everything in one overlay</h2>
-          <p>Press <kbd>F2</kbd> in game to open it. The key can be changed in Settings.</p>
+          <h2>{t("featuresTitle")}</h2>
+          <p>{t.rich("featuresLead", { kbd: (c) => <kbd>{c}</kbd> })}</p>
         </header>
         <div className="features">
           {FEATURES.map((f) => (
             <article key={f.title}>
-              <h3>{f.href && (live || !f.needsPosts) ? <Link href={f.href}>{f.title}</Link> : f.title}</h3>
-              <p>{f.body}</p>
+              <h3>{f.href && (live || !f.needsPosts) ? <Link href={f.href}>{text(f.title, "title")}</Link> : text(f.title, "title")}</h3>
+              <p>{text(f.title, "body")}</p>
             </article>
           ))}
         </div>
@@ -90,16 +93,19 @@ export function Features({ live }: { live: boolean }) {
 }
 
 export function Download() {
+  const t = useTranslations("landing");
+  const code = (c: React.ReactNode) => <code>{c}</code>;
+  const kbd = (c: React.ReactNode) => <kbd>{c}</kbd>;
   return (
     <section className="section" id="download">
       <div className="wrap">
         <div className="panel download">
           <div className="download__intro">
-            <h2>Download Eclipse</h2>
-            <p>Includes the retail asset pack: items, mounts, fonts, effects and spells.</p>
+            <h2>{t("downloadTitle")}</h2>
+            <p>{t("downloadLead")}</p>
             <div className="download__btns">
               <a className="btn btn--primary" href={downloadUrl} target="_blank" rel="noopener">
-                <Icon id="i-download" /><span>Download Eclipse.zip</span>
+                <Icon id="i-download" /><span>{t("downloadZip")}</span>
               </a>
               <Suspense fallback={null}><DllButton /></Suspense>
             </div>
@@ -108,9 +114,9 @@ export function Download() {
             </p>
           </div>
           <ol className="steps">
-            <li><h3>Extract</h3><p>Unzip <code>Eclipse.zip</code> anywhere.</p></li>
-            <li><h3>Copy</h3><p>Place <code>dinput8.dll</code> and the <code>Eclipse</code> folder next to <code>Wow.exe</code>.</p></li>
-            <li><h3>Play</h3><p>Start the game, enter the world and press <kbd>F2</kbd>.</p></li>
+            <li><h3>{t("extract")}</h3><p>{t.rich("extractBody", { code })}</p></li>
+            <li><h3>{t("copy")}</h3><p>{t.rich("copyBody", { code })}</p></li>
+            <li><h3>{t("play")}</h3><p>{t.rich("playBody", { kbd })}</p></li>
           </ol>
         </div>
       </div>
@@ -119,12 +125,13 @@ export function Download() {
 }
 
 export function Support() {
+  const t = useTranslations("landing");
   return (
     <section className="section" id="support">
       <div className="wrap">
         <header className="section__head section__head--center">
-          <h2>Eclipse is free</h2>
-          <p>There is no price and there never will be. If it has earned a place in your game, you can help keep it going.</p>
+          <h2>{t("supportTitle")}</h2>
+          <p>{t("supportLead")}</p>
         </header>
         <div className="support">
           <SupportLinks />

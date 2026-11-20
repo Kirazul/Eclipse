@@ -7,6 +7,8 @@ export default defineConfig({
   oxc: { jsx: { runtime: "automatic" } },
   test: {
     include: ["src/**/*.test.ts", "packages/*/test/**/*.test.ts"],
+    // English messages for anything that renders text (src/test/intl.ts).
+    setupFiles: ["src/test/intl.ts"],
     // The *-sql tests each start a Postgres (PGlite) per test. Run all at once, starting
     // one can wait past the 10 s default on a busy machine, though it passes alone.
     hookTimeout: 30_000,

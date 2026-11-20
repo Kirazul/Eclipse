@@ -1,9 +1,12 @@
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { DonateButton } from "@/components/site/support-dialog";
 import { DISCORD_URL, GITHUB_URL, KOFI_URL, NARCISSUS_URL } from "@/lib/site";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getTranslations("footer");
   return (
     <footer className="foot">
       <div className="wrap foot__inner">
@@ -11,21 +14,23 @@ export function SiteFooter() {
           <Image src="/assets/img/logo-96.webp" width={24} height={24} alt="" unoptimized />
           <span>Eclipse</span>
         </Link>
-        <nav aria-label="Footer">
-          <Link href="/#features">Features</Link>
-          <Link href="/guide">Setup guide</Link>
+        <nav aria-label={t("label")}>
+          <Link href="/#features">{t("features")}</Link>
+          <Link href="/guide">{t("guide")}</Link>
           <a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a>
           <a href={DISCORD_URL} target="_blank" rel="noopener">Discord</a>
           <a href={KOFI_URL} target="_blank" rel="noopener">Ko-fi</a>
           <DonateButton />
-          <Link href="/privacy">Privacy</Link>
+          <Link href="/privacy">{t("privacy")}</Link>
+          <LanguageSwitcher className="linklike foot__lang" withName />
         </nav>
       </div>
       <p className="wrap foot__legal">
-        Eclipse is a free fan project and is not affiliated with Blizzard Entertainment. World of Warcraft and the artwork
-        shown are property of Blizzard Entertainment, Inc. Studio backdrops and item rings are from{" "}
-        <a href={NARCISSUS_URL} target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-ink">Narcissus</a>{" "}
-        by Peterodox (CC BY-NC-SA 4.0).
+        {t.rich("legal", {
+          narcissus: (chunks) => (
+            <a href={NARCISSUS_URL} target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-ink">{chunks}</a>
+          ),
+        })}
       </p>
     </footer>
   );

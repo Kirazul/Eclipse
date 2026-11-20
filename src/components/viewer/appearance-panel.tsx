@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useStore } from "@nanostores/react";
 import { $customization, $look, $manifest } from "@eclipse/engine/stores";
 import { classTag, randomLook, type CustomChoice, type CustomOption, type Look } from "@eclipse/format";
@@ -71,6 +72,7 @@ function SwatchRow({ o, look, onPick }: { o: CustomOption; look: Look; onPick: (
 }
 
 function StepRow({ o, look, onPick }: { o: CustomOption; look: Look; onPick: (c: CustomChoice) => void }) {
+  const t = useTranslations("viewer");
   const n = o.choices.length;
   const at = Math.max(0, o.choices.findIndex((c) => c.id === look[o.id]));
   const step = (d: number) => o.choices[(at + d + n) % n]!;
@@ -79,13 +81,13 @@ function StepRow({ o, look, onPick }: { o: CustomOption; look: Look; onPick: (c:
     <div className="flex flex-col gap-1">
       <p className="text-xs">{o.name}</p>
       <div className="flex items-center gap-1">
-        <button type="button" className="pill px-2" disabled={n <= 1} aria-label={`Previous ${o.name}`} onPointerEnter={() => warm(step(-1))} onClick={() => onPick(step(-1))}>
+        <button type="button" className="pill px-2" disabled={n <= 1} aria-label={t("previous", { name: o.name })} onPointerEnter={() => warm(step(-1))} onClick={() => onPick(step(-1))}>
           <ChevronLeft className="size-3.5" aria-hidden />
         </button>
         <span className="min-w-0 flex-1 truncate text-center text-sm" aria-live="polite">
           {choiceName(o, o.choices[at]!, at)} <span className="text-ink-faint">{at + 1}/{n}</span>
         </span>
-        <button type="button" className="pill px-2" disabled={n <= 1} aria-label={`Next ${o.name}`} onPointerEnter={() => warm(step(1))} onClick={() => onPick(step(1))}>
+        <button type="button" className="pill px-2" disabled={n <= 1} aria-label={t("next", { name: o.name })} onPointerEnter={() => warm(step(1))} onClick={() => onPick(step(1))}>
           <ChevronRight className="size-3.5" aria-hidden />
         </button>
       </div>
@@ -99,6 +101,7 @@ export function AppearancePanel({ onBody }: { onBody: (bodyId: string) => void }
   const data = useStore($customization);
   const look = useStore($look);
   const engine = useStore($engine);
+  const t = useTranslations("viewer");
   const [tabId, setTabId] = useState<number | null>(null);
 
   // Fetched when the panel opens, never with the figure: it is the size of a texture.
@@ -111,9 +114,9 @@ export function AppearancePanel({ onBody }: { onBody: (bodyId: string) => void }
   const activeTab = tabs.find((t) => t.id === tabId)?.id ?? tabs[0]?.id ?? null;
   const options = useMemo(() => (data?.options ?? []).filter((o) => o.tab === activeTab), [data, activeTab]);
 
-  if (!manifest) return <p className="text-sm text-ink-dim">The character is still on its way.</p>;
-  if (!manifest.customization) return <p className="text-sm text-ink-dim">This body has nothing to change.</p>;
-  if (!data || !look || data.id !== manifest.id) return <p role="status" className="text-sm text-ink-dim">Loading the barber&apos;s chair…</p>;
+  if (!manifest) return <p className="text-sm text-ink-dim">{t("onItsWay")}</p>;
+  if (!manifest.customization) return <p className="text-sm text-ink-dim">{t("nothing")}</p>;
+  if (!data || !look || data.id !== manifest.id) return <p role="status" className="text-sm text-ink-dim">{t("loadingChair")}</p>;
 
   const pick = (o: CustomOption, c: CustomChoice) => {
     if (look[o.id] === c.id) return;
@@ -125,7 +128,7 @@ export function AppearancePanel({ onBody }: { onBody: (bodyId: string) => void }
   return (
     <div className="flex flex-col gap-3">
       {tabs.length > 1 && (
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Appearance category">
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label={t("category")}>
           {tabs.map((t) => (
             <button key={t.id} type="button" aria-pressed={t.id === activeTab} className="pill" onClick={() => setTabId(t.id)}>
               {tabLabel(t.name)}

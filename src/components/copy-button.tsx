@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { copiedLook } from "@/app/actions";
@@ -13,9 +14,9 @@ const CONFIRM_MS = 1800;
 export function CopyButton({
   code,
   look,
-  label = "Copy code",
-  toastTitle = "Code copied",
-  toastHint = "Paste it with Import in the game.",
+  label,
+  toastTitle,
+  toastHint,
   variant = "default",
   className,
 }: {
@@ -28,6 +29,8 @@ export function CopyButton({
   variant?: "default" | "outline";
   className?: string;
 }) {
+  const t = useTranslations("copy");
+  const text = label ?? t("label");
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -37,13 +40,13 @@ export function CopyButton({
     event.preventDefault();
     event.stopPropagation();
     if (!(await copyText(code))) {
-      toast.error("The browser refused the clipboard. Select the code and copy it by hand.");
+      toast.error(t("refused"));
       return;
     }
     setCopied(true);
     // Counting is the server's job and never the visitor's problem: a failure stays silent.
     if (look) copiedLook(look).catch(() => {});
-    toast.success(toastTitle, { description: toastHint });
+    toast.success(toastTitle ?? t("toast"), { description: toastHint ?? t("hint") });
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setCopied(false), CONFIRM_MS);
   }
@@ -54,11 +57,11 @@ export function CopyButton({
       size="sm"
       variant={variant}
       onClick={copy}
-      aria-label={copied ? "Copied" : label}
+      aria-label={copied ? t("copied") : text}
       className={cn("nums min-w-28 gap-1.5", className)}
     >
       {copied ? <Check className="size-4" strokeWidth={2} /> : <Copy className="size-4" strokeWidth={1.5} />}
-      {copied ? "Copied" : label}
+      {copied ? t("copied") : text}
     </Button>
   );
 }

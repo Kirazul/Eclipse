@@ -1,6 +1,7 @@
 "use client";
 
 import { Bookmark, ChevronDown, Flag, Heart, Layers, LogOut, Settings, UserRound } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { AccountDialog } from "@/components/account-dialog";
@@ -19,6 +20,7 @@ import type { Account } from "@/lib/data/types";
 
 /** The header's signed-in control. Settings opens by itself until a name is chosen. */
 export function AccountMenu({ account, onNamed }: { account: Account; onNamed: (name: string) => void }) {
+  const t = useTranslations("account");
   const [settings, setSettings] = useState(account.name === null);
   const signOut = useRef<HTMLFormElement>(null);
   const provider = account.provider ? PROVIDER_NAMES[account.provider] : null;
@@ -27,45 +29,45 @@ export function AccountMenu({ account, onNamed }: { account: Account; onNamed: (
     <>
       {/* Not modal: a modal menu and the dialog it opens both lock the page, and fight over it. */}
       <DropdownMenu modal={false}>
-        <DropdownMenuTrigger className="btn btn--ghost btn--sm bar__account" aria-label="Your account">
+        <DropdownMenuTrigger className="btn btn--ghost btn--sm bar__account" aria-label={t("menuLabel")}>
           <Avatar account={account} />
-          <span className="bar__account-name">{account.name ?? "Choose a name"}</span>
+          <span className="bar__account-name">{account.name ?? t("chooseName")}</span>
           <ChevronDown className="bar__account-caret" aria-hidden="true" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="max-w-72">
           <div className="flex items-center gap-2.5 px-2 py-2">
             <Avatar account={account} size={36} />
             <div className="min-w-0">
-              <p className="truncate text-sm text-ink">{account.name ?? "No name yet"}</p>
-              {provider && <p className="text-xs text-ink-faint">Signed in with {provider}</p>}
-              {account.moderator && <p className="text-xs text-amber">Moderator</p>}
+              <p className="truncate text-sm text-ink">{account.name ?? t("noName")}</p>
+              {provider && <p className="text-xs text-ink-faint">{t("signedInWith", { provider })}</p>}
+              {account.moderator && <p className="text-xs text-amber">{t("moderator")}</p>}
             </div>
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href={`/creators/${account.id}`}><UserRound />Your profile</Link>
+            <Link href={`/creators/${account.id}`}><UserRound />{t("profile")}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/community-gallery?saved=true&sort=newest"><Bookmark />Bookmarks</Link>
+            <Link href="/community-gallery?saved=true&sort=newest"><Bookmark />{t("bookmarks")}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/loadouts"><Layers />Loadouts</Link>
+            <Link href="/loadouts"><Layers />{t("loadouts")}</Link>
           </DropdownMenuItem>
           {account.moderator && (
             <DropdownMenuItem asChild>
-              <Link href="/moderation"><Flag />Reports</Link>
+              <Link href="/moderation"><Flag />{t("reports")}</Link>
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem onSelect={() => setSettings(true)}><Settings />Settings</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setSettings(true)}><Settings />{t("settings")}</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href="/#support"><Heart />Support Eclipse</Link>
+            <Link href="/#support"><Heart />{t("support")}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <a href={DISCORD_URL} target="_blank" rel="noopener"><Icon id="i-discord" />Join the Discord</a>
+            <a href={DISCORD_URL} target="_blank" rel="noopener"><Icon id="i-discord" />{t("discord")}</a>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => signOut.current?.requestSubmit()}><LogOut />Sign out</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => signOut.current?.requestSubmit()}><LogOut />{t("signOut")}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       {/* Outside the menu, which unmounts as soon as an item is chosen. A real form:

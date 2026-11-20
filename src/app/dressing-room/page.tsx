@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DressingRoom } from "@/components/dressing-room";
@@ -29,12 +30,14 @@ async function lookToOpen(id: unknown): Promise<{ id: string; title: string; pub
 }
 
 export default async function DressingRoomPage({ searchParams }: Props) {
+  const t = await getTranslations("hub");
+  const tp = await getTranslations("preview");
   const opened = await lookToOpen((await searchParams).look);
   return (
     <main id="main" className="wrap flex flex-col gap-5 py-10">
-      <HubTitle title="Dressing room" blurb="Choose a piece for each slot, copy the code, then use Import on the Loadout page in the game." />
+      <HubTitle title={t("dressingRoom")} blurb={t("dressingRoomBlurb")} />
       <HubTabs current="/dressing-room" />
-      <PreviewNotice advice="Try the code in game before you share it." className="max-w-2xl" />
+      <PreviewNotice advice={tp("tryInGame")} className="max-w-2xl" />
       {opened && (
         <p className="text-sm text-ink-dim">
           Started from{" "}

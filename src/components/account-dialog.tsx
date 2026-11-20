@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { saveDisplayName } from "@/app/actions";
 import { Avatar } from "@/components/avatar";
@@ -25,6 +26,8 @@ interface AccountDialogProps {
 
 /** Account settings, opened from the account menu. */
 export function AccountDialog({ account, open, onOpenChange, onNamed }: AccountDialogProps) {
+  const t = useTranslations("settings");
+  const ta = useTranslations("account");
   const unnamed = account.name === null;
   const provider = account.provider ? PROVIDER_NAMES[account.provider] : null;
   const [name, setName] = useState(account.name ?? "");
@@ -43,7 +46,7 @@ export function AccountDialog({ account, open, onOpenChange, onNamed }: AccountD
       setName(r.value);
       onNamed(r.value);
       onOpenChange(false);
-      toast.success("Name saved");
+      toast.success(t("saved"));
     });
   }
 
@@ -51,22 +54,22 @@ export function AccountDialog({ account, open, onOpenChange, onNamed }: AccountD
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-5 border-line bg-surface p-6">
         <DialogHeader>
-          <DialogTitle>{unnamed ? "Choose your public name" : "Settings"}</DialogTitle>
+          <DialogTitle>{unnamed ? t("chooseTitle") : t("title")}</DialogTitle>
           <DialogDescription>
             {unnamed
-              ? "It appears on the looks you publish. Use your Discord name if you have one, so people recognize you."
-              : "This name appears on the looks you publish."}
+              ? t("chooseDescription")
+              : t("description")}
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-3">
           <Avatar account={account} size={44} />
           <div className="min-w-0 text-sm">
-            <p className="truncate text-ink">{account.name ?? "No name yet"}</p>
-            {provider && <p className="text-ink-faint">Signed in with {provider}</p>}
+            <p className="truncate text-ink">{account.name ?? ta("noName")}</p>
+            {provider && <p className="text-ink-faint">{ta("signedInWith", { provider })}</p>}
           </div>
         </div>
         <form onSubmit={save} className="flex flex-col gap-3">
-          <label htmlFor="account-name" className="text-sm text-ink-dim">Public name</label>
+          <label htmlFor="account-name" className="text-sm text-ink-dim">{t("nameLabel")}</label>
           <Input
             id="account-name"
             value={name}
@@ -79,16 +82,19 @@ export function AccountDialog({ account, open, onOpenChange, onNamed }: AccountD
           />
           {error && <p id="account-name-error" role="alert" className="text-sm text-bad">{error}</p>}
           <button type="submit" className="btn btn--primary btn--block" disabled={saving}>
-            {saving ? "Saving" : "Save name"}
+            {saving ? t("saving") : t("save")}
           </button>
         </form>
         {/* A real form: signing out ends in a redirect, which a page refresh must not repeat. */}
         <form action="/auth/logout" method="post">
-          <button type="submit" className="btn btn--ghost btn--block">Sign out</button>
+          <button type="submit" className="btn btn--ghost btn--block">{ta("signOut")}</button>
         </form>
         <p className="text-xs text-ink-faint">
-          To delete your account, ask us on{" "}
-          <a href={DISCORD_URL} target="_blank" rel="noopener" className="text-amber underline underline-offset-2">Discord</a>.
+          {t.rich("deleteAccount", {
+            discord: (chunks) => (
+              <a href={DISCORD_URL} target="_blank" rel="noopener" className="text-amber underline underline-offset-2">{chunks}</a>
+            ),
+          })}
         </p>
       </DialogContent>
     </Dialog>

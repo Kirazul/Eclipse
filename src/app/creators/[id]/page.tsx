@@ -1,3 +1,6 @@
+import { useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
+import { term } from "@/i18n/terms";
 import { BadgeCheck, EyeOff, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -23,7 +26,6 @@ type Props = { params: Promise<{ id: string }>; searchParams: Promise<SearchPara
 // One lookup per request, shared by the page and its metadata.
 const getCreator = cache((id: string) => repository.getCreator(id));
 
-const plural = (n: number, one: string) => `${n.toLocaleString("en-US")} ${one}${n === 1 ? "" : "s"}`;
 const serialize = createSerializer(wardrobeParsers);
 
 /** A top look is worth pinning once there are a few to choose it from. */
@@ -31,9 +33,10 @@ const TOP_LOOK_FROM = 3;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const creator = await getCreator((await params).id);
-  if (!creator) return { title: "Creator" };
-  const title = `${creator.name}'s looks`;
-  const description = `${plural(creator.looks, "look")} by ${creator.name} for World of Warcraft 3.3.5a. Copy any of them and wear it with Eclipse.`;
+  const t = await getTranslations("creator");
+  if (!creator) return { title: t("metaTitle") };
+  const title = t("title", { name: creator.name });
+  const description = t("description", { count: creator.looks, name: creator.name });
   const url = `/creators/${creator.id}`;
   return { title, description, alternates: { canonical: url }, openGraph: { ...OPEN_GRAPH, title, description, url } };
 }
@@ -46,6 +49,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CreatorPage({ params, searchParams }: Props) {
   const creator = await getCreator((await params).id);
   if (!creator) notFound();
+  const t = await getTranslations("creator");
+  const tw = await getTranslations();
+  const locale = await getLocale();
+  const b = (c: React.ReactNode) => <b className="font-semibold text-ink">{c}</b>;
   const filters = await wardrobeCache.parse(searchParams);
   // A profile reads newest first unless asked for the most upvoted.
   const sort = filters.sort === "top" ? "top" : "newest";
@@ -73,10 +80,10 @@ export default async function CreatorPage({ params, searchParams }: Props) {
         <div className="flex min-w-0 flex-1 flex-col gap-1 pb-1.5">
           <h1 className="flex items-center gap-2 text-3xl leading-tight sm:text-4xl">
             <span className="truncate">{creator.name}</span>
-            {creator.verified && <BadgeCheck className="size-6 shrink-0 text-amber" strokeWidth={1.5} aria-label="Verified" />}
+            {creator.verified && <BadgeCheck className="size-6 shrink-0 text-amber" strokeWidth={1.5} aria-label={tw("look.verified")} />}
           </h1>
           <p className="text-sm text-ink-faint">
-            Joined {new Date(creator.joinedAt).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" })}
+            {t("joined", { date: new Date(creator.joinedAt).toLocaleDateString(locale, { month: "long", year: "numeric", timeZone: "UTC" }) })}
           </p>
         </div>
         <div className="flex gap-2 pb-2">
@@ -85,9 +92,9 @@ export default async function CreatorPage({ params, searchParams }: Props) {
           ) : (
             <CopyButton
               code={`${siteUrl}${base}`}
-              label="Copy profile link"
-              toastTitle="Link copied"
-              toastHint={`Anyone with it can see ${creator.name}'s public looks.`}
+              label={t("copyLink")}
+              toastTitle={t("linkCopied")}
+              toastHint={t("linkHint", { name: creator.name })}
               variant="outline"
             />
           )}
@@ -95,21 +102,19 @@ export default async function CreatorPage({ params, searchParams }: Props) {
       </div>
 
       <p className="nums mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-dim">
-        <span><b className="font-semibold text-ink">{creator.looks.toLocaleString("en-US")}</b> {creator.looks === 1 ? "look" : "looks"}</span>
-        <span><b className="font-semibold text-ink">{creator.upvotes.toLocaleString("en-US")}</b> {creator.upvotes === 1 ? "upvote" : "upvotes"}</span>
-        {creator.classes.length > 0 && (
-          <span><b className="font-semibold text-ink">{creator.classes.length}</b> {creator.classes.length === 1 ? "class" : "classes"}</span>
-        )}
+        <span>{t.rich("looks", { count: creator.looks, b })}</span>
+        <span>{t.rich("upvotes", { count: creator.upvotes, b })}</span>
+        {creator.classes.length > 0 && <span>{t.rich("classes", { count: creator.classes.length, b })}</span>}
       </p>
 
       {creator.classes.length > 0 && (
-        <nav aria-label={`${creator.name}'s looks by class`} className="mt-4 flex flex-wrap gap-2">
+        <nav aria-label={t("byClass", { name: creator.name })} className="mt-4 flex flex-wrap gap-2">
           {creator.classes.map(({ className, looks }) => {
             const on = filters.class === className;
             return (
               <Link key={className} href={link({ class: on ? null : className })} className="pill" aria-current={on ? "page" : undefined}>
                 <Image src={classArt(className)} alt="" width={18} height={18} unoptimized className="size-[18px] rounded-full" />
-                {className}
+                {term(tw, "class", className)}
                 <span className="nums opacity-70">{looks}</span>
               </Link>
             );
@@ -121,15 +126,17 @@ export default async function CreatorPage({ params, searchParams }: Props) {
         <p className="mt-6 flex items-center gap-3 rounded-[var(--r-md)] border border-gold/30 bg-gold/10 px-4 py-3 text-sm">
           <Trophy className="size-5 shrink-0 text-gold" strokeWidth={1.5} aria-hidden />
           <span>
-            <Link href={`/community-gallery/${weekly.id}`} className="text-gold underline underline-offset-2">{weekly.title}</Link>{" "}
-            is this week&apos;s Look of the Week.
+            {t.rich("weekly", {
+              title: weekly.title,
+              look: (c) => <Link href={`/community-gallery/${weekly.id}`} className="text-gold underline underline-offset-2">{c}</Link>,
+            })}
           </span>
         </p>
       )}
 
       {best && creator.looks >= TOP_LOOK_FROM && !filters.class && filters.page === 1 && (
         <section aria-labelledby="top-look" className="mt-8 flex flex-col gap-3">
-          <h2 id="top-look" className="text-xl">Top look</h2>
+          <h2 id="top-look" className="text-xl">{t("topLook")}</h2>
           <TopLook post={best} />
         </section>
       )}
@@ -137,17 +144,18 @@ export default async function CreatorPage({ params, searchParams }: Props) {
       <section aria-labelledby="all-looks" className="mt-8 flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
           <h2 id="all-looks" className="text-xl">
-            {filters.class ? `${filters.class} looks` : "Looks"} <span className="nums text-base text-ink-faint">{total.toLocaleString("en-US")}</span>
+            {filters.class ? t("classLooks", { class: term(tw, "class", filters.class) }) : t("allLooks")}{" "}
+            <span className="nums text-base text-ink-faint">{total.toLocaleString(locale)}</span>
           </h2>
-          <nav aria-label="Sort" className="flex gap-1.5">
-            <Link href={link({ sort: "newest" })} className="pill" aria-current={sort === "newest" ? "page" : undefined}>Newest</Link>
-            <Link href={link({ sort: "top" })} className="pill" aria-current={sort === "top" ? "page" : undefined}>Most upvoted</Link>
+          <nav aria-label={t("sort")} className="flex gap-1.5">
+            <Link href={link({ sort: "newest" })} className="pill" aria-current={sort === "newest" ? "page" : undefined}>{t("newest")}</Link>
+            <Link href={link({ sort: "top" })} className="pill" aria-current={sort === "top" ? "page" : undefined}>{t("mostUpvoted")}</Link>
           </nav>
         </div>
         {own && posts.some((p) => p.isPrivate) && (
           <p className="flex items-center gap-2 text-sm text-ink-dim">
             <EyeOff className="size-4" strokeWidth={1.5} aria-hidden />
-            Only you see your private looks here.
+            {t("privateHere")}
           </p>
         )}
         {posts.length ? (
@@ -157,8 +165,8 @@ export default async function CreatorPage({ params, searchParams }: Props) {
         ) : (
           <p className="rounded-lg border border-dashed border-line p-10 text-center text-sm text-ink-dim">
             {filters.class
-              ? `${creator.name} has not published a ${filters.class} look yet.`
-              : `${creator.name} has not published a look yet.`}
+              ? t("noneOfClass", { name: creator.name, class: term(tw, "class", filters.class) })
+              : t("none", { name: creator.name })}
           </p>
         )}
         <Pager base={base} filters={{ ...filters, sort }} total={total} />
@@ -184,8 +192,14 @@ function ProfileCover({ creator, best }: { creator: Creator; best: OutfitPost | 
 
 /** Pinned like a social post: the picture beside what it is, one link to the look. */
 function TopLook({ post }: { post: OutfitPost }) {
+  const t = useTranslations("creator");
   const shot = post.gallery[0];
-  const line = [post.className, post.armor ? ARMOR_LABEL[post.armor] : null, post.race ? RACE_LABEL[post.race] : null]
+  const tw = useTranslations();
+  const line = [
+    post.className ? term(tw, "class", post.className) : null,
+    post.armor ? term(tw, "armor", post.armor, ARMOR_LABEL[post.armor]) : null,
+    post.race ? term(tw, "race", post.race, RACE_LABEL[post.race] ?? post.race) : null,
+  ]
     .filter(Boolean)
     .join(" · ");
   return (
@@ -212,7 +226,7 @@ function TopLook({ post }: { post: OutfitPost }) {
         {line && <p className="text-sm text-ink-faint">{line}</p>}
         {post.description && <p className="line-clamp-4 text-sm text-ink-dim">{post.description}</p>}
         {post.upvotes !== null && (
-          <p className="nums mt-auto text-sm text-ink-faint">{plural(post.upvotes, "upvote")}</p>
+          <p className="nums mt-auto text-sm text-ink-faint">{t("upvoteCount", { count: post.upvotes })}</p>
         )}
       </div>
     </Link>

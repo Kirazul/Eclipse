@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { createSerializer, type SearchParams } from "nuqs/server";
 import { repository } from "@/lib/data";
@@ -14,11 +15,7 @@ export function HubTitle({ title, blurb }: { title: string; blurb: string }) {
   );
 }
 
-type Tab = { href: string; label: string };
-
-/** What the Loadouts page is for, shared with its loading outline. */
-export const LOADOUTS_BLURB =
-  "Import a code to see what it holds, and keep the loadouts saved in your game backed up here, private to you.";
+type Tab = { href: string; label: "dressingRoom" | "mounts" };
 
 /**
  * The Dressing room's views: the builder and the mounts, both drawn in 3D. Since
@@ -26,8 +23,8 @@ export const LOADOUTS_BLURB =
  * Loadouts, which stay about sharing.
  */
 const DRESSING_TABS: Tab[] = [
-  { href: "/dressing-room", label: "Dressing room" },
-  { href: "/mounts", label: "Mounts" },
+  { href: "/dressing-room", label: "dressingRoom" },
+  { href: "/mounts", label: "mounts" },
 ];
 
 /**
@@ -54,19 +51,21 @@ export async function listFromSearch(searchParams: Promise<SearchParams>) {
 }
 
 export function PublishButton() {
+  const t = useTranslations("hub");
   if (!repository.live) return null;
   return (
     <Link href="/loadouts" className="btn btn--ghost btn--sm">
-      <span>Publish a look</span>
+      <span>{t("publish")}</span>
     </Link>
   );
 }
 
 export function BuiltinNotice() {
+  const t = useTranslations("hub");
   if (repository.live) return null;
   return (
     <p className="rounded-md border border-line bg-surface px-3 py-2 text-xs text-ink-dim">
-      These are the game&apos;s own item sets and one look saved in Eclipse, each a code you can wear today. Community publishing is not open yet, so nothing here has an author or votes.
+      {t("builtin")}
     </p>
   );
 }
@@ -74,23 +73,13 @@ export function BuiltinNotice() {
 const EMPTY = "rounded-lg border border-dashed border-line p-10 text-center text-sm text-ink-dim";
 
 export function NoLooks({ bookmarks = false }: { bookmarks?: boolean }) {
-  if (bookmarks) {
-    return (
-      <p className={EMPTY}>
-        No bookmarks match. Use the bookmark button on any look to keep it here, or{" "}
-        <Link href="/community-gallery" className="text-amber underline underline-offset-2">browse the Community Gallery</Link>.
-      </p>
-    );
-  }
-  if (!repository.live) {
-    return <p className={EMPTY}>Nothing matches. Only armor sets are listed until community publishing opens, so try clearing a filter.</p>;
-  }
-  return (
-    <p className={EMPTY}>
-      Nothing here yet. Clear a filter, or{" "}
-      <Link href="/loadouts" className="text-amber underline underline-offset-2">publish the first look</Link>.
-    </p>
-  );
+  const t = useTranslations("hub");
+  const link = (href: string) => function Linked(chunks: React.ReactNode) {
+    return <Link href={href} className="text-amber underline underline-offset-2">{chunks}</Link>;
+  };
+  if (bookmarks) return <p className={EMPTY}>{t.rich("noBookmarks", { gallery: link("/community-gallery") })}</p>;
+  if (!repository.live) return <p className={EMPTY}>{t("noArmor")}</p>;
+  return <p className={EMPTY}>{t.rich("nothingYet", { publish: link("/loadouts") })}</p>;
 }
 
 const serialize = createSerializer(wardrobeParsers);
@@ -99,21 +88,22 @@ type Filters = Awaited<ReturnType<typeof listFromSearch>>["filters"];
 
 /** Plain links, so every page of looks works without JavaScript and can be crawled. */
 export function Pager({ base, filters, total }: { base: string; filters: Filters; total: number }) {
+  const t = useTranslations("hub");
   const pages = Math.ceil(total / LOOKS_PER_PAGE);
   if (pages < 2) return null;
   const page = Math.max(1, filters.page);
   const href = (to: number) => serialize(base, { ...filters, page: to });
   return (
-    <nav aria-label="Pages" className="flex items-center justify-center gap-3 pt-2">
+    <nav aria-label={t("pages")} className="flex items-center justify-center gap-3 pt-2">
       {page > 1 ? (
         <Link href={href(Math.min(page - 1, pages))} className="pill" rel="prev">
-          <ChevronLeft className="size-3.5" /> Previous
+          <ChevronLeft className="size-3.5" /> {t("previous")}
         </Link>
       ) : null}
-      <span className="nums text-xs text-ink-faint">Page {page} of {pages}</span>
+      <span className="nums text-xs text-ink-faint">{t("page", { page, pages })}</span>
       {page < pages ? (
         <Link href={href(page + 1)} className="pill" rel="next">
-          Next <ChevronRight className="size-3.5" />
+          {t("next")} <ChevronRight className="size-3.5" />
         </Link>
       ) : null}
     </nav>
@@ -122,11 +112,12 @@ export function Pager({ base, filters, total }: { base: string; filters: Filters
 
 /** The Dressing room's views as pills. */
 export function HubTabs({ current }: { current: string }) {
+  const t = useTranslations("hub");
   return (
-    <nav aria-label="Dressing room views" className="flex flex-wrap gap-1.5">
-      {DRESSING_TABS.map((t) => (
-        <Link key={t.href} href={t.href} className="pill" aria-current={t.href === current ? "page" : undefined}>
-          {t.label}
+    <nav aria-label={t("views")} className="flex flex-wrap gap-1.5">
+      {DRESSING_TABS.map((tab) => (
+        <Link key={tab.href} href={tab.href} className="pill" aria-current={tab.href === current ? "page" : undefined}>
+          {t(tab.label)}
         </Link>
       ))}
     </nav>
