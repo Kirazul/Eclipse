@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, ChevronDown, Flag, Heart, Layers, LogOut, Settings, UserRound } from "lucide-react";
+import { BadgeCheck, Bookmark, ChevronDown, Flag, Heart, Layers, LogOut, Settings, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -19,7 +19,12 @@ import { DISCORD_URL } from "@/lib/site";
 import type { Account } from "@/lib/data/types";
 
 /** The header's signed-in control. Settings opens by itself until a name is chosen. */
-export function AccountMenu({ account, onNamed }: { account: Account; onNamed: (name: string) => void }) {
+export function AccountMenu({ account, linkedRoles = false, onNamed }: {
+  account: Account;
+  /** Offer Discord roles: only once they are switched on. */
+  linkedRoles?: boolean;
+  onNamed: (name: string) => void;
+}) {
   const t = useTranslations("account");
   const [settings, setSettings] = useState(account.name === null);
   const signOut = useRef<HTMLFormElement>(null);
@@ -56,6 +61,11 @@ export function AccountMenu({ account, onNamed }: { account: Account; onNamed: (
           {account.moderator && (
             <DropdownMenuItem asChild>
               <Link href="/moderation"><Flag />{t("reports")}</Link>
+            </DropdownMenuItem>
+          )}
+          {linkedRoles && (
+            <DropdownMenuItem asChild>
+              <Link href="/linked-roles"><BadgeCheck />{t("discordRoles")}</Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onSelect={() => setSettings(true)}><Settings />{t("settings")}</DropdownMenuItem>

@@ -55,7 +55,8 @@ function useAuthNotice() {
   }, [t]);
 }
 
-export function SiteHeader({ signIn }: { signIn: boolean }) {
+/** linkedRoles: whether Discord roles are switched on, so the account menu offers them. */
+export function SiteHeader({ signIn, linkedRoles = false }: { signIn: boolean; linkedRoles?: boolean }) {
   const pathname = usePathname();
   const home = pathname === "/";
   const scrolled = useScrolled();
@@ -83,7 +84,7 @@ export function SiteHeader({ signIn }: { signIn: boolean }) {
         <div className="bar__actions">
           <SearchTrigger />
           <LanguageSwitcher className="lang-btn" />
-          {account ? <AccountMenu account={account} onNamed={(name) => setAccount({ ...account, name })} /> : signIn && <SignInDialog pending={checking} />}
+          {account ? <AccountMenu account={account} linkedRoles={linkedRoles} onNamed={(name) => setAccount({ ...account, name })} /> : signIn && <SignInDialog pending={checking} />}
           <Link className="btn btn--primary btn--sm" href="/#download" aria-label={t("downloadLabel")}>
             <Icon id="i-download" /><span>{t("download")}</span>
           </Link>
