@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { HELP_IDS, helpParts } from "@/lib/help";
-import { pageMetadata } from "@/lib/seo";
+import { localPageMetadata } from "@/lib/seo";
 import { DISCORD_URL } from "@/lib/site";
 
-export const metadata: Metadata = pageMetadata("/guide");
+export function generateMetadata(): Promise<Metadata> {
+  return localPageMetadata("/guide");
+}
 
 const STEPS = ["files", "start", "wear", "color", "share"] as const;
 const TRAVELS = ["slots", "sheathe", "morph", "race", "colours"] as const;

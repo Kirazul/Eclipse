@@ -11,9 +11,11 @@ import { sizedAvatar } from "@/lib/avatar";
 import { itemName } from "@/lib/catalog";
 import { repository } from "@/lib/data";
 import { wardrobeCache } from "@/lib/search-params";
-import { pageMetadata } from "@/lib/seo";
+import { localPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = pageMetadata("/community-gallery");
+export function generateMetadata(): Promise<Metadata> {
+  return localPageMetadata("/community-gallery");
+}
 
 /** How many matching creators a search shows above the looks. */
 const PEOPLE = 6;

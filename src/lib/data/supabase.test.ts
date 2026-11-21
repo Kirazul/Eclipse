@@ -471,6 +471,12 @@ describe("votes", () => {
     expect(await repo.vote(row.id, true)).toEqual({ ok: false, error: "Sign in to vote." });
   });
 
+  // The vote function is not granted to anon, so a signed-out vote never reaches its own check.
+  it("asks a signed-out visitor to sign in when the database refuses them the vote", async () => {
+    reply = failWith("42501", 401);
+    expect(await repo.vote(row.id, true)).toEqual({ ok: false, error: "Sign in to vote." });
+  });
+
   it("reads which of the given looks the account voted for", async () => {
     user = { id: row.author_id };
     reply = () => Response.json([{ outfit_id: row.id }]);

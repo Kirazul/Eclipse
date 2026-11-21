@@ -343,7 +343,8 @@ export const supabaseRepository: Repository = {
     if (!UUID.test(id)) return { ok: false, error: "That look cannot be voted on." };
     const db = await createServerSupabase();
     const { data, error } = await db.rpc("set_outfit_vote", { target: id, up });
-    if (error?.code === SIGNED_OUT) return { ok: false, error: "Sign in to vote." };
+    // Only signed-in accounts may run the vote function, so a refusal means a signed-out visitor.
+    if (error?.code === SIGNED_OUT || error?.code === REFUSED_BY_POLICY) return { ok: false, error: "Sign in to vote." };
     if (error) return { ok: false, error: "That vote could not be counted. Try again." };
     return { ok: true, value: data as number };
   },
