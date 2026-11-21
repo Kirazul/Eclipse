@@ -19,9 +19,11 @@ import { getOutfit, repository } from "@/lib/data";
 import type { GameLink, GameSet, OutfitList } from "@/lib/data/types";
 import { VISIBLE_SLOTS } from "@/lib/domain";
 import { screenshotUrl, thumbOf } from "@/lib/screenshots";
-import { pageMetadata } from "@/lib/seo";
+import { localPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = pageMetadata("/loadouts");
+export function generateMetadata(): Promise<Metadata> {
+  return localPageMetadata("/loadouts");
+}
 
 type Props = { searchParams?: Promise<{ code?: string | string[]; from?: string | string[] }> };
 

@@ -1,40 +1,26 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import en from "@/i18n/messages/en.json";
 import { OPEN_GRAPH, SITE_DESCRIPTION, siteUrl } from "@/lib/site";
 
-/** What search results and link previews say about each page. The sitemap lists these too. */
-export const PAGES = {
-  "/community-gallery": {
-    title: "Community Gallery: WoW 3.3.5a looks to copy",
-    description:
-      "World of Warcraft 3.3.5a loadouts published by the Eclipse community. Filter by class, race and armor, copy a code, and import it with the free overlay.",
-  },
-  "/loadouts": {
-    title: "Loadouts: import Eclipse codes",
-    description:
-      "Paste an Eclipse loadout or world code to see what it holds, edit it, or publish it with your screenshots, and back up the loadouts saved in your game.",
-  },
-  "/dressing-room": {
-    title: "Dressing room: build a WoW 3.3.5a look",
-    description:
-      "Choose World of Warcraft items slot by slot, hide what you like, and copy the code to wear the look in game with Eclipse.",
-  },
-  "/mounts": {
-    title: "Mounts: every WoW mount in 3D",
-    description:
-      "Browse every World of Warcraft mount, animated in 3D in each of its colours, with or without a rider.",
-  },
-  "/guide": {
-    title: "Setup guide for WoW 3.3.5a",
-    description:
-      "Set up Eclipse for World of Warcraft 3.3.5a in about two minutes. There is no installer, and nothing is written to the game's own files.",
-  },
-  "/privacy": {
-    title: "Privacy",
-    description: "What the Eclipse website stores, what is public, and how to remove it if you change your mind.",
-  },
+/**
+ * What search results and link previews say about each page. The sitemap lists these too.
+ * The English lives in the message file beside the Russian, under `pages`.
+ */
+const PAGE_KEYS = {
+  "/community-gallery": "gallery",
+  "/loadouts": "loadouts",
+  "/dressing-room": "dressingRoom",
+  "/mounts": "mounts",
+  "/guide": "guide",
+  "/privacy": "privacy",
 } as const;
 
-export type PagePath = keyof typeof PAGES;
+export type PagePath = keyof typeof PAGE_KEYS;
+
+export const PAGES = Object.fromEntries(
+  Object.entries(PAGE_KEYS).map(([path, key]) => [path, en.pages[key]]),
+) as Record<PagePath, { title: string; description: string }>;
 
 /**
  * The canonical is the bare path, so a filtered or paged address such as
@@ -48,6 +34,15 @@ export function pageMetadata(path: PagePath): Metadata {
     alternates: { canonical: path },
     openGraph: { ...OPEN_GRAPH, title: `${title} · Eclipse`, description, url: path },
   };
+}
+
+/** pageMetadata in the reader's language, for a page's generateMetadata. */
+export async function localPageMetadata(path: PagePath): Promise<Metadata> {
+  const t = await getTranslations(`pages.${PAGE_KEYS[path]}`);
+  const title = t("title");
+  const description = t("description");
+  const base = pageMetadata(path);
+  return { ...base, title, description, openGraph: { ...base.openGraph, title: `${title} · Eclipse`, description } };
 }
 
 /**

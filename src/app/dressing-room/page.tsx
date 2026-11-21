@@ -8,9 +8,11 @@ import { catalogCounts, resolveOutfit } from "@/lib/catalog";
 import { decodeOutfit } from "@/lib/codec/outfit";
 import { getOutfit, repository } from "@/lib/data";
 import { startingRack, type StartingRack } from "@/lib/dressing-room";
-import { pageMetadata } from "@/lib/seo";
+import { localPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = pageMetadata("/dressing-room");
+export function generateMetadata(): Promise<Metadata> {
+  return localPageMetadata("/dressing-room");
+}
 
 type Props = { searchParams: Promise<{ look?: string | string[] }> };
 

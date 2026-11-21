@@ -2,10 +2,12 @@ import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { HubTabs, HubTitle } from "@/components/hub";
 import { MountGrid } from "@/components/viewer/mount-grid";
-import { pageMetadata } from "@/lib/seo";
+import { localPageMetadata } from "@/lib/seo";
 import { getMounts, toCard } from "@/lib/viewer/mounts";
 
-export const metadata: Metadata = pageMetadata("/mounts");
+export function generateMetadata(): Promise<Metadata> {
+  return localPageMetadata("/mounts");
+}
 
 export default async function MountsPage() {
   const t = await getTranslations("hub");

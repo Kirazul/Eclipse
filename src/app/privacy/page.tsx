@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import { pageMetadata } from "@/lib/seo";
+import { localPageMetadata } from "@/lib/seo";
 import { DISCORD_URL } from "@/lib/site";
 
-export const metadata: Metadata = pageMetadata("/privacy");
+export function generateMetadata(): Promise<Metadata> {
+  return localPageMetadata("/privacy");
+}
 
 const UPDATED = "2026-11-20";
 

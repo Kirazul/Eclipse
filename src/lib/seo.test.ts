@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
+import ru from "@/i18n/messages/ru.json";
 import { pageMetadata, PAGES, siteStructuredData, type PagePath } from "@/lib/seo";
 
 const paths = Object.keys(PAGES) as PagePath[];
 const SUFFIX = " · Eclipse";
+
+describe("what Russian search results show for each page", () => {
+  it.each(Object.entries(ru.pages))("%s fits a search result", (_, { title, description }) => {
+    expect((title + SUFFIX).length).toBeLessThanOrEqual(60);
+    expect(description.length).toBeGreaterThanOrEqual(70);
+    expect(description.length).toBeLessThanOrEqual(160);
+  });
+});
 
 describe("what search results show for each page", () => {
   it.each(paths)("%s fits a search result", (path) => {
