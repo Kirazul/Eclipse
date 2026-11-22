@@ -8,11 +8,11 @@ export function generateMetadata(): Promise<Metadata> {
   return localPageMetadata("/privacy");
 }
 
-const UPDATED = "2026-11-20";
+const UPDATED = "2026-11-22";
 
 /** Each section and how many points it has, in src/i18n/messages (privacy.sections). */
 const SECTIONS = [
-  ["visiting", 4], ["account", 6], ["game", 3], ["updates", 1], ["public", 5], ["services", 5], ["control", 6],
+  ["visiting", 5], ["account", 6], ["game", 4], ["updates", 1], ["public", 5], ["services", 5], ["control", 6],
 ] as const;
 
 export default function PrivacyPage() {

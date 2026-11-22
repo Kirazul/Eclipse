@@ -18,6 +18,7 @@ import { decodeOutfit } from "@/lib/codec/outfit";
 import { getOutfit, repository } from "@/lib/data";
 import type { GameLink, GameSet, OutfitList } from "@/lib/data/types";
 import { VISIBLE_SLOTS } from "@/lib/domain";
+import { GAME_PICTURES_MAX } from "@/lib/limits";
 import { screenshotUrl, thumbOf } from "@/lib/screenshots";
 import { localPageMetadata } from "@/lib/seo";
 
@@ -96,11 +97,14 @@ function Thumb({ path, alt, className }: { path: string; alt: string; className:
 // one the player sent from the studio and has not finished: it leads the page.
 function ReadyToPublish({ sets }: { sets: GameSet[] }) {
   const t = useTranslations("loadouts");
+  // The game cannot say why a picture did not arrive, so this does.
+  const full = sets.reduce((n, set) => n + set.gallery.length, 0) >= GAME_PICTURES_MAX;
   return (
     <section aria-labelledby="ready-heading" className="flex flex-col gap-3 rounded-lg border border-amber/40 bg-amber/5 p-4">
       <div>
         <h2 id="ready-heading" className="text-sm font-medium text-ink">{t("ready")}</h2>
         <p className="text-xs text-ink-dim">{t("readyLead")}</p>
+        {full && <p className="mt-1 text-xs text-amber">{t("picturesFull", { max: GAME_PICTURES_MAX })}</p>}
       </div>
       <ul className="flex flex-col gap-3">
         {sets.map((set) => (

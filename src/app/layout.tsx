@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import { CommandMenu } from "@/components/command-menu";
+import { SiteAnalytics } from "@/components/site-analytics";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Sprite } from "@/components/site/icons";
@@ -96,6 +97,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           </TooltipProvider>
         </NuqsAdapter>
         </NextIntlClientProvider>
+        {/* Only the live site counts visits: not previews, a clone or a local build. */}
+        {process.env.VERCEL_ENV === "production" && <SiteAnalytics />}
       </body>
     </html>
   );
