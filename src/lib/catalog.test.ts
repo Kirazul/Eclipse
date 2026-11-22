@@ -92,6 +92,19 @@ describe("the model each item is drawn with", () => {
     expect(searchItems(bare[1], SLOT.head, 200).find((h) => h.id === bare[0])?.display).toBeNull();
   });
 
+  it("lists an enchant only when the code names one", () => {
+    const outfit = emptyOutfit();
+    outfit.glowKnown = true;
+    // As the game writes a weapon with none, and one whose own enchant is left alone.
+    outfit.glow = [
+      { id: 0, managed: false, tint: false, colour: 0x73ccff },
+      { id: 3370, managed: false, tint: true, colour: 0xff0000 },
+    ];
+    expect(resolveOutfit(outfit).glows).toEqual([]);
+    outfit.glow = [{ id: 0, managed: true, tint: true, colour: 0x44fd04 }, { id: 3370, managed: true, tint: false, colour: 0 }];
+    expect(resolveOutfit(outfit).glows.map((g) => [g.hand, g.id])).toEqual([["Off Hand", 3370]]);
+  });
+
   it("carries the display through a resolved code", () => {
     const [id, display] = Object.entries(displaysJson as Record<string, number>)[0]!;
     const outfit = emptyOutfit();

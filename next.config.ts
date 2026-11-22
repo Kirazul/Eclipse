@@ -29,6 +29,17 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
+      // Art under public/ is asked for again on every visit unless told otherwise, and a
+      // Gallery page shows over a hundred pieces of it. Game art keeps its name for good;
+      // the site's own pictures may be replaced under theirs, so they are checked daily.
+      ...["/icons/:path*", "/wow/:path*"].map((source) => ({
+        source,
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=2592000" }],
+      })),
+      {
+        source: "/assets/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=2592000" }],
+      },
     ];
   },
   async redirects() {

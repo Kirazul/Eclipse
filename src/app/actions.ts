@@ -7,9 +7,7 @@ import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { resolveOutfit, resolveWorld, type ResolvedOutfit, type ResolvedWorldPlace } from "@/lib/catalog";
 import { decodeOutfit, OUTFIT_TAG, type Outfit } from "@/lib/codec/outfit";
-import {
-  displayNameSchema, MAX_SCREENSHOT_BYTES, SCREENSHOT_TYPES, submitOutfitSchema, type SubmitOutfit,
-} from "@/lib/codec/schema";
+import { displayNameSchema, submitOutfitSchema, type SubmitOutfit } from "@/lib/codec/schema";
 import { decodeWorld, OUTFIT_WORLD_TAG } from "@/lib/codec/world";
 import { repository } from "@/lib/data";
 import { adminConfigured, recordCopy } from "@/lib/data/admin";
@@ -18,6 +16,7 @@ import {
 } from "@/lib/data/types";
 import { commentSchema } from "@/lib/comments";
 import { creatorOf, grantCreatorOfLook, recheckCreator } from "@/lib/discord-roles";
+import { MAX_SCREENSHOT_BYTES, SCREENSHOT_TYPES } from "@/lib/limits";
 import { announceLook } from "@/lib/look-feed";
 import { alertCommentReport, alertModerators } from "@/lib/moderation-alert";
 import { UPLOAD_PATH } from "@/lib/screenshots";
@@ -60,22 +59,13 @@ export async function publishOutfit(
 ): Promise<{ ok: true; id: string } | { ok: false; error: string; existing?: string }> {
   const parsed = submitOutfitSchema.safeParse(input);
   if (!parsed.success) return said({ ok: false, error: parsed.error.issues[0].message });
-  const r = await repository.createOutfit({ ...parsed.data, tags: withCodeTags(parsed.data) });
+  const r = await repository.createOutfit(parsed.data);
   if (!r.ok) return said(r);
   revalidateHub();
   const post = r.value;
   after(() => announceLook(post));
   after(() => grantCreatorOfLook(post.id));
   return { ok: true, id: post.id };
-}
-
-/** The Wardrobe's Mounts and Enchants filters, read from the code and not typed. */
-function withCodeTags({ code, tags }: { code: string; tags: string[] }): string[] {
-  const decoded = decodeOutfit(code);
-  if (!decoded.ok) return tags;
-  const { mount, mountFly, glow } = decoded.outfit;
-  const found = [...(mount || mountFly ? ["mount"] : []), ...(glow.some(Boolean) ? ["enchant"] : [])];
-  return [...new Set([...found, ...tags])].slice(0, 6);
 }
 
 function revalidateHub() {

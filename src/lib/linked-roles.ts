@@ -1,6 +1,6 @@
 import "server-only";
 import {
-  adminConfigured, discordLinkForget, discordLinks, discordLinkTokens, type LinkStats,
+  adminConfigured, discordLinkForget, discordLinks, discordLinkTokens, type DiscordLink, type LinkStats,
 } from "@/lib/data/admin";
 import { bot, botConfigured } from "@/lib/discord-bot";
 import { siteUrl } from "@/lib/site";
@@ -59,14 +59,21 @@ export interface Tokens {
   expires: string;
 }
 
-/** Discord's token endpoint. Null when Discord refuses: a bad code, or a revoked refresh. */
-async function token(app: string, grant: Record<string, string>): Promise<Tokens | null> {
+/**
+ * Discord's token endpoint. "revoked" only when Discord says the grant itself is no good: a
+ * used code, or a connection the player removed. A rate limit, an outage or our own wrong
+ * secret says nothing about the player, so those are "failed".
+ */
+async function token(app: string, grant: Record<string, string>): Promise<Tokens | "revoked" | "failed"> {
   const res = await fetch(`${API}/oauth2/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ client_id: app, client_secret: process.env.DISCORD_CLIENT_SECRET ?? "", ...grant }),
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    const { error } = (await res.json().catch(() => ({}))) as { error?: string };
+    return res.status === 400 && error === "invalid_grant" ? "revoked" : "failed";
+  }
   const body = (await res.json()) as { access_token: string; refresh_token: string; expires_in: number };
   return {
     access: body.access_token,
@@ -75,8 +82,11 @@ async function token(app: string, grant: Record<string, string>): Promise<Tokens
   };
 }
 
-export const exchangeCode = (app: string, code: string) =>
-  token(app, { grant_type: "authorization_code", code, redirect_uri: REDIRECT_URI });
+/** Null when Discord refuses the code. */
+export async function exchangeCode(app: string, code: string): Promise<Tokens | null> {
+  const tokens = await token(app, { grant_type: "authorization_code", code, redirect_uri: REDIRECT_URI });
+  return typeof tokens === "string" ? null : tokens;
+}
 
 const refreshTokens = (app: string, refresh: string) => token(app, { grant_type: "refresh_token", refresh_token: refresh });
 
@@ -104,29 +114,36 @@ export async function pushRoleData(app: string, access: string, stats: LinkStats
 /** A token this close to its end is renewed before use. */
 const RENEW_MS = 24 * 60 * 60 * 1000;
 
-/**
- * The daily run: every connected player's current numbers, to Discord. A token near
- * its end is renewed first; one Discord no longer honours is forgotten, since the
- * player removed the connection there.
- */
+/** One player's numbers, to Discord. A token near its end is renewed first. */
+async function syncPlayer(app: string, link: DiscordLink, now: number): Promise<"pushed" | "forgotten" | "failed"> {
+  let access = link.access_token;
+  if (Date.parse(link.expires_at) - now < RENEW_MS) {
+    const renewed = await refreshTokens(app, link.refresh_token);
+    // Only the player's own removal forgets them. Anything else is tried again tomorrow.
+    if (renewed === "revoked") {
+      await discordLinkForget(link.discord_id);
+      return "forgotten";
+    }
+    if (renewed === "failed") return "failed";
+    await discordLinkTokens(link.discord_id, renewed.access, renewed.refresh, renewed.expires);
+    access = renewed.access;
+  }
+  return (await pushRoleData(app, access, link.stats)) ? "pushed" : "failed";
+}
+
+/** The daily run: every connected player's current numbers, to Discord. One failing stops nobody else's. */
 export async function syncLinkedRoles(now = Date.now()): Promise<{ pushed: number; forgotten: number }> {
   if (!linkedRolesConfigured()) return { pushed: 0, forgotten: 0 };
   const app = await applicationId();
   let pushed = 0;
   let forgotten = 0;
   for (const link of await discordLinks()) {
-    let access = link.access_token;
-    if (Date.parse(link.expires_at) - now < RENEW_MS) {
-      const renewed = await refreshTokens(app, link.refresh_token);
-      if (!renewed) {
-        await discordLinkForget(link.discord_id);
-        forgotten++;
-        continue;
-      }
-      await discordLinkTokens(link.discord_id, renewed.access, renewed.refresh, renewed.expires);
-      access = renewed.access;
-    }
-    if (await pushRoleData(app, access, link.stats)) pushed++;
+    const result = await syncPlayer(app, link, now).catch((error: unknown) => {
+      console.error("A player's Linked Roles refresh failed:", error);
+      return "failed" as const;
+    });
+    if (result === "pushed") pushed++;
+    if (result === "forgotten") forgotten++;
   }
   return { pushed, forgotten };
 }

@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { COMMENT_MAX } from "@/lib/comments";
+import { COMMENT_MAX } from "@/lib/limits";
 import { useViewer } from "@/components/comment-actions";
 
 // The bar under the list, as a social app holds its comment box at the bottom.

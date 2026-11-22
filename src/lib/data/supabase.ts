@@ -216,13 +216,10 @@ async function listOutfits(f: OutfitFilters): Promise<OutfitList> {
   const size = f.pageSize ?? LOOKS_PER_PAGE;
   const from = (Math.max(1, f.page ?? 1) - 1) * size;
   const page = outfitRows(db, f, OUTFIT_COLUMNS, { count: "exact" }, savedBy).range(from, from + size - 1);
-  const query =
-    f.sort === "newest"
-      ? page.order("created_at", { ascending: false })
-      : f.sort === "top"
-        ? page.order("upvotes", { ascending: false })
-        : page.order("trending_score", { ascending: false });
-  const { data, error, count } = await query;
+  const ranked =
+    f.sort === "newest" ? page : page.order(f.sort === "top" ? "upvotes" : "trending_score", { ascending: false });
+  // Ties end at the id, so a look never shows on two pages or on none.
+  const { data, error, count } = await ranked.order("created_at", { ascending: false }).order("id");
   if (error?.code === RANGE_NOT_SATISFIABLE) {
     // The refusal holds no count, and the caller pages on past the last row.
     const { count: rows, error: failed } = await outfitRows(db, f, "id", { count: "exact", head: true }, savedBy);

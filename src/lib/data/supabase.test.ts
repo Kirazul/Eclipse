@@ -621,6 +621,16 @@ describe("the Supabase adapter", () => {
     expect(requests[0].searchParams.get("limit")).toBe(String(LOOKS_PER_PAGE));
   });
 
+  // Most looks have no votes: without a last word on ties, a look shows on two pages or on none.
+  it.each([
+    ["newest", "created_at.desc,id.asc"],
+    ["top", "upvotes.desc,created_at.desc,id.asc"],
+    ["trending", "trending_score.desc,created_at.desc,id.asc"],
+  ] as const)("puts %s looks in one order, ties and all", async (sort, order) => {
+    await repo.listOutfits({ sort });
+    expect(requests[0].searchParams.get("order")).toBe(order);
+  });
+
   // The game's own sets were taken off the site: it lists what players publish, nothing else.
   it("lists only the published looks", async () => {
     reply = () => Response.json([row], { headers: { "Content-Range": `0-0/1` } });

@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { term } from "@/i18n/terms";
+import { HoverLink } from "@/components/hover-link";
 import { ItemRing } from "@/components/item-icon";
 import type { ResolvedOutfit } from "@/lib/catalog";
 import { SLOT_NAMES, VISIBLE_SLOTS } from "@/lib/domain";
@@ -37,14 +37,14 @@ export function LookPieces({ resolved }: { resolved: ResolvedOutfit }) {
                 {hidden ? (
                   <p className="truncate text-sm font-medium text-ink-dim">{name}</p>
                 ) : (
-                  <Link
+                  <HoverLink
                     href={`/community-gallery?item=${s.item}`}
                     className="block truncate text-sm font-medium underline-offset-2 hover:underline"
                     style={{ color: qualityColour(s.quality) }}
                     title={t("everyLook", { name })}
                   >
                     {name}
-                  </Link>
+                  </HoverLink>
                 )}
                 <p className="text-xs text-ink-faint">{term(tw, "slot", SLOT_NAMES[s.slot])}</p>
               </div>

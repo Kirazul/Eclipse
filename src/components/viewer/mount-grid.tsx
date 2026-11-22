@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
 import { useDeferredValue, useState } from "react";
+import { HoverLink } from "@/components/hover-link";
 import { Input } from "@/components/ui/input";
 import type { MountCard } from "@/lib/viewer/mounts";
 
@@ -45,7 +45,7 @@ export function MountGrid({ mounts }: { mounts: MountCard[] }) {
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {shown.map((m) => (
           <li key={m.id}>
-            <Link href={`/mounts/${m.id}`} className="group flex flex-col overflow-hidden rounded-md border border-line bg-surface transition-colors hover:border-line-strong">
+            <HoverLink href={`/mounts/${m.id}`} className="group flex flex-col overflow-hidden rounded-md border border-line bg-surface transition-colors hover:border-line-strong">
               <span className="relative aspect-square bg-surface-high">
                 {m.poster && <Image src={m.poster} alt="" fill unoptimized sizes="12rem" className="object-contain p-2 transition-transform group-hover:scale-105" />}
               </span>
@@ -55,7 +55,7 @@ export function MountGrid({ mounts }: { mounts: MountCard[] }) {
                   {m.flying ? t("flying") : t("ground")}{m.colours > 1 ? t("colours", { count: m.colours }) : ""}
                 </span>
               </span>
-            </Link>
+            </HoverLink>
           </li>
         ))}
       </ul>

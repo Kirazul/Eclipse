@@ -2,6 +2,7 @@ import { z } from "zod";
 import { NAME_MAX } from "@/lib/account";
 import { descriptionSchema } from "@/lib/comments";
 import { ARMOR_TYPES, CLASSES, RACE_LABEL } from "@/lib/domain";
+import { MAX_SCREENSHOTS } from "@/lib/limits";
 import { UPLOAD_PATH } from "@/lib/screenshots";
 import { decodeOutfit } from "./outfit";
 
@@ -10,10 +11,6 @@ export const outfitCodeSchema = z.string().superRefine((text, ctx) => {
   const r = decodeOutfit(text);
   if (!r.ok) ctx.addIssue({ code: "custom", message: r.error });
 });
-
-export const MAX_SCREENSHOTS = 6;
-export const MAX_SCREENSHOT_BYTES = 4 * 1024 * 1024;
-export const SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
 
 // A post only shows files uploaded here: an outside link would show unmoderated
 // images and tell another site's owner who is looking at them.
@@ -25,7 +22,7 @@ export const submitOutfitSchema = z.object({
   className: z.enum(CLASSES).optional(),
   armor: z.enum(ARMOR_TYPES).optional(),
   race: z.enum(Object.keys(RACE_LABEL) as [string, ...string[]]).optional(),
-  // No longer typed on the publish form; the code's own tags (Mounts, Enchants) are added on publish.
+  // No longer typed on the publish form; the database adds the code's own (mount, enchant).
   tags: z.array(z.string().trim().min(1).max(24)).max(6).default([]),
   /** The author's caption, shown with the comments. */
   description: descriptionSchema.optional(),
