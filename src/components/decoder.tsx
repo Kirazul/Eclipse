@@ -15,10 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { encodeOutfit } from "@/lib/codec/outfit";
-import { MAX_SCREENSHOT_BYTES, MAX_SCREENSHOTS, SCREENSHOT_TYPES } from "@/lib/codec/schema";
 import { WORLD_MODES, WORLD_ROWS } from "@/lib/codec/world";
-import { DESCRIPTION_MAX } from "@/lib/comments";
 import { ARMOR_LABEL, ARMOR_TYPES, CLASSES, RACE_LABEL, toCss, type ArmorType, type ClassName } from "@/lib/domain";
+import { DESCRIPTION_MAX, MAX_SCREENSHOT_BYTES, MAX_SCREENSHOTS, SCREENSHOT_TYPES } from "@/lib/limits";
 import { screenshotUrl, thumbOf } from "@/lib/screenshots";
 import { shrinkForUpload } from "@/lib/shrink-upload";
 

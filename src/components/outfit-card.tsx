@@ -1,8 +1,8 @@
 import { BadgeCheck, Copy, EyeOff } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { CopyButton } from "@/components/copy-button";
+import { HoverLink } from "@/components/hover-link";
 import { ItemRing } from "@/components/item-icon";
 import { LookMenu } from "@/components/look-menu";
 import { UpvoteButton } from "@/components/upvote-button";
@@ -61,7 +61,7 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
     <article className="corona-rim relative isolate flex flex-col overflow-hidden rounded-[8px] border border-line bg-surface transition-colors duration-[120ms] hover:bg-surface-raised">
       {/* The look's link covers the card from underneath, so the author's name can be a link of its own above it: a link inside a link is not allowed. */}
       <div className="group relative flex flex-1 flex-col">
-        <Link
+        <HoverLink
           href={`/community-gallery/${post.id}`}
           className="absolute inset-0 z-20 rounded-t-[8px] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-amber"
           aria-label={t("card.open", { title: post.title })}
@@ -109,9 +109,9 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
               <h3 className="truncate text-base leading-6 font-semibold tracking-[-0.02em] text-ink">{post.title}</h3>
               <p className="flex items-center gap-1 text-xs text-ink-faint">
                 {post.authorId && post.author ? (
-                  <Link href={`/creators/${post.authorId}`} className="relative z-30 truncate underline-offset-2 hover:text-ink hover:underline">
+                  <HoverLink href={`/creators/${post.authorId}`} className="relative z-30 truncate underline-offset-2 hover:text-ink hover:underline">
                     {post.author}
-                  </Link>
+                  </HoverLink>
                 ) : (
                   <span className="truncate">{post.author ?? t("card.itemSet")}</span>
                 )}
@@ -174,7 +174,7 @@ export function OutfitPoster({ post }: { post: OutfitPost }) {
   const copiesLabel = t("card.copies", { count: copies });
   return (
     <article className="relative">
-      <Link href={`/community-gallery/${post.id}`} className="poster group" aria-label={t("card.open", { title: post.title })}>
+      <HoverLink href={`/community-gallery/${post.id}`} className="poster group" aria-label={t("card.open", { title: post.title })}>
         {capture ? (
           <Image src={thumbOf(capture)} alt="" fill unoptimized sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" className="poster__art" />
         ) : (
@@ -225,7 +225,7 @@ export function OutfitPoster({ post }: { post: OutfitPost }) {
             </div>
           </div>
         </div>
-      </Link>
+      </HoverLink>
       {/* Stacked: side by side they overlap on a phone's two-column grid. */}
       <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1.5">
         <CopyButton code={post.code} look={post.id} />

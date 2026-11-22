@@ -1,7 +1,5 @@
 import { z } from "zod";
-
-/** The database's limit too (the look_comments migration). */
-export const COMMENT_MAX = 500;
+import { COMMENT_MAX, DESCRIPTION_MAX } from "@/lib/limits";
 
 /**
  * Text as the database stores a comment or a description: trimmed, with plain line
@@ -24,9 +22,6 @@ export const commentSchema = z
       .min(1, "Write something first.")
       .max(COMMENT_MAX, `Keep it to ${COMMENT_MAX} characters.`),
   );
-
-/** The database's limit for a look's description too (the look_description migration). */
-export const DESCRIPTION_MAX = 500;
 
 /** Optional: blank is no description at all. */
 export const descriptionSchema = z

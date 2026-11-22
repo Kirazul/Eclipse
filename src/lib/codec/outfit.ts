@@ -31,6 +31,9 @@ export interface Glow {
   colour: number;
 }
 
+/** Whether a hand wears an enchant of the look's own. Id 0 is none, and an unmanaged hand keeps whatever the weapon really has. */
+export const enchanted = (g: Glow | null): g is Glow => g !== null && g.managed && g.id > 0;
+
 export interface Tint {
   slot: number;
   item: number;

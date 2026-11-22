@@ -22,7 +22,8 @@ const { GET: callback } = await import("@/app/api/discord/linked-roles/callback/
 const { syncLinkedRoles, STATE_COOKIE } = await import("./linked-roles");
 
 /** Discord, as the code sees it: the token endpoint, who the token is, and role data. */
-let refreshRefused = false;
+/** What Discord answers a refresh with, when not a new token. */
+let refreshAnswer: (() => Response) | null = null;
 const calls: { url: string; method: string; body: string }[] = [];
 
 beforeEach(() => {
@@ -32,13 +33,13 @@ beforeEach(() => {
   links = [];
   db.length = 0;
   calls.length = 0;
-  refreshRefused = false;
+  refreshAnswer = null;
   vi.stubGlobal("fetch", async (url: string, init: RequestInit = {}) => {
     const body = init.body ? String(init.body) : "";
     calls.push({ url, method: init.method ?? "GET", body });
     if (url.endsWith("/applications/@me")) return Response.json({ id: APP });
     if (url.endsWith("/oauth2/token")) {
-      if (body.includes("refresh_token") && refreshRefused) return new Response(null, { status: 400 });
+      if (body.includes("refresh_token") && refreshAnswer) return refreshAnswer();
       return Response.json({ access_token: "fresh-access", refresh_token: "fresh-refresh", expires_in: 604800 });
     }
     if (url.endsWith("/users/@me")) return Response.json({ id: PLAYER });
@@ -117,8 +118,28 @@ describe("the daily refresh", () => {
 
   it("forgets a player who removed the connection in Discord", async () => {
     links = [link("2026-11-20T12:00:00Z")];
-    refreshRefused = true;
+    refreshAnswer = () => Response.json({ error: "invalid_grant" }, { status: 400 });
     expect(await syncLinkedRoles(NOW)).toEqual({ pushed: 0, forgotten: 1 });
     expect(db).toEqual([`forget ${PLAYER}`]);
+  });
+
+  // None of these says the player removed anything, so the connection must survive them.
+  it.each([
+    ["a rate limit", () => Response.json({ message: "slow down", retry_after: 5 }, { status: 429 })],
+    ["an outage", () => new Response("bad gateway", { status: 502 })],
+    ["our own secret being wrong", () => Response.json({ error: "invalid_client" }, { status: 401 })],
+    ["a malformed request of ours", () => Response.json({ error: "invalid_request" }, { status: 400 })],
+  ])("keeps a player through %s", async (_, answer) => {
+    links = [link("2026-11-20T12:00:00Z")];
+    refreshAnswer = answer;
+    expect(await syncLinkedRoles(NOW)).toEqual({ pushed: 0, forgotten: 0 });
+    expect(db).toEqual([]);
+  });
+
+  it("goes on to the next player when one fails", async () => {
+    links = [link("2026-11-20T12:00:00Z"), { ...link("2026-11-25T00:00:00Z"), discord_id: "708022303841058907" }];
+    refreshAnswer = () => { throw new TypeError("fetch failed"); };
+    expect(await syncLinkedRoles(NOW)).toEqual({ pushed: 1, forgotten: 0 });
+    expect(db).toEqual([]);
   });
 });

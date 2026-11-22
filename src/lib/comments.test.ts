@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { COMMENT_MAX, commentSchema } from "./comments";
+import { commentSchema } from "./comments";
+import { COMMENT_MAX } from "./limits";
 
 // What the database's check accepts (the look_comments migration): 1 to 500 characters,
 // no padding, and no control character but a line break.

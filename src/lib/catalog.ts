@@ -6,7 +6,7 @@ import mountsJson from "@/data/catalog/mounts.json";
 import placesJson from "@/data/catalog/places.json";
 import qualityJson from "@/data/catalog/quality.json";
 import { COLOUR_AXES, RACE_BY_ID, RACE_LABEL, SLOT_INV_TYPES, SLOT_NAMES, VISIBLE_SLOTS, WORLD_GROUPS, type WorldGroup } from "@/lib/domain";
-import type { Outfit } from "@/lib/codec/outfit";
+import { enchanted, type Outfit } from "@/lib/codec/outfit";
 import type { WorldPlace } from "@/lib/codec/world";
 
 // tools/export_catalog.py writes these from the Eclipse data. Numbers in a code
@@ -215,7 +215,7 @@ export function resolveOutfit(o: Outfit): ResolvedOutfit {
     mountFly: mount(o.mountFly),
     mountHidden: o.mountHidden,
     glows: o.glow.flatMap((g, i) =>
-      g ? [{ hand: HANDS[i], id: g.id, name: enchantById[g.id] ?? null, colour: g.tint ? hexColour(g.colour) : null }] : [],
+      enchanted(g) ? [{ hand: HANDS[i], id: g.id, name: enchantById[g.id] ?? null, colour: g.tint ? hexColour(g.colour) : null }] : [],
     ),
     sheathe: o.sheathe.flatMap((position, i) => (position ? [{ hand: HANDS[i], position }] : [])),
     scale: o.scale || null,

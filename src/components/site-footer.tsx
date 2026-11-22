@@ -16,12 +16,13 @@ export async function SiteFooter() {
         </Link>
         <nav aria-label={t("label")}>
           <Link href="/#features">{t("features")}</Link>
-          <Link href="/guide">{t("guide")}</Link>
+          {/* Rarely followed, and on every page: not worth fetching ahead. */}
+          <Link href="/guide" prefetch={false}>{t("guide")}</Link>
           <a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a>
           <a href={DISCORD_URL} target="_blank" rel="noopener">Discord</a>
           <a href={KOFI_URL} target="_blank" rel="noopener">Ko-fi</a>
           <DonateButton />
-          <Link href="/privacy">{t("privacy")}</Link>
+          <Link href="/privacy" prefetch={false}>{t("privacy")}</Link>
           <LanguageSwitcher className="linklike foot__lang" withName />
         </nav>
       </div>

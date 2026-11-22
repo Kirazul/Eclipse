@@ -65,11 +65,6 @@ export function titleOf(race: string | null, caption: string): string {
   return race ? `${RACE_LABEL[race]} transmog` : "Transmog";
 }
 
-/** As the publish action adds them: the Wardrobe's Mounts and Enchants filters, read from the code. */
-function codeTags(outfit: { mount: number; mountFly: number; glow: unknown[] }): string[] {
-  return [...(outfit.mount || outfit.mountFly ? ["mount"] : []), ...(outfit.glow.some(Boolean) ? ["enchant"] : [])];
-}
-
 export interface ShowcaseLook {
   messageId: string;
   discordId: string;
@@ -107,7 +102,8 @@ export function showcaseLook(
       description: caption && caption !== title ? caption : null,
       code,
       race: race && RACE_LABEL[race] ? race : null,
-      tags: codeTags(decoded.outfit),
+      // The database adds the code's own (the look_tags migration).
+      tags: [],
       createdAt: picture.timestamp,
       pictures: images(picture).slice(0, MAX_SCREENSHOTS).map((a) => a.url),
     },
