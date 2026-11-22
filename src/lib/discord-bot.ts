@@ -39,6 +39,42 @@ export async function messagesBefore(channel: string, message: string): Promise<
   return ((await res.json()) as ShowcaseMessage[]).reverse();
 }
 
+/** Up to 100 messages after this one in its channel, oldest first. Empty when Discord refuses. */
+export async function messagesAfter(channel: string, message: string): Promise<ShowcaseMessage[]> {
+  if (!isSnowflake(channel) || !isSnowflake(message)) return [];
+  const res = await bot(`/channels/${channel}/messages?after=${message}&limit=100`);
+  if (!res.ok) {
+    console.error("Discord refused what follows a showcase post:", res.status, await res.text());
+    return [];
+  }
+  return ((await res.json()) as ShowcaseMessage[]).reverse();
+}
+
+/** One message as it is now, or null when it is gone or Discord refuses. */
+export async function messageOf(channel: string, message: string): Promise<ShowcaseMessage | null> {
+  if (!isSnowflake(channel) || !isSnowflake(message)) return null;
+  const res = await bot(`/channels/${channel}/messages/${message}`);
+  return res.ok ? ((await res.json()) as ShowcaseMessage) : null;
+}
+
+/**
+ * Replies under a message as the bot. It tells whoever wrote the message, as a reply does,
+ * and pings nobody else whatever the text says. False when Discord refuses.
+ */
+export async function replyTo(channel: string, message: string, body: { content: string; components: unknown[] }): Promise<boolean> {
+  if (!isSnowflake(channel) || !isSnowflake(message)) return false;
+  const res = await bot(`/channels/${channel}/messages`, {
+    method: "POST",
+    body: JSON.stringify({
+      ...body,
+      message_reference: { message_id: message, fail_if_not_exists: true },
+      allowed_mentions: { parse: [], replied_user: true },
+    }),
+  });
+  if (!res.ok) console.error("Discord refused a reply under a post:", res.status, await res.text());
+  return res.ok;
+}
+
 /** Biggest attachment worth fetching: a phone screenshot is a few MB. */
 const MAX_DOWNLOAD = 25 * 1024 * 1024;
 

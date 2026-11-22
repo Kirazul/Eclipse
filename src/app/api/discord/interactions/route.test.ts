@@ -24,6 +24,16 @@ vi.mock("./add-to-wardrobe", () => ({
   addToWardrobe: async () => (await wait(slowMs), { content: "Added", flags: 64, allowed_mentions: { parse: [] } }),
 }));
 
+// Its own tests cover who may ask and answer; here it only answers, slowly while slowMs is set.
+let codeAnswer: unknown = null;
+vi.mock("./ask-code", () => ({
+  opensCodeForm: (id: string) => id.startsWith("code:add:"),
+  isCodeForm: (id: string) => id.startsWith("code:save:"),
+  codeForm: () => ({ type: 9, data: { custom_id: "code:save:1:2", title: "Add this look's code", components: [] } }),
+  askForCode: async () => (await wait(slowMs), { content: "Asked", flags: 64, allowed_mentions: { parse: [] } }),
+  saveCode: async () => (await wait(slowMs), codeAnswer),
+}));
+
 const { POST } = await import("./route");
 const { lookId, timing } = await import("./commands");
 const { siteUrl } = await import("@/lib/site");
@@ -441,5 +451,56 @@ describe("answering in the asker's language", () => {
   it("falls back to English for a language the site does not have", async () => {
     const reply = await answered({ ...command("help", {}), locale: "de" });
     expect((reply.embeds as { title: string }[])[0].title).toBe("Common fixes");
+  });
+});
+
+describe("asking for a look's code", () => {
+  const press = (type: number, customId: string) => ({
+    type, application_id: "app-1", token: "tok-1", data: { custom_id: customId }, message: { id: "1300000000000000009" },
+  });
+  const added = { type: 7, data: { content: "Here is the code.", components: [], allowed_mentions: { parse: [] } } };
+  const refused = { type: 4, data: { content: "That is not a code.", flags: 64, allowed_mentions: { parse: [] } } };
+
+  it("answers the right-click for the asker alone, also when it is slow", async () => {
+    const asked = { type: 2, application_id: "app-1", token: "tok-1", data: { name: "Ask for the code", type: 3, target_id: "9" } };
+    expect(await answered(asked)).toMatchObject({ content: "Asked", flags: 64 });
+    slowMs = 80;
+    expect(await (await send(asked)).json()).toEqual({ type: 5, data: { flags: 64 } });
+    await Promise.all(pending);
+    expect(edits[0].url).toContain("/messages/@original");
+  });
+
+  it("opens the form at once, however slow everything else is", async () => {
+    slowMs = 500;
+    const body = await (await send(press(3, "code:add:1:2"))).json();
+    expect(body.type).toBe(9);
+    expect(pending).toEqual([]);
+  });
+
+  it("turns the request into its answer, in time or after thinking", async () => {
+    codeAnswer = added;
+    expect(await (await send(press(5, "code:save:1:2"))).json()).toEqual(added);
+    slowMs = 80;
+    expect(await (await send(press(5, "code:save:1:2"))).json()).toEqual({ type: 6 });
+    await Promise.all(pending);
+    expect(edits).toHaveLength(1);
+    expect(edits[0]).toMatchObject({ method: "PATCH", body: { content: "Here is the code." } });
+  });
+
+  it("tells a refusal to the sender alone, leaving the request as it was", async () => {
+    codeAnswer = refused;
+    expect(await (await send(press(5, "code:save:1:2"))).json()).toEqual(refused);
+    slowMs = 80;
+    expect(await (await send(press(5, "code:save:1:2"))).json()).toEqual({ type: 6 });
+    await Promise.all(pending);
+    expect(edits).toHaveLength(1);
+    expect(edits[0]).toMatchObject({ method: "POST", body: { content: "That is not a code.", flags: 64 } });
+  });
+
+  it("answers a button or a form it does not know, privately", async () => {
+    for (const [type, id] of [[3, "other:1"], [5, "other:1"], [5, "mod:keep:look:1"]] as const) {
+      const body = await (await send(press(type, id))).json();
+      expect(body).toMatchObject({ type: 4, data: { flags: 64 } });
+    }
   });
 });

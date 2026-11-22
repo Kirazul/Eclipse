@@ -14,7 +14,8 @@ import { SCREENSHOT_TYPE } from "./compress";
 // functions in 20261120120000_discord_moderation.sql, which check who clicked. The
 // functions in 20261120150000_discord_linked_roles.sql keep connected players' Discord
 // tokens for Linked Roles, and those in 20261122150000_game_picture_budget.sql let the
-// daily sweep remove pictures nothing shows. Keep it that narrow: anything added here runs
+// daily sweep remove pictures nothing shows. 20261122160000_code_asks.sql limits how often
+// the bot asks a player for a code. Keep it that narrow: anything added here runs
 // with full power over the database.
 
 const secretKey = () => process.env.SUPABASE_SECRET_KEY ?? "";
@@ -75,6 +76,16 @@ export const importDiscordLook = (id: string, look: ShowcaseLook, gallery: strin
     shots: gallery,
     shared_at: look.createdAt,
   });
+
+/**
+ * Whether the bot may ask under a post for its code (20261122160000_code_asks.sql): "ok",
+ * "asked" when it did this week, "slow" when this person has asked under many posts.
+ */
+export const askCode = (message: string, asker: string) =>
+  call<"ok" | "asked" | "slow">("discord_ask_code", { p_message: message, p_asker: asker });
+
+/** The request was not posted after all. */
+export const unaskCode = (message: string) => call<null>("discord_unask_code", { p_message: message });
 
 /** An imported look's folder is discord/<look>: nothing else is written with this key. */
 const IMPORTED = /^discord\/[0-9a-f-]{36}\/[0-9a-f-]{36}(-thumb)?\.avif$/;

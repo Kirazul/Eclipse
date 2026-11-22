@@ -186,6 +186,29 @@
       "cannot": "This post cannot be added: {reason}.",
       "badShot": "A screenshot in this post could not be read. Try again.",
       "added": "Added to the Community Gallery: {url}"
+    },
+    "ask": {
+      "off": "Asking for codes is not switched on yet.",
+      "wrongChannel": "Codes can be asked for under posts in {channel}.",
+      "noPicture": "That post has no screenshot of a player's look.",
+      "given": "Its code is already here: {url}",
+      "own": "Add this look's code, and it joins the Community Gallery with your screenshots.",
+      "add": "Add its code",
+      "request": "**{name}** would like the code for this look. Press the button to paste it: the look joins the Community Gallery with these screenshots, credited to you.",
+      "done": "Asked. If {name} adds the code, it appears under the post and in the Community Gallery.",
+      "already": "Someone already asked for this code. If it is added, it appears under the post and in the Community Gallery.",
+      "slow": "That is a lot of asking at once. Try again in an hour.",
+      "cannotPost": "The bot could not post under that look. Try again later.",
+      "notYours": "Only the player who posted this look can add its code.",
+      "formTitle": "Add this look's code",
+      "codeLabel": "Eclipse code",
+      "codeHint": "In the game, press Share on the loadout, then paste what it copied here.",
+      "titleLabel": "Title (optional)",
+      "titleHint": "Left empty, the look takes its name from your post or its race.",
+      "badCode": "That is not an Eclipse loadout code. Press Share on the loadout in the game, and paste what it copies.",
+      "shortTitle": "Give the title at least 3 letters, or leave it empty.",
+      "postGone": "That post is gone, so its look cannot be added.",
+      "added": "Here is the code. The look is in the Community Gallery: [{title}]({url})"
     }
   },
   "layout": {
@@ -544,8 +567,9 @@
           "p1": "Service providers host the website and store accounts, looks and screenshots for us.",
           "p2": "Discord handles signing in, under its own privacy policy.",
           "p3": "When a look is reported, moderators get a message on Discord naming the look and the reason, but not who reported it.",
-          "p4": "Links to downloads, code and donations take you to other sites, which have their own policies.",
-          "p5": "We do not sell your data or use it for advertising."
+          "p4": "When you ask a player for a look's code on Discord, the bot says under their post that you asked. We keep a scrambled fingerprint of your Discord account with that post, so that nobody can flood players with requests.",
+          "p5": "Links to downloads, code and donations take you to other sites, which have their own policies.",
+          "p6": "We do not sell your data or use it for advertising."
         }
       },
       "control": {

@@ -1,6 +1,8 @@
 import { after } from "next/server";
+import { codeForm, isCodeForm, opensCodeForm, saveCode } from "./ask-code";
 import { EPHEMERAL, answer, isQuiet, quickReply, suggest, timing, type Interaction, type Reply } from "./commands";
-import { isModeration, moderate, opensMessage, type ClickAnswer } from "./moderate";
+import { isModeration, moderate, opensMessage } from "./moderate";
+import { MESSAGE, type ClickAnswer } from "./reply";
 import { translator } from "./t";
 import { verifyDiscord } from "./verify";
 
@@ -13,8 +15,8 @@ const PING = 1;
 const COMMAND = 2;
 const CLICK = 3;
 const AUTOCOMPLETE = 4;
+const SUBMIT = 5;
 const PONG = 1;
-const MESSAGE = 4;
 const DEFERRED = 5;
 const DEFERRED_UPDATE = 6;
 const CHOICES = 8;
@@ -58,12 +60,15 @@ async function followUp(interaction: Interaction, reply: Reply) {
   if (!res.ok) console.error("Discord refused a click's answer:", res.status, await res.text());
 }
 
-/** A button on a report alert. Same three seconds, same "thinking" when slower. */
+/** A clicked button, or a form it opened. Same three seconds, same "thinking" when slower. */
 async function click(interaction: Interaction): Promise<Response> {
   const id = interaction.data?.custom_id ?? "";
+  // A form is only ever a click's first answer.
+  if (interaction.type === CLICK && opensCodeForm(id)) return Response.json(codeForm(interaction));
   const broke: ClickAnswer = { type: MESSAGE, data: { ...failed(interaction), flags: EPHEMERAL } };
-  const work = isModeration(id)
-    ? moderate(interaction).catch((error) => {
+  const act = interaction.type === SUBMIT ? (isCodeForm(id) ? saveCode : null) : isModeration(id) ? moderate : null;
+  const work = act
+    ? act(interaction).catch((error) => {
       console.error("A Discord button failed:", error);
       return broke;
     })
@@ -102,7 +107,7 @@ export async function POST(request: Request) {
     const choices = await Promise.race([suggest(interaction.data, interaction.locale).catch(() => []), none]);
     return Response.json({ type: CHOICES, data: { choices } });
   }
-  if (interaction.type === CLICK && interaction.data?.custom_id) return click(interaction);
+  if ((interaction.type === CLICK || interaction.type === SUBMIT) && interaction.data?.custom_id) return click(interaction);
   if (interaction.type !== COMMAND || !interaction.data) return new Response(null, { status: 400 });
 
   const quick = quickReply(interaction);

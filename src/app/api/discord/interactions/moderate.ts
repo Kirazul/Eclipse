@@ -4,20 +4,11 @@ import {
 } from "@/lib/data/admin";
 import { NO_MENTIONS, plain } from "@/lib/discord";
 import { bot, botConfigured, isSnowflake } from "@/lib/discord-bot";
-import { EPHEMERAL, say, type Interaction, type Reply } from "./reply";
+import { EPHEMERAL, MESSAGE, UPDATE, say, type ClickAnswer, type Interaction, type Reply } from "./reply";
 
 // The Keep and Delete… buttons on report alerts in the moderators' channel
 // (src/lib/moderation-alert.ts). Delete asks first, in a message only the moderator
 // sees. The database checks that the clicking Discord account is a site moderator's.
-
-const MESSAGE = 4;
-const UPDATE = 7;
-
-/** MESSAGE answers with a new message; UPDATE changes the one the button is on. */
-export interface ClickAnswer {
-  type: typeof MESSAGE | typeof UPDATE;
-  data: Reply;
-}
 
 /**
  * keep and ask sit on the alert (reportButtons in src/lib/moderation-alert.ts); delete
