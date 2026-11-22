@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { SCREENSHOT_BUCKET, thumbOf } from "@/lib/screenshots";
+import { SCREENSHOT_BUCKET, thumbOf, UPLOAD_PATH } from "@/lib/screenshots";
 import type { ShowcaseLook } from "@/lib/showcase-post";
 import { supabaseUrl } from "@/lib/supabase/config";
 import { SCREENSHOT_TYPE } from "./compress";
@@ -13,8 +13,9 @@ import { SCREENSHOT_TYPE } from "./compress";
 // count (20261119090000_look_copies.sql). Moderators also act from Discord through the
 // functions in 20261120120000_discord_moderation.sql, which check who clicked. The
 // functions in 20261120150000_discord_linked_roles.sql keep connected players' Discord
-// tokens for Linked Roles. Keep it that narrow: anything added here runs with full power
-// over the database.
+// tokens for Linked Roles, and those in 20261122150000_game_picture_budget.sql let the
+// daily sweep remove pictures nothing shows. Keep it that narrow: anything added here runs
+// with full power over the database.
 
 const secretKey = () => process.env.SUPABASE_SECRET_KEY ?? "";
 
@@ -138,3 +139,25 @@ export const discordLinkTokens = (player: string, access: string, refresh: strin
   call<null>("discord_link_tokens", { player, access, refresh, expires });
 
 export const discordLinkForget = (player: string) => call<null>("discord_link_forget", { player });
+
+/** More batches than a day should ever leave, so a fault cannot keep this going. */
+const SWEEP_BATCHES = 20;
+
+/**
+ * Removes the files of game pictures no set or look shows any more, and says how many.
+ * The paths are the database's own, and a picture is forgotten only once its file is gone.
+ */
+export async function sweepGamePictures(): Promise<number> {
+  let removed = 0;
+  for (let batch = 0; batch < SWEEP_BATCHES; batch++) {
+    const paths = (await call<string[] | null>("game_shot_sweep")) ?? [];
+    if (!paths.length) break;
+    const odd = paths.find((path) => !UPLOAD_PATH.test(path));
+    if (odd) throw new Error(`Not a game picture: ${odd}`);
+    const { error } = await admin().storage.from(SCREENSHOT_BUCKET).remove(paths.flatMap((path) => [path, thumbOf(path)]));
+    if (error) throw new Error(`Sweeping pictures: ${error.message}`);
+    await call<null>("game_shot_swept", { p_paths: paths });
+    removed += paths.length;
+  }
+  return removed;
+}

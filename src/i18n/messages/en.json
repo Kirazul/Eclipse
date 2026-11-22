@@ -495,18 +495,19 @@
       "visiting": {
         "title": "If you only visit",
         "points": {
-          "p1": "You do not need an account. The site has no ads, no analytics and no tracking cookies.",
-          "p2": "Our hosting provider handles each request, and that includes your IP address and browser details.",
-          "p3": "When you copy a look's code, we count it once per visitor. We keep only a scrambled fingerprint of your IP address, browser and that look, which cannot be turned back into your address.",
-          "p4": "The site remembers that you have seen the support message, in your browser only, until you close the tab."
+          "p1": "You do not need an account. The site has no ads and no tracking cookies.",
+          "p2": "We count page views to see which pages are used: the page, the site that linked to it, roughly where in the world it was opened, and the kind of device and browser. Searches, codes and anything else after the page's address are left out. The count uses no cookies, and what tells one visitor from another is thrown away after a day.",
+          "p3": "Our hosting provider handles each request, and that includes your IP address and browser details.",
+          "p4": "When you copy a look's code, we count it once per visitor. We keep only a scrambled fingerprint of your IP address, browser and that look, which cannot be turned back into your address.",
+          "p5": "Your browser remembers that you have seen the support message, and which language you chose."
         }
       },
       "account": {
         "title": "If you sign in",
         "points": {
           "p1": "You sign in with Discord. We never see your password.",
-          "p2": "Discord gives us your email address, your name or username, your profile picture and an account ID. These stay private.",
-          "p3": "Your profile picture appears only to you, in your account menu.",
+          "p2": "Discord gives us your email address, your name or username, your profile picture and an account ID. Your email address stays private.",
+          "p3": "Your profile picture is public, beside your looks, comments and profile. The picture's address on Discord contains your Discord account ID.",
           "p4": "Your Discord username is your public name until you change it.",
           "p5": "Cookies keep you signed in and return you to the page you were on.",
           "p6": "If you connect Discord roles, we keep a Discord token that can only report your public name, looks and upvotes to the Eclipse server's roles. It ends when you remove the connection in Discord."
@@ -516,8 +517,9 @@
         "title": "If you link your game",
         "points": {
           "p1": "Linking is optional. A linked game copies your saved loadouts here so you can see them, restore them on another PC and send looks to them.",
-          "p2": "We store each loadout's name, icon and code, and the character and realm that last synced, with the time. These stay private to your account.",
-          "p3": "A loadout becomes public only if you publish it yourself."
+          "p2": "We store each loadout's name, icon, code and pictures, and the character and realm that last synced, with the time. Only your account lists them.",
+          "p3": "Newer versions of the overlay take a picture of a loadout when its look changes and send it here. It can show your character's name and title. Nothing on the site shows it to anyone else until you publish the loadout, but it is stored at a long, random address, and anyone who has that address can open it. Unlinking your game stops new pictures, and removing a loadout deletes its pictures.",
+          "p4": "A loadout becomes public only if you publish it yourself."
         }
       },
       "updates": {
@@ -529,7 +531,7 @@
       "public": {
         "title": "What is public",
         "points": {
-          "p1": "Your public name, and any look you publish with its title, code, tags and screenshots. Anyone can see these without an account.",
+          "p1": "Your public name and profile picture, any look you publish with its title, description, code, tags and screenshots, and your comments. Anyone can see these without an account.",
           "p2": "How many votes and copies a look has. Which looks you voted for or copied stays private.",
           "p3": "Your bookmarks, which only you can see.",
           "p4": "Any report you send, with its reason. Only moderators see who reported a look.",
@@ -750,6 +752,7 @@
     "pictureAlt": "{name}, picture {index}",
     "ready": "Ready to publish",
     "readyLead": "Pictures your game sent wait here, private to you, until you publish their look to the Community Gallery.",
+    "picturesFull": "Your game has {max} pictures waiting here, as many as it can. Publish or remove some, and new looks get pictures again.",
     "publish": "Publish",
     "published": "Your Published Loadouts",
     "seeAll": "See all {count}",
