@@ -4,7 +4,9 @@ The official site for the Eclipse overlay: landing page, the Community Gallery (
 
 This repo is public. Keep secrets, project IDs and personal details out of commits and this file.
 
-`.notes/GOALS.md` (product intent) and `.notes/TASKS.md` (open work) are local notes, linked in from the private dev-notes repo and excluded from git. They can lag the code, so confirm a claim against the code before acting on it.
+`.notes/` holds local notes (product intent in `GOALS.md`, open work in `TASKS.md`, past prompts), linked in from the private dev-notes repo and excluded from git. The index below loads every session; open a note only when the task needs it. Notes can lag the code, so confirm a claim against the code before acting on it.
+
+@.notes/README.md
 
 ## Verify
 
