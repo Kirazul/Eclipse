@@ -64,5 +64,12 @@
     "integration_types": [0],
     "contexts": [0],
     "name_localizations": { "ru": "Добавить в Галерею сообщества" }
+  },
+  {
+    "name": "Ask for the code",
+    "type": 3,
+    "integration_types": [0],
+    "contexts": [0],
+    "name_localizations": { "ru": "Попросить код" }
   }
 ]

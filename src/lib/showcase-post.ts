@@ -1,6 +1,6 @@
 import "server-only";
 import { resolveOutfit } from "@/lib/catalog";
-import { decodeOutfit } from "@/lib/codec/outfit";
+import { decodeOutfit, type Outfit } from "@/lib/codec/outfit";
 import { RACE_LABEL } from "@/lib/domain";
 
 // How a post in the Discord showcase becomes a Wardrobe look. Shared by the bulk
@@ -79,6 +79,59 @@ export interface ShowcaseLook {
   pictures: string[];
 }
 
+/** A picture, its code and its player, as a look. `messageId` is the message the code came from or was asked under. */
+function lookOf(
+  { messageId, player, picture, code, outfit, caption, title, createdAt }: {
+    messageId: string; player: ShowcaseMessage["author"]; picture: ShowcaseMessage; code: string; outfit: Outfit;
+    caption: string; title?: string | null; createdAt: string;
+  },
+): ShowcaseLook {
+  const race = resolveOutfit(outfit).raceKey;
+  const named = title || titleOf(race, caption);
+  return {
+    messageId,
+    discordId: player.id,
+    name: (player.global_name ?? player.username).slice(0, 40),
+    title: named,
+    description: caption && caption !== named ? caption : null,
+    code,
+    race: race && RACE_LABEL[race] ? race : null,
+    // The database adds the code's own (the look_tags migration).
+    tags: [],
+    createdAt,
+    pictures: images(picture).slice(0, MAX_SCREENSHOTS).map((a) => a.url),
+  };
+}
+
+/** A later message by the picture's own player that gives its code. */
+export function codeAfter(picture: ShowcaseMessage, later: ShowcaseMessage[]): ShowcaseMessage | null {
+  const channel = [picture, ...later];
+  const byId = new Map(channel.map((m) => [m.id, m]));
+  return later.find((m, i) =>
+    m.author.id === picture.author.id && codeIn(m.content) !== null
+    && pictureFor(m, byId, channel.slice(0, i + 1))?.id === picture.id) ?? null;
+}
+
+/**
+ * The look of a picture whose player gave its code through the bot. It is dated when the code
+ * was given, not when the picture was posted: that is when the look joins the Gallery.
+ */
+export function lookWithCode(
+  picture: ShowcaseMessage, text: string, title: string | null, at: string,
+): { ok: true; look: ShowcaseLook } | { ok: false; why: "code" | "picture" } {
+  if (picture.author.bot || !images(picture).length) return { ok: false, why: "picture" };
+  const code = codeIn(text);
+  const decoded = code ? decodeOutfit(code) : null;
+  if (!code || !decoded?.ok) return { ok: false, why: "code" };
+  return {
+    ok: true,
+    look: lookOf({
+      messageId: picture.id, player: picture.author, picture, code, outfit: decoded.outfit,
+      caption: said(picture).slice(0, 500).trim(), title, createdAt: at,
+    }),
+  };
+}
+
 /** The look a code message makes, or why it makes none. */
 export function showcaseLook(
   m: ShowcaseMessage, byId: Map<string, ShowcaseMessage>, messages: ShowcaseMessage[],
@@ -90,22 +143,8 @@ export function showcaseLook(
   const picture = pictureFor(m, byId, messages);
   if (!picture) return { ok: false, reason: "it has no screenshot of the player's own" };
   const caption = [said(picture), picture === m ? "" : said(m)].filter(Boolean).join("\n").slice(0, 500).trim();
-  const race = resolveOutfit(decoded.outfit).raceKey;
-  const title = titleOf(race, caption);
   return {
     ok: true,
-    look: {
-      messageId: m.id,
-      discordId: m.author.id,
-      name: (m.author.global_name ?? m.author.username).slice(0, 40),
-      title,
-      description: caption && caption !== title ? caption : null,
-      code,
-      race: race && RACE_LABEL[race] ? race : null,
-      // The database adds the code's own (the look_tags migration).
-      tags: [],
-      createdAt: picture.timestamp,
-      pictures: images(picture).slice(0, MAX_SCREENSHOTS).map((a) => a.url),
-    },
+    look: lookOf({ messageId: m.id, player: m.author, picture, code, outfit: decoded.outfit, caption, createdAt: picture.timestamp }),
   };
 }

@@ -6,6 +6,7 @@ import { HELP_IDS } from "@/lib/help";
 import { codeIn } from "@/lib/showcase-post";
 import { siteUrl } from "@/lib/site";
 import { addToWardrobe } from "./add-to-wardrobe";
+import { askForCode } from "./ask-code";
 import { decodeReply } from "./decode";
 import { itemAnswer, suggestItems } from "./item";
 import { MESSAGE_COMMAND, say, type CommandData, type Interaction, type Reply } from "./reply";
@@ -107,6 +108,7 @@ const DECODE_MESSAGE = "Decode Eclipse code";
 // The Wardrobe became the Community Gallery. Discord keeps showing a renamed command
 // under its old name until each client refreshes, so both names still answer.
 const ADD_TO_GALLERY = ["Add to Community Gallery", "Add to Wardrobe"];
+const ASK_FOR_CODE = "Ask for the code";
 const SEARCH = ["gallery", "wardrobe"];
 
 /** A right-click answers the asker alone, so it never fills a channel. */
@@ -125,7 +127,7 @@ export function quickReply(interaction: Interaction): Reply | null {
     const code = codeIn(target(data)?.content ?? "");
     return code ? decodeReply(code, { quiet: true, t }) : say(t("bot.decode.noCode"));
   }
-  if (!["look", ...SEARCH, ...ADD_TO_GALLERY].includes(data.name)) return say(t("bot.gone"));
+  if (!["look", ...SEARCH, ...ADD_TO_GALLERY, ASK_FOR_CODE].includes(data.name)) return say(t("bot.gone"));
   return null;
 }
 
@@ -134,6 +136,7 @@ export async function answer(interaction: Interaction): Promise<Reply> {
   const data = interaction.data!;
   const t = translator(interaction.locale);
   if (ADD_TO_GALLERY.includes(data.name)) return addToWardrobe(interaction, t);
+  if (data.name === ASK_FOR_CODE) return askForCode(interaction, t);
   if (SEARCH.includes(data.name)) return searchReply(option(data, "search"), t);
   const id = lookId(option(data, "look"));
   const post = id ? await repository.getOutfit(id) : null;
