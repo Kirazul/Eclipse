@@ -81,10 +81,10 @@ A complete look fits in one short code, such as `ECA1:…`. This website is wher
 
 ```mermaid
 flowchart LR
-    game["Eclipse in game"] -- "Share" --> code["Code<br/>ECA1:…"]
-    code -- "Import · Publish" --> site["Community Gallery"]
-    site -- "Copy code · Send to game" --> game
-    room["Dressing room"] -- "Copy code" --> code
+    game["Eclipse in game"] -->|Share| code["Look code"]
+    code -->|Import and publish| site["Community Gallery"]
+    site -->|Copy code or Send to game| game
+    room["Dressing room"] -->|Copy code| code
 ```
 
 ## Share codes
