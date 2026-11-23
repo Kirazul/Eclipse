@@ -79,13 +79,9 @@ A complete look fits in one short code, such as `ECA1:…`. This website is wher
 
 ## How a look travels
 
-```mermaid
-flowchart LR
-    game["Eclipse in game"] -->|Share| code["Look code"]
-    code -->|Import and publish| site["Community Gallery"]
-    site -->|Copy code or Send to game| game
-    room["Dressing room"] -->|Copy code| code
-```
+1. **Share** on the Loadout page in game copies the look as a code.
+2. **Import** on the site shows every piece the code holds. **Publish** adds it to the Community Gallery with screenshots from your game.
+3. Another player finds it, presses **Copy code** or **Send to game**, and wears it. The Dressing room makes codes too, so a look can start on the site.
 
 ## Share codes
 
