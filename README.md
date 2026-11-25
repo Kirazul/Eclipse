@@ -319,7 +319,7 @@ code for every address.
 
 ### seolyam
 
-[seolyam](https://github.com/seolyam) co-maintains Eclipse and wrote its
+[seolyam](https://github.com/seolyam) co-develops Eclipse and wrote its
 [website](https://github.com/seolyam/eclipse-web).
 
 - **[Ko-fi](https://ko-fi.com/seolyam)** - support seolyam's work on Eclipse.
