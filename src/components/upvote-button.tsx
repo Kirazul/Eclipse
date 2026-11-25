@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 // One reader for the whole page, so every card's button shares one request.
 const hasVoted = voteReader(votedLooks, () => SESSION_COOKIE.test(document.cookie));
 
-export function UpvoteButton({ id, count, className }: { id: string; count: number; className?: string }) {
+/** With `hideZero`, as on a card, the count shows once there is one: a row of zeros says nothing. */
+export function UpvoteButton({ id, count, className, hideZero = false }: { id: string; count: number; className?: string; hideZero?: boolean }) {
   const t = useTranslations("upvote");
   const locale = useLocale();
   const [voted, setVoted] = useState(false);
@@ -74,7 +75,7 @@ export function UpvoteButton({ id, count, className }: { id: string; count: numb
       )}
     >
       <ArrowBigUp className="size-4" strokeWidth={1.5} fill={voted ? "currentColor" : "none"} />
-      {shown.toLocaleString(locale)}
+      {(shown > 0 || !hideZero) && shown.toLocaleString(locale)}
     </button>
   );
 }

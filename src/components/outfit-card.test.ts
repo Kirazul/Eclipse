@@ -25,7 +25,10 @@ const POST: OutfitPost = {
   gallery: ["https://example.test/capture.webp"],
 };
 
-const render = (post: OutfitPost) => renderToStaticMarkup(createElement(OutfitPoster, { post }));
+const render = (post: OutfitPost, eager?: boolean) => renderToStaticMarkup(createElement(OutfitPoster, { post, eager }));
+
+/** The opening tag of the look's own capture. */
+const captureTag = (html: string) => html.match(/<img[^>]*capture-thumb\.webp[^>]*>/)?.[0] ?? "";
 
 describe("a Showcase poster", () => {
   it("can be voted on where it is seen, beside its code", () => {
@@ -38,6 +41,23 @@ describe("a Showcase poster", () => {
     const html = render({ ...POST, upvotes: null });
     expect(html).not.toContain("Upvote");
     expect(html).toContain('aria-label="Copy code"');
+  });
+
+  it("shows its upvotes once it has some, and the button alone before that", () => {
+    expect(render(POST)).toMatch(/<\/svg>12<\/button>/);
+    const html = render({ ...POST, upvotes: 0 });
+    expect(html).toContain('aria-label="Upvote, 0 votes"');
+    expect(html).not.toMatch(/<\/svg>0<\/button>/);
+  });
+
+  it("crops its capture from the top, where the head is", () => {
+    expect(captureTag(render(POST))).toContain("object-top");
+  });
+
+  it("loads the first posters at once and the rest when scrolled to", () => {
+    expect(captureTag(render(POST, true))).not.toContain('loading="lazy"');
+    expect(captureTag(render(POST, true))).toContain('fetchPriority="high"');
+    expect(captureTag(render(POST))).toContain('loading="lazy"');
   });
 });
 
@@ -83,6 +103,17 @@ describe("a Community Gallery card", () => {
     expect(html).toContain("Made for raid night");
     expect(html).toContain(">Armor<");
     expect(card({ ...POST, categories: [] })).not.toContain("group-hover:opacity-100");
+  });
+
+  it("shows its upvotes once it has some, and the button alone before that", () => {
+    expect(card(POST)).toMatch(/<\/svg>12<\/button>/);
+    const html = card({ ...POST, upvotes: 0 });
+    expect(html).toContain('aria-label="Upvote, 0 votes"');
+    expect(html).not.toMatch(/<\/svg>0<\/button>/);
+  });
+
+  it("crops its capture from the top, where the head is", () => {
+    expect(captureTag(card(POST))).toContain("object-top");
   });
 
   it("labels a private look, and only a private one", () => {

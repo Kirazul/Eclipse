@@ -76,7 +76,8 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
           )}
           {capture ? (
             // The capture stands alone at rest; only hover lays the caption over it.
-            <Image src={thumbOf(capture)} alt="" fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
+            // Cropped from the top, where the head is.
+            <Image src={thumbOf(capture)} alt="" fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover object-top" />
           ) : (
             <>
               {/* An image rather than a CSS background, so cards below the fold fetch theirs only when scrolled to. */}
@@ -138,7 +139,7 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
         </div>
       </div>
       <div className="flex items-center gap-2 px-4 pb-4">
-        {post.upvotes !== null && <UpvoteButton id={post.id} count={post.upvotes} />}
+        {post.upvotes !== null && <UpvoteButton id={post.id} count={post.upvotes} hideZero />}
         <CopyButton code={post.code} look={post.id} className="ml-auto" />
         {manage && (
           <LookMenu
@@ -160,7 +161,7 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
  * Hover (or keyboard focus) slides up what the author wrote, the remaining details, who made it, its copies and when.
  * A look with no capture gets its crest on a backdrop, so a grid lines up either way.
  */
-export function OutfitPoster({ post }: { post: OutfitPost }) {
+export function OutfitPoster({ post, eager = false }: { post: OutfitPost; eager?: boolean }) {
   const t = useTranslations();
   const locale = useLocale();
   const resolved = resolve(post);
@@ -176,7 +177,8 @@ export function OutfitPoster({ post }: { post: OutfitPost }) {
     <article className="relative">
       <HoverLink href={`/community-gallery/${post.id}`} className="poster group" aria-label={t("card.open", { title: post.title })}>
         {capture ? (
-          <Image src={thumbOf(capture)} alt="" fill unoptimized sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" className="poster__art" />
+          // Cropped from the top, where the head is. The Gallery's first row is its largest picture, so it loads at once.
+          <Image src={thumbOf(capture)} alt="" fill unoptimized priority={eager} fetchPriority={eager ? "high" : undefined} sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" className="poster__art object-top" />
         ) : (
           <>
             <Image src={cardBackdropFor(post.id)} alt="" aria-hidden fill unoptimized loading="lazy" sizes="25vw" className="poster__art opacity-40" />
@@ -229,7 +231,7 @@ export function OutfitPoster({ post }: { post: OutfitPost }) {
       {/* Stacked: side by side they overlap on a phone's two-column grid. */}
       <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1.5">
         <CopyButton code={post.code} look={post.id} />
-        {post.upvotes !== null && <UpvoteButton id={post.id} count={post.upvotes} className="bg-surface/85 text-ink backdrop-blur-sm" />}
+        {post.upvotes !== null && <UpvoteButton id={post.id} count={post.upvotes} hideZero className="bg-surface/85 text-ink backdrop-blur-sm" />}
       </div>
     </article>
   );
