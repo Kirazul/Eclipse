@@ -388,3 +388,45 @@ describe("the website's own writes", () => {
     expect(r.sets).toEqual([{ name: "Dreadful", icon: "", code: null, rev: 2 }]);
   });
 });
+
+describe("the character a set was saved on", () => {
+  const CHARACTER = migration("20261125160000_game_set_character.sql");
+  const mark = (token: string, names: string[], cls: string | null, race: string | null) =>
+    call<number>("anon", null, "public.game_set_character($1, $2, $3, $4)", [token, names, cls, race]);
+  const bodies = async () =>
+    (await db.query<{ name: string; class_name: string | null; race: string | null }>(
+      "select name, class_name, race from public.game_sets order by name",
+    )).rows;
+
+  beforeEach(async () => {
+    await db.exec(CHARACTER);
+    await link(ME, TOKEN);
+    await link(STRANGER, STRANGER_TOKEN);
+    await sync(TOKEN, 0, [put("Raid", "ECA1:AAAA"), put("Town", "ECA1:BBBB")]);
+  });
+
+  it("marks the sets a sync just saved, by name without case", async () => {
+    expect(await mark(TOKEN, ["raid"], "Mage", "gnome")).toBe(1);
+    expect(await bodies()).toEqual([
+      { name: "Raid", class_name: "Mage", race: "gnome" },
+      { name: "Town", class_name: null, race: null },
+    ]);
+  });
+
+  it("never touches another player's sets, or anything for a token it does not know", async () => {
+    expect(await mark(STRANGER_TOKEN, ["Raid"], "Warrior", "orc")).toBe(0);
+    expect(await mark(OTHER_PC, ["Raid"], "Warrior", "orc")).toBe(0);
+    expect((await bodies()).every((s) => s.class_name === null)).toBe(true);
+  });
+
+  it("refuses a class or race that is not the game's", async () => {
+    await expect(mark(TOKEN, ["Raid"], "Bard", "gnome")).rejects.toThrow();
+    await expect(mark(TOKEN, ["Raid"], "Mage", "Gnome; drop")).rejects.toThrow();
+  });
+
+  it("is the game's alone to call", async () => {
+    await expect(
+      as("authenticated", ME, () => db.query("select public.game_set_character($1, $2, $3, $4)", [TOKEN, ["Raid"], "Mage", "gnome"])),
+    ).rejects.toThrow();
+  });
+});
