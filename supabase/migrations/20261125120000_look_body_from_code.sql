@@ -3,8 +3,9 @@
 -- actually gives. Until now race was the author's pick on the publish form and the
 -- import's reading of the code for Discord looks, and nothing gave a look's body.
 --
--- The live code still sends a race; the trigger replaces it, so it runs on this unchanged.
--- A look whose code changes no race (armor alone) has none, as copying it gives none.
+-- The code wins only when it carries a race: a look whose code changes no race (armor
+-- alone) keeps the race its author picked, or the one it already had. The live code still
+-- sends the author's pick, so it runs on this unchanged.
 --
 -- Mirrors the decoder (readLook and parseOutfit in src/lib/codec/outfit.ts) and the race
 -- keys of src/lib/domain.ts, and look-body-sql.test.ts runs every code the game wrote
@@ -56,18 +57,20 @@ language plpgsql set search_path = '' as $$
 declare
   body text[] := private.code_body(new.code);
 begin
-  new.race := body[1];
-  new.sex := body[2];
+  -- A code with no look line, or a race the site has no key for, leaves the row's own value.
+  new.race := coalesce(body[1], new.race);
+  new.sex := coalesce(body[2], new.sex);
   return new;
 end;
 $$;
 
--- As with categories and tags: whatever a client writes to race or sex, the code decides.
+-- As with categories and tags, a client cannot overrule what the code says.
 create trigger set_outfit_body before insert or update of code, race, sex on public.outfits
   for each row execute function private.set_outfit_body();
 
--- Put the looks already there right. Only this trigger fires: the others watch other columns.
-update public.outfits set race = race;
+-- Put right the looks whose code carries a race; the others keep theirs. Only this trigger
+-- fires: the others watch other columns.
+update public.outfits set race = race where private.code_body(code) is not null;
 
 create index outfits_sex_idx on public.outfits (sex) where sex is not null;
 

@@ -54,6 +54,7 @@ beforeAll(async () => {
       is_private boolean not null default false, category text, tags text[] not null default '{}'
     );
     insert into public.outfits (code, race) values ('${code("rlook vulpera f 1 2 3\n")}', 'human');
+    insert into public.outfits (code, race) values ('${code("slot 0 231001\n")}', 'human');
   `);
   // For private.code_text, which reads a code as the decoder does.
   await db.exec(migration("20261110090000_look_categories.sql"));
@@ -82,22 +83,32 @@ describe("a look's race and body in the database", () => {
     }
   });
 
-  it("cannot be claimed by an author, on a new look or a changed one", async () => {
-    const made = await insert(code("slot 0 231001\n"), "human");
-    expect(made.race).toBeNull();
+  it("come from the code over a different race the author picked", async () => {
+    const made = await insert(code("rlook bloodelf f\n"), "human");
+    expect(made).toMatchObject({ race: "bloodelf", sex: "female" });
     const claimed = await db.query<{ race: string | null; sex: string | null }>(
-      "update public.outfits set race = 'orc', sex = 'female' where id = $1 returning race, sex", [made.id],
+      "update public.outfits set race = 'orc', sex = 'male' where id = $1 returning race, sex", [made.id],
     );
-    expect(claimed.rows[0]).toEqual({ race: null, sex: null });
-    const changed = await db.query<{ race: string | null; sex: string | null }>(
-      "update public.outfits set code = $1 where id = $2 returning race, sex", [code("rlook bloodelf f\n"), made.id],
-    );
-    expect(changed.rows[0]).toEqual({ race: "bloodelf", sex: "female" });
+    expect(claimed.rows[0]).toEqual({ race: "bloodelf", sex: "female" });
   });
 
-  it("are put right on the looks already there", async () => {
-    const { rows } = await db.query<{ race: string; sex: string }>("select race, sex from public.outfits where id = 1");
-    expect(rows[0]).toEqual({ race: "vulpera", sex: "female" });
+  it("keep the author's race when the code carries none", async () => {
+    const made = await insert(code("slot 0 231001\n"), "human");
+    expect(made).toMatchObject({ race: "human", sex: null });
+    const changed = await db.query<{ race: string | null; sex: string | null }>(
+      "update public.outfits set code = $1 where id = $2 returning race, sex", [code("rlook vulpera m\n"), made.id],
+    );
+    expect(changed.rows[0]).toEqual({ race: "vulpera", sex: "male" });
+  });
+
+  it("are put right on the looks already there only where the code carries a race", async () => {
+    const { rows } = await db.query<{ id: number; race: string; sex: string | null }>(
+      "select id, race, sex from public.outfits where id in (1, 2) order by id",
+    );
+    expect(rows).toEqual([
+      { id: 1, race: "vulpera", sex: "female" },
+      { id: 2, race: "human", sex: null },
+    ]);
   });
 });
 

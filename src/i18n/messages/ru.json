@@ -830,6 +830,7 @@
     "title": "Название",
     "class": "Класс",
     "armor": "Броня",
+    "race": "Раса",
     "description": "Описание <optional>(необязательно)</optional>",
     "inspired": "Что вас вдохновило?",
     "openIt": "Открыть",
