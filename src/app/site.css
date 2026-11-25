@@ -519,6 +519,27 @@
 .slink__text strong { font-weight: 600; }
 .slink__text > span { font-size: 0.85rem; color: var(--ink-dim); }
 .slink__short { display: none; }
+
+/* seolyam's own ways, under Kirazul's: a Ko-fi and a GCash code. */
+.backer { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+.backer__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.6rem; margin-bottom: 1rem; }
+.backer__head strong { font-weight: 600; }
+.backer__head span { font-size: 0.9rem; color: var(--ink-dim); }
+.backer__ways { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: start; }
+.gcash {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.gcash__qr { flex: none; width: 12rem; aspect-ratio: 1; padding: 0.5rem; border-radius: 0.6rem; background: #fff; }
+.gcash__qr img { width: 100%; height: 100%; }
+.gcash__text { display: grid; gap: 0.25rem; }
+.gcash__text strong { font-weight: 600; }
+.gcash__text span { font-size: 0.85rem; color: var(--ink-dim); }
 .slink__arrow { margin-left: auto; width: 1.05rem; height: 1.05rem; color: var(--ink-faint); transition: transform 0.2s var(--ease), color 0.2s var(--ease); }
 .slink:hover .slink__arrow { transform: translateX(3px); color: var(--ink); }
 
@@ -607,6 +628,8 @@
 @media (max-width: 860px) {
   .download { grid-template-columns: 1fr; gap: 2rem; }
   .support { grid-template-columns: 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
+  .backer__ways { grid-template-columns: 1fr; gap: 0.6rem; }
+  .gcash__qr { width: 9.5rem; }
 
   /* Small screens scroll by touch; the bar itself is noise. */
   html { scrollbar-width: none; }
