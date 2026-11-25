@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://kirazul.github.io/Eclipse/"><img alt="Website" src="https://img.shields.io/badge/Website-kirazul.github.io%2FEclipse-f7c34a?style=for-the-badge"></a>
+  <a href="https://eclipsewow.vercel.app"><img alt="Website" src="https://img.shields.io/badge/Website-eclipsewow.vercel.app-f7a541?style=for-the-badge"></a>
   <a href="https://discord.gg/RvY5VjHgTA"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
   <a href="https://ko-fi.com/eclipsewow"><img alt="Ko-fi" src="https://img.shields.io/badge/Ko--fi-Support-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white"></a>
   <a href="https://github.com/Kirazul/Eclipse/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Kirazul/Eclipse?style=for-the-badge&color=ff8a2a"></a>
@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  <a href="https://kirazul.github.io/Eclipse/"><strong>Website</strong></a>
+  <a href="https://eclipsewow.vercel.app"><strong>Website</strong></a>
   &nbsp;&middot;&nbsp;
   <a href="https://drive.google.com/file/d/1UuOb9tl43sohg41_gV2z82WAgIKBLhXF/view?usp=sharing"><strong>Download</strong></a>
   &nbsp;&middot;&nbsp;
@@ -32,6 +32,12 @@
   &nbsp;&middot;&nbsp;
   <a href="#support"><strong>Support</strong></a>
 </p>
+
+<p align="center">
+  <a href="https://eclipsewow.vercel.app"><img src="website/.github/assets/readme/hero.webp" alt="The Eclipse website: A wardrobe for World of Warcraft" width="100%"></a>
+</p>
+
+> **The website's real repository is [seolyam/eclipse-web](https://github.com/seolyam/eclipse-web)**, where it is built and developed. [`website/`](website) here is an automatic copy of it. See [Website](#website).
 
 ---
 
@@ -43,6 +49,7 @@
 - [Usage](#usage)
 - [How it works](#how-it-works)
 - [Troubleshooting](#troubleshooting)
+- [Website](#website)
 - [Support](#support)
 
 ---
@@ -243,6 +250,47 @@ relative to the game's own folder.
 **Still stuck?**
 Ask in the [Discord](https://discord.gg/RvY5VjHgTA) and bring the newest log
 file.
+
+---
+
+## Website
+
+**[eclipsewow.vercel.app](https://eclipsewow.vercel.app)** is the official Eclipse website. Players publish their looks with screenshots from their game, browse what others have made in the Community Gallery, and dress a character in 3D before they try it in game.
+
+> **Source:** the website is built and developed by [seolyam](https://github.com/seolyam) in **[seolyam/eclipse-web](https://github.com/seolyam/eclipse-web)**, the real repository. [`website/`](website) is an automatic copy of it, updated with every change. Open website issues and pull requests there, not here.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="https://eclipsewow.vercel.app/community-gallery"><img src="website/.github/assets/readme/gallery.webp" alt="The Community Gallery, a grid of looks with in-game screenshots"></a>
+      <p><b>Community Gallery</b><br>Looks the community has dressed, filtered by class, race, armor and tags, and sorted by what is trending.</p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="website/.github/assets/readme/look.webp" alt="A look's page with its screenshots, comments and Copy code button">
+      <p><b>A look</b><br>Screenshots from the player's game, every piece it wears, comments and upvotes. One click copies the code.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="https://eclipsewow.vercel.app/dressing-room"><img src="website/.github/assets/readme/dressing-room.webp" alt="The Dressing room with a fully dressed 3D character"></a>
+      <p><b>Dressing room</b><br>Build a look slot by slot on a 3D character, or start from any look in the Gallery, then copy its code.</p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://eclipsewow.vercel.app/mounts"><img src="website/.github/assets/readme/mounts.webp" alt="The Mounts page, a grid of 3D mounts"></a>
+      <p><b>Mounts</b><br>Every mount in the game, animated and in each of its colours. Open one to see it move, or put a rider on it.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="https://eclipsewow.vercel.app/loadouts"><img src="website/.github/assets/readme/loadouts.webp" alt="The Loadouts page with the Import box and the Publish form"></a>
+      <p><b>Loadouts</b><br>Paste a code to see what it holds, edit it, or publish it to the Gallery with your screenshots.</p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://eclipsewow.vercel.app/guide"><img src="website/.github/assets/readme/guide.webp" alt="The setup guide"></a>
+      <p><b>Setup guide</b><br>From download to your first imported look in about two minutes. No installer, and nothing written to the game's own files.</p>
+    </td>
+  </tr>
+</table>
 
 ---
 
