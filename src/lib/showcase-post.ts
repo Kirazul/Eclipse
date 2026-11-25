@@ -3,6 +3,7 @@ import { resolveOutfit } from "@/lib/catalog";
 import { decodeOutfit, type Outfit } from "@/lib/codec/outfit";
 import { RACE_LABEL } from "@/lib/domain";
 import { CODE_MAX } from "@/lib/limits";
+import { pieceTitle } from "@/lib/look-title";
 
 // How a post in the Discord showcase becomes a Wardrobe look. Shared by the bulk
 // import (tools/import-discord-showcase.mts) and the bot's "Add to Community Gallery" right-click,
@@ -60,10 +61,30 @@ export function pictureFor(code: ShowcaseMessage, byId: Map<string, ShowcaseMess
   ) ?? null;
 }
 
-/** "Blood Elf transmog" from the code itself: a Discord post has no title. */
-export function titleOf(race: string | null, caption: string): string {
+/** What a look was titled before pieceTitle: still the title when its pieces share no name. */
+export function fallbackTitle(race: string | null): string {
+  return race && RACE_LABEL[race] ? `${RACE_LABEL[race]} transmog` : "Transmog";
+}
+
+/**
+ * A Discord post has no title: a short caption is one, or else the name its pieces
+ * share ("Dark Ranger General"), or else its race ("Blood Elf transmog").
+ */
+export function titleOf(race: string | null, caption: string, pieces: string | null = null): string {
   if (caption.length >= 3 && caption.length <= 40 && !/[.!?,]/.test(caption)) return caption;
-  return race ? `${RACE_LABEL[race]} transmog` : "Transmog";
+  return pieces ?? fallbackTitle(race);
+}
+
+/**
+ * A better title for a look the import named by its race, or null to keep its title: one
+ * a player typed is never exactly the made-up title for its own code. For
+ * tools/retitle-discord-looks.mts.
+ */
+export function retitled(look: { title: string; code: string }): string | null {
+  const decoded = decodeOutfit(look.code);
+  if (!decoded.ok || look.title !== fallbackTitle(resolveOutfit(decoded.outfit).raceKey)) return null;
+  const named = pieceTitle(decoded.outfit);
+  return named && named !== look.title ? named : null;
 }
 
 export interface ShowcaseLook {
@@ -88,7 +109,7 @@ function lookOf(
   },
 ): ShowcaseLook {
   const race = resolveOutfit(outfit).raceKey;
-  const named = title || titleOf(race, caption);
+  const named = title || titleOf(race, caption, pieceTitle(outfit));
   return {
     messageId,
     discordId: player.id,
