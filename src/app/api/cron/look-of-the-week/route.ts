@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { repository } from "@/lib/data";
 import { AMBER, plain } from "@/lib/discord";
 import { crownLookOfTheWeek, syncCreators } from "@/lib/discord-roles";
@@ -9,14 +10,14 @@ import { siteUrl } from "@/lib/site";
 // Week role to its player, and hands Gallery Creator to everyone with a look. A quiet
 // week posts nothing and takes the role back: the site only shows what was recorded.
 
-/** Roles never stop the weekly post. */
+/**
+ * Roles never stop the weekly post: they run after the answer, once the post is out,
+ * and each one's failure is logged without stopping the other.
+ */
 async function roles(winner: string | null) {
-  try {
-    await crownLookOfTheWeek(winner);
-    await syncCreators();
-  } catch (error) {
-    console.error("The weekly Discord roles failed:", error);
-  }
+  const [crown, creators] = await Promise.allSettled([crownLookOfTheWeek(winner), syncCreators()]);
+  if (crown.status === "rejected") console.error("The Look of the Week role failed:", crown.reason);
+  if (creators.status === "rejected") console.error("The Gallery Creator roles failed:", creators.reason);
 }
 
 export async function GET(request: Request) {
@@ -27,7 +28,8 @@ export async function GET(request: Request) {
   }
   const hook = process.env.DISCORD_WEBHOOK_URL;
   const pick = await repository.lookOfTheWeek();
-  await roles(pick?.post.id ?? null);
+  // Registered here so a quiet week or a refused post still moves the roles.
+  after(() => roles(pick?.post.id ?? null));
   if (!hook || !pick) return Response.json({ posted: false });
 
   const { post, votes } = pick;
