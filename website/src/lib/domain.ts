@@ -69,6 +69,12 @@ export const RACE_LABEL: Record<string, string> = {
   orcupright: "Orc (upright)", magharupright: "Mag'har (upright)",
 };
 
+/** The client's ChrClasses id, as the game reports its own character's class. */
+export const CLASS_BY_ID: Record<number, ClassName> = {
+  1: "Warrior", 2: "Paladin", 3: "Hunter", 4: "Rogue", 5: "Priest",
+  6: "Death Knight", 7: "Shaman", 8: "Mage", 9: "Warlock", 11: "Druid",
+};
+
 /** A stored `look` line's race byte, the client's ChrRaces id. */
 export const RACE_BY_ID: Record<number, string> = {
   1: "human", 2: "orc", 3: "dwarf", 4: "nightelf", 5: "undead",

@@ -93,6 +93,8 @@ interface GameSetRow {
   code: string;
   updated_at: string;
   gallery: string[];
+  class_name: ClassName | null;
+  race: string | null;
 }
 
 const toGameSet = (r: GameSetRow): GameSet => ({
@@ -101,6 +103,8 @@ const toGameSet = (r: GameSetRow): GameSet => ({
   code: r.code,
   updatedAt: r.updated_at,
   gallery: r.gallery,
+  className: r.class_name,
+  race: r.race,
 });
 
 // The hint is required: outfit_votes, outfit_reports and outfit_bookmarks also join
@@ -651,7 +655,7 @@ export const supabaseRepository: Repository = {
     const db = await createServerSupabase();
     const { data, error } = await db
       .from("game_sets")
-      .select("id,name,code,updated_at,gallery")
+      .select("id,name,code,updated_at,gallery,class_name,race")
       .not("code", "is", null)
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -662,7 +666,7 @@ export const supabaseRepository: Repository = {
     const db = await createServerSupabase();
     const { data, error } = await db
       .from("game_sets")
-      .select("id,name,code,updated_at,gallery")
+      .select("id,name,code,updated_at,gallery,class_name,race")
       .eq("id", id)
       .not("code", "is", null)
       .maybeSingle();

@@ -58,6 +58,9 @@ export interface SetPictures {
   id: string;
   /** The name the game saved it under, offered as the title. */
   name: string;
+  /** The class and race of the character that saved it, offered when the code has none. */
+  className: ClassName | null;
+  race: string | null;
   gallery: string[];
 }
 
@@ -149,6 +152,7 @@ export interface RemixOf {
 /** What the form offers before anyone chooses: read from the code, or from the set it came from. */
 interface Suggested {
   title: string;
+  className: ClassName | null;
   armor: ArmorType | null;
   race: string | null;
 }
@@ -166,10 +170,11 @@ function PublishForm({ code, remixOf, fromSet, suggested }: {
   // A field follows the pasted code until someone changes it; then their choice stays,
   // "Not set" included. Undefined means nobody has chosen yet.
   const [titleChoice, setTitle] = useState<string | undefined>(undefined);
-  const [className, setClassName] = useState<ClassName | null>(null);
+  const [classChoice, setClassName] = useState<ClassName | null | undefined>(undefined);
   const [armorChoice, setArmor] = useState<ArmorType | null | undefined>(undefined);
   const [raceChoice, setRace] = useState<string | null | undefined>(undefined);
   const title = titleChoice ?? suggested.title;
+  const className = classChoice === undefined ? suggested.className : classChoice;
   const armor = armorChoice === undefined ? suggested.armor : armorChoice;
   const race = raceChoice === undefined ? suggested.race : raceChoice;
   const [description, setDescription] = useState("");
@@ -387,8 +392,10 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
   const pictures = text === initial && removed.length === 0 ? fromSet : null;
   const suggested = useMemo<Suggested>(() => ({
     title: fromSet?.name ?? "",
+    className: fromSet?.className ?? null,
     armor: outfit?.resolved.armor ?? null,
-    race: outfit?.resolved.raceKey ?? null,
+    // A race the look changes to beats the race of the character who saved it.
+    race: outfit?.resolved.raceKey ?? fromSet?.race ?? null,
   }), [fromSet, outfit]);
 
   useEffect(() => {

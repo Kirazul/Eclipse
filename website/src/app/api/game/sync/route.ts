@@ -34,5 +34,20 @@ export async function POST(request: NextRequest) {
   const answer = data as SyncAnswer & { status: string };
   if (answer.status === "unlinked") return reply("unlinked", 401);
   if (answer.status === "busy") return reply("busy", 429, { "Retry-After": "2" });
+  if (parsed.character && (parsed.character.className || parsed.character.race)) {
+    // The sets this round saved remember who saved them, for the publish form. Only a
+    // suggestion, so a failure here is logged and the game still gets its answer.
+    const puts = new Set(parsed.changes.filter((c) => c.code !== null).map((c) => c.name.toLowerCase()));
+    const saved = answer.acks.map((a) => a.name).filter((name) => puts.has(name.toLowerCase()));
+    if (saved.length) {
+      const { error: noted } = await createAnonSupabase().rpc("game_set_character", {
+        p_token_hash: hashSecret(token),
+        p_names: saved,
+        p_class: parsed.character.className,
+        p_race: parsed.character.race,
+      });
+      if (noted) console.error("Game sync could not note the character:", noted.message);
+    }
+  }
   return reply(formatSyncAnswer({ ...answer, rejected: [...answer.rejected, ...parsed.rejected] }));
 }

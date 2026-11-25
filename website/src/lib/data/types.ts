@@ -144,6 +144,9 @@ export interface GameSet {
   updatedAt: string;
   /** Pictures the game's Showcase studio sent of this look: storage paths, as a post's. */
   gallery: string[];
+  /** The class and race of the character that last saved it, as its game said. */
+  className: ClassName | null;
+  race: string | null;
 }
 
 export const REPORT_REASONS = {
