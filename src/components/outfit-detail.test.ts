@@ -147,6 +147,13 @@ describe("a look with more comments than one page shows", () => {
     expect(html).toContain("Show newer comments");
   });
 
+  it("keeps the conversation beside the picture on a page past the oldest, by the look's whole count", async () => {
+    data.total = 450;
+    const html = await render(POST, 9);
+    expect(classesOf(html, 'aria-label="Comments"')).toContain("lg:col-start-2");
+    expect(html).toContain("Show newer comments");
+  });
+
   it("shows no link when every comment fits", async () => {
     data.comments = [COMMENT];
     const html = await render(POST);
