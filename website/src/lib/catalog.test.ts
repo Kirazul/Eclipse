@@ -112,3 +112,26 @@ describe("the model each item is drawn with", () => {
     expect(resolveOutfit(outfit).slots[0]?.display).toBe(display);
   });
 });
+
+describe("the armor a look wears", () => {
+  const wearing = (slots: Record<number, number>) => resolveOutfit({ ...emptyOutfit(), slots }).armor;
+
+  it("is the type most of its armor pieces share", () => {
+    // Plate chest, legs and hands over cloth sandals.
+    expect(wearing({ 4: 10482, 6: 10486, 9: 10484, 7: 10347 })).toBe("plate");
+  });
+
+  it("is unknown when no type has most of the pieces", () => {
+    expect(wearing({ 4: 10482, 6: 10486, 0: 64931, 7: 10347 })).toBeNull();
+  });
+
+  it("leaves out the cloak, whose type says nothing about who wears it", () => {
+    // A leather-typed cloak beside one plate piece.
+    expect(wearing({ 14: 11426, 4: 10482 })).toBe("plate");
+  });
+
+  it("is unknown for a look with no armor pieces or only hidden slots", () => {
+    expect(wearing({})).toBeNull();
+    expect(wearing({ 4: 0, 6: 0 })).toBeNull();
+  });
+});

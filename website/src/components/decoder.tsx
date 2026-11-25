@@ -56,6 +56,8 @@ function Choice<T extends string>({
 /** A saved set and the pictures its game sent of it, offered to the publish form. */
 export interface SetPictures {
   id: string;
+  /** The name the game saved it under, offered as the title. */
+  name: string;
   gallery: string[];
 }
 
@@ -144,15 +146,32 @@ export interface RemixOf {
   author: string | null;
 }
 
+/** What the form offers before anyone chooses: read from the code, or from the set it came from. */
+interface Suggested {
+  title: string;
+  armor: ArmorType | null;
+  race: string | null;
+}
+
 /** `code` is null until a valid loadout code is pasted; the form can be filled in before that. */
-function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf: RemixOf | null; fromSet: SetPictures | null }) {
+function PublishForm({ code, remixOf, fromSet, suggested }: {
+  code: string | null;
+  remixOf: RemixOf | null;
+  fromSet: SetPictures | null;
+  suggested: Suggested;
+}) {
   const t = useTranslations("decoder");
   const tw = useTranslations();
   const [credit, setCredit] = useState(remixOf !== null);
-  const [title, setTitle] = useState("");
+  // A field follows the pasted code until someone changes it; then their choice stays,
+  // "Not set" included. Undefined means nobody has chosen yet.
+  const [titleChoice, setTitle] = useState<string | undefined>(undefined);
   const [className, setClassName] = useState<ClassName | null>(null);
-  const [armor, setArmor] = useState<ArmorType | null>(null);
-  const [race, setRace] = useState<string | null>(null);
+  const [armorChoice, setArmor] = useState<ArmorType | null | undefined>(undefined);
+  const [raceChoice, setRace] = useState<string | null | undefined>(undefined);
+  const title = titleChoice ?? suggested.title;
+  const armor = armorChoice === undefined ? suggested.armor : armorChoice;
+  const race = raceChoice === undefined ? suggested.race : raceChoice;
   const [description, setDescription] = useState("");
   const [gallery, setGallery] = useState<string[]>(fromSet?.gallery ?? []);
   // Which code was published, so pasting another one offers the form again.
@@ -366,6 +385,11 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
   }, [outfit, removed]);
   // A set's pictures show its look: an edited look starts with none.
   const pictures = text === initial && removed.length === 0 ? fromSet : null;
+  const suggested = useMemo<Suggested>(() => ({
+    title: fromSet?.name ?? "",
+    armor: outfit?.resolved.armor ?? null,
+    race: outfit?.resolved.raceKey ?? null,
+  }), [fromSet, outfit]);
 
   useEffect(() => {
     if (!text.trim()) {
@@ -426,7 +450,7 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
           )}
           <section className="flex flex-col gap-3 rounded-md border border-line bg-surface p-4" aria-label={t("publishLabel")}>
             <h2 className="text-base">{t("publishIt")}</h2>
-            <PublishForm key={pictures ? "set" : "code"} code={code} remixOf={remixOf} fromSet={pictures} />
+            <PublishForm key={pictures ? "set" : "code"} code={code} remixOf={remixOf} fromSet={pictures} suggested={suggested} />
           </section>
         </div>
       ) : (
