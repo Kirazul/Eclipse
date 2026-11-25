@@ -313,7 +313,7 @@
     "sendCrypto": "Отправить криптовалюту",
     "continue": "Продолжить в Eclipse",
     "donate": "Пожертвовать",
-    "kofi": "Поддержать разработку",
+    "kofi": "Kirazul, основатель Eclipse",
     "kofiLabel": "Поддержать на Ko-fi",
     "kofiNote": "Помогите проекту жить",
     "star": "Звезда на GitHub",
@@ -326,7 +326,11 @@
     "copiedShort": "Скопировано",
     "copy": "Скопировать адрес",
     "qr": "QR-код адреса {coin}",
-    "network": "<strong>{coin}</strong> в сети {network}"
+    "network": "<strong>{coin}</strong> в сети {network}",
+    "seolyamRole": "Соразработчик Eclipse и автор этого сайта",
+    "seolyamKofi": "Поддержать работу seolyam над Eclipse",
+    "gcashNote": "Отсканируйте в GCash или любом банковском приложении с InstaPay (Филиппины)",
+    "gcashQr": "QR-код GCash для seolyam"
   },
   "landing": {
     "members": "{count, plural, one {# участник} few {# участника} many {# участников} other {# участника}}",

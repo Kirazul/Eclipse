@@ -1,6 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { preload } from "react-dom";
@@ -126,6 +127,7 @@ export function Download() {
 
 export function Support() {
   const t = useTranslations("landing");
+  const ts = useTranslations("support");
   return (
     <section className="section" id="support">
       <div className="wrap">
@@ -137,6 +139,18 @@ export function Support() {
           <SupportLinks />
         </div>
         <WalletSection />
+        <div className="backer">
+          <p className="backer__head"><strong>seolyam</strong><span>{ts("seolyamRole")}</span></p>
+          <div className="backer__ways">
+            <SupportLinks set="seolyam" />
+            <article className="gcash">
+              <div className="gcash__qr">
+                <Image src="/assets/img/qr-gcash.svg" alt={ts("gcashQr")} width={320} height={320} unoptimized loading="lazy" />
+              </div>
+              <p className="gcash__text"><strong>GCash</strong><span>{ts("gcashNote")}</span></p>
+            </article>
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -313,7 +313,7 @@
     "sendCrypto": "Send crypto",
     "continue": "Continue to Eclipse",
     "donate": "Donate",
-    "kofi": "Support development",
+    "kofi": "Kirazul, founder of Eclipse",
     "kofiLabel": "Support on Ko-fi",
     "kofiNote": "Keep the project going",
     "star": "Star on GitHub",
@@ -326,7 +326,11 @@
     "copiedShort": "Copied",
     "copy": "Copy address",
     "qr": "QR code for the {coin} address",
-    "network": "<strong>{coin}</strong> on {network}"
+    "network": "<strong>{coin}</strong> on {network}",
+    "seolyamRole": "Co-maintainer of Eclipse and author of this website",
+    "seolyamKofi": "Support seolyam's work on Eclipse",
+    "gcashNote": "Scan with GCash or any InstaPay bank app in the Philippines",
+    "gcashQr": "GCash QR code for seolyam"
   },
   "landing": {
     "members": "{count, plural, one {# member} other {# members}}",
