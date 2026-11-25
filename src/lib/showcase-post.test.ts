@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
+import { CODE_MAX } from "@/lib/limits";
 import type { ShowcaseMessage } from "./showcase-post";
 
 vi.mock("server-only", () => ({}));
-const { codeAfter, codeIn, lookWithCode, pictureFor, said, titleOf } = await import("./showcase-post");
+const { codeAfter, codeIn, lookWithCode, pictureFor, said, showcaseLook, titleOf } = await import("./showcase-post");
 
 const PLAYER = { id: "354266414397390858", username: "shadow", global_name: "Shadow" };
 const OTHER = { id: "708022303841058907", username: "kira", global_name: null };
@@ -105,6 +106,13 @@ describe("a look made from a picture and the code its player gave", () => {
   it("takes the player's own title, and keeps what they wrote as its caption", () => {
     const made = lookWithCode(picture, CODE, "Warden of the North", AT);
     expect(made).toMatchObject({ ok: true, look: { title: "Warden of the North", description: "Frost knight" } });
+  });
+
+  it("is refused for a code longer than any new look may have", () => {
+    const long = `ECA1:${"A".repeat(CODE_MAX)}`;
+    expect(lookWithCode(picture, long, null, AT)).toEqual({ ok: false, why: "code" });
+    const post = message({ content: long, attachments: [IMAGE] });
+    expect(showcaseLook(post, new Map([[post.id, post]]), [post])).toMatchObject({ ok: false });
   });
 
   it("is refused without a real code or a screenshot", () => {
