@@ -18,7 +18,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { compressScreenshot } from "@/lib/data/compress";
-import { SCREENSHOT_BUCKET, thumbOf } from "@/lib/screenshots";
+import { SCREENSHOT_BUCKET, smallOf, thumbOf } from "@/lib/screenshots";
 import { SHOWCASE_CHANNEL, codeIn, showcaseLook, type ShowcaseLook, type ShowcaseMessage } from "@/lib/showcase-post";
 
 const APPLY = process.argv.includes("--apply");
@@ -110,8 +110,8 @@ for (const l of looks) {
     const compressed = await compressScreenshot(Buffer.from(await res.arrayBuffer()));
     if (!compressed) throw new Error(`A screenshot of ${l.name}'s look is not an image`);
     const path = `discord/${l.id}/${crypto.randomUUID()}.avif`;
-    // The thumbnail first, as the site uploads: a gallery names only the full file.
-    for (const [file, body] of [[thumbOf(path), compressed.thumb], [path, compressed.full]] as const) {
+    // The smaller copies first, as the site uploads: a gallery names only the full file.
+    for (const [file, body] of [[thumbOf(path), compressed.thumb], [smallOf(path), compressed.small], [path, compressed.full]] as const) {
       writeFileSync(`${root}/${file}`, body);
       supabase(["storage", "cp", `${root}/${file}`, `ss:///${SCREENSHOT_BUCKET}/${file}`, "--linked", "--experimental", "--content-type", "image/avif"]);
     }

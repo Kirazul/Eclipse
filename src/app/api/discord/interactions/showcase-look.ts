@@ -6,7 +6,7 @@ import { compressScreenshot } from "@/lib/data/compress";
 import { download } from "@/lib/discord-bot";
 import { grantCreator } from "@/lib/discord-roles";
 import { announceLook } from "@/lib/look-feed";
-import { thumbOf } from "@/lib/screenshots";
+import { smallOf, thumbOf } from "@/lib/screenshots";
 import type { ShowcaseLook } from "@/lib/showcase-post";
 
 // What "Add to Community Gallery" and "Ask for the code" share: who may act for a post's
@@ -43,11 +43,15 @@ export async function addShowcaseLook(look: ShowcaseLook): Promise<Added> {
         return { status: "badShot" };
       }
       const path = `discord/${id}/${crypto.randomUUID()}.avif`;
-      // The thumbnail first, as the site uploads: a gallery names only the full file.
-      await storeScreenshot(thumbOf(path), compressed.thumb);
-      written.push(thumbOf(path));
-      await storeScreenshot(path, compressed.full);
-      written.push(path);
+      // The smaller copies first, as the site uploads: a gallery names only the full file.
+      for (const [file, body] of [
+        [thumbOf(path), compressed.thumb],
+        [smallOf(path), compressed.small],
+        [path, compressed.full],
+      ] as const) {
+        await storeScreenshot(file, body);
+        written.push(file);
+      }
       gallery.push(path);
     }
     const saved = await importDiscordLook(id, look, gallery);

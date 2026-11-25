@@ -38,7 +38,7 @@ beforeEach(() => {
   upload.mockReset();
   upload.mockResolvedValue({ data: {}, error: null });
   compress.mockReset();
-  compress.mockResolvedValue({ full: Buffer.from("full"), thumb: Buffer.from("thumb") });
+  compress.mockResolvedValue({ full: Buffer.from("full"), thumb: Buffer.from("thumb"), small: Buffer.from("small") });
 });
 
 describe("POST /api/game/sync", () => {
@@ -177,7 +177,7 @@ describe("POST /api/game/shot", () => {
     }));
   }
 
-  it("files the picture on the set: a ticket, the thumbnail, the picture, then the attach", async () => {
+  it("files the picture on the set: a ticket, the smaller copies, the picture, then the attach", async () => {
     answers({ status: "ok", path: PATH });
     const response = await shot(post("shot", request, signed));
     expect(response.status).toBe(200);
@@ -185,7 +185,11 @@ describe("POST /api/game/shot", () => {
     expect(rpc.mock.calls.map(([name]) => name)).toEqual(["game_shot_begin", "game_shot_attach"]);
     expect(rpc.mock.calls[0][1]).toMatchObject({ p_name: "Charnel", p_ext: "avif" });
     expect(rpc.mock.calls[1][1]).toMatchObject({ p_path: PATH });
-    expect(upload.mock.calls.map(([path]) => path)).toEqual([PATH.replace(".avif", "-thumb.avif"), PATH]);
+    expect(upload.mock.calls.map(([path]) => path)).toEqual([
+      PATH.replace(".avif", "-thumb.avif"),
+      PATH.replace(".avif", "-small.avif"),
+      PATH,
+    ]);
     expect(upload.mock.calls[0][2]).toMatchObject({ contentType: "image/avif" });
     expect(JSON.stringify(rpc.mock.calls)).not.toContain(TOKEN);
   });

@@ -41,6 +41,7 @@ const { builtinRepository } = await import("./builtin");
 
 const SHOT = "33333333-3333-4333-8333-333333333333/44444444-4444-4444-8444-444444444444.avif";
 const THUMB = SHOT.replace(".avif", "-thumb.avif");
+const SMALL = SHOT.replace(".avif", "-small.avif");
 
 const row = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -162,7 +163,7 @@ describe("screenshots", () => {
     return new File([new Uint8Array(png)], "capture.png", { type: "image/png" });
   };
 
-  it("stores a full file and its thumbnail in the person's folder", async () => {
+  it("stores a full file, its thumbnail and its small copy in the person's folder", async () => {
     user = { id: row.author_id };
     reply = stored;
     const result = await repo.uploadScreenshot(await screenshot());
@@ -170,6 +171,7 @@ describe("screenshots", () => {
     expect(result.value).toMatch(new RegExp(`^${row.author_id}/[0-9a-f-]{36}\\.avif$`));
     expect(requests.map((r) => r.pathname)).toEqual([
       `/storage/v1/object/showcase/${result.value.replace(".avif", "-thumb.avif")}`,
+      `/storage/v1/object/showcase/${result.value.replace(".avif", "-small.avif")}`,
       `/storage/v1/object/showcase/${result.value}`,
     ]);
   });
@@ -195,7 +197,21 @@ describe("screenshots", () => {
     });
   });
 
-  it("leaves no thumbnail behind when the full file is refused", async () => {
+  it("leaves no smaller copy behind when the full file is refused", async () => {
+    user = { id: row.author_id };
+    let uploads = 0;
+    reply = (url) => {
+      if (!url.pathname.includes(row.author_id)) return Response.json([]);
+      return ++uploads <= 2 ? stored() : refused("new row violates row-level security policy");
+    };
+    const result = await repo.uploadScreenshot(await screenshot());
+    expect(result.ok).toBe(false);
+    expect(removed).toHaveLength(2);
+    expect(removed[0]).toMatch(/-thumb\.avif$/);
+    expect(removed[1]).toMatch(/-small\.avif$/);
+  });
+
+  it("leaves no thumbnail behind when the small copy is refused", async () => {
     user = { id: row.author_id };
     let uploads = 0;
     reply = (url) => {
@@ -203,15 +219,15 @@ describe("screenshots", () => {
       return ++uploads === 1 ? stored() : refused("new row violates row-level security policy");
     };
     const result = await repo.uploadScreenshot(await screenshot());
-    expect(result.ok).toBe(false);
+    expect(result).toEqual({ ok: false, error: "You have 60 screenshots stored. Delete a look to free some up." });
     expect(removed).toHaveLength(1);
     expect(removed[0]).toMatch(/-thumb\.avif$/);
   });
 
-  it("removes a file and its thumbnail together", async () => {
+  it("removes a file and its smaller copies together", async () => {
     user = { id: row.author_id };
     expect(await repo.removeScreenshot(SHOT)).toEqual({ ok: true, value: SHOT });
-    expect(removed).toEqual([SHOT, THUMB]);
+    expect(removed).toEqual([SHOT, THUMB, SMALL]);
   });
 });
 
@@ -221,7 +237,7 @@ describe("deleting a look", () => {
     reply = (url) => Response.json(url.pathname.startsWith("/rest/") ? [{ gallery: [SHOT] }] : []);
     expect(await repo.deleteOutfit(row.id)).toEqual({ ok: true, value: row.id });
     expect(requests[0].searchParams.get("id")).toBe(`eq.${row.id}`);
-    expect(removed).toEqual([SHOT, THUMB]);
+    expect(removed).toEqual([SHOT, THUMB, SMALL]);
   });
 
   // RLS answers a refused delete with no rows, not an error.

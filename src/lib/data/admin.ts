@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { SCREENSHOT_BUCKET, thumbOf, UPLOAD_PATH } from "@/lib/screenshots";
+import { SCREENSHOT_BUCKET, screenshotFiles, UPLOAD_PATH } from "@/lib/screenshots";
 import type { ShowcaseLook } from "@/lib/showcase-post";
 import { supabaseUrl } from "@/lib/supabase/config";
 import { SCREENSHOT_TYPE } from "./compress";
@@ -88,7 +88,7 @@ export const askCode = (message: string, asker: string) =>
 export const unaskCode = (message: string) => call<null>("discord_unask_code", { p_message: message });
 
 /** An imported look's folder is discord/<look>: nothing else is written with this key. */
-const IMPORTED = /^discord\/[0-9a-f-]{36}\/[0-9a-f-]{36}(-thumb)?\.avif$/;
+const IMPORTED = /^discord\/[0-9a-f-]{36}\/[0-9a-f-]{36}(-thumb|-small)?\.avif$/;
 
 export async function storeScreenshot(path: string, body: Buffer) {
   if (!IMPORTED.test(path)) throw new Error(`Not an imported look's screenshot: ${path}`);
@@ -116,7 +116,7 @@ export async function discordDeleteReported(player: string, kind: Reported, targ
   const shots = await call<string[] | null>("discord_delete_reported", { player, kind, target });
   if (!shots) return false;
   // The paths come from the deleted row itself, never from what Discord sent.
-  const paths = shots.flatMap((path) => [path, thumbOf(path)]);
+  const paths = shots.flatMap(screenshotFiles);
   if (paths.length) {
     const { error } = await admin().storage.from(SCREENSHOT_BUCKET).remove(paths);
     if (error) console.error("A deleted look's screenshots stayed in storage:", error.message);
@@ -165,7 +165,7 @@ export async function sweepGamePictures(): Promise<number> {
     if (!paths.length) break;
     const odd = paths.find((path) => !UPLOAD_PATH.test(path));
     if (odd) throw new Error(`Not a game picture: ${odd}`);
-    const { error } = await admin().storage.from(SCREENSHOT_BUCKET).remove(paths.flatMap((path) => [path, thumbOf(path)]));
+    const { error } = await admin().storage.from(SCREENSHOT_BUCKET).remove(paths.flatMap(screenshotFiles));
     if (error) throw new Error(`Sweeping pictures: ${error.message}`);
     await call<null>("game_shot_swept", { p_paths: paths });
     removed += paths.length;

@@ -33,7 +33,7 @@ vi.mock("@/lib/discord-bot", () => ({
   download: async () => (readable ? Buffer.from("png") : null),
 }));
 vi.mock("@/lib/data/compress", () => ({
-  compressScreenshot: async () => ({ full: Buffer.from("full"), thumb: Buffer.from("thumb") }),
+  compressScreenshot: async () => ({ full: Buffer.from("full"), thumb: Buffer.from("thumb"), small: Buffer.from("small") }),
 }));
 const granted: string[] = [];
 vi.mock("@/lib/discord-roles", () => ({ grantCreator: async (id: string) => void granted.push(id) }));
@@ -88,9 +88,11 @@ describe("Add to Community Gallery", () => {
     expect(look).toMatchObject({ discordId: PLAYER, title: "Frost knight" });
     expect(look.gallery).toHaveLength(2);
     expect(look.gallery.every((p) => p.startsWith(`discord/${look.id}/`) && p.endsWith(".avif"))).toBe(true);
-    // Each screenshot's thumbnail goes up before it, as the site uploads.
-    expect(stored).toHaveLength(4);
+    // Each screenshot's smaller copies go up before it, as the site uploads.
+    expect(stored).toHaveLength(6);
     expect(stored[0]).toMatch(/-thumb\.avif$/);
+    expect(stored[1]).toMatch(/-small\.avif$/);
+    expect(stored[2]).toBe(look.gallery[0]);
     expect(granted).toEqual([PLAYER]);
     expect(announced).toEqual([look.id]);
     expect(reply.flags).toBe(64);
