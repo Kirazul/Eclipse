@@ -70,6 +70,10 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
   const tags = [...post.categories.map((c) => term(tw, "category", c)), ...post.tags];
   // Only a player's look has someone to talk to, and only a live site stores what is said.
   const social = repository.live && community;
+  const comments = social ? await repository.listComments(post.id) : [];
+  // With nothing said yet, what the look wears takes the place beside the picture, and the
+  // place to write the first comment waits under it.
+  const talk = social && (comments.length > 0 || Boolean(post.description));
 
   return (
     <article className="flex flex-col gap-8">
@@ -90,15 +94,18 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
             {facts.length > 0 && <span>{facts.join(" · ")}</span>}
             {facts.length > 0 && <span aria-hidden className="text-ink-faint">·</span>}
             <span className="inline-flex items-center gap-1">
-              {post.authorId && post.author ? (
-                t.rich("by", {
-                  author: post.author,
-                  creator: (c) => <Link href={`/creators/${post.authorId}`} className="text-ink underline-offset-2 hover:underline">{c}</Link>,
-                })
-              ) : post.sharedOnDiscord && post.author ? (
-                // No account to link yet: it becomes theirs when they sign in with Discord.
-                t.rich("byDiscord", { author: post.author, name: (c) => <span className="text-ink">{c}</span> })
-              ) : (post.author ?? t("gameSet"))}
+              {/* One run of text: as flex items, the name and the comma after it would each get the gap. */}
+              <span>
+                {post.authorId && post.author ? (
+                  t.rich("by", {
+                    author: post.author,
+                    creator: (c) => <Link href={`/creators/${post.authorId}`} className="text-ink underline-offset-2 hover:underline">{c}</Link>,
+                  })
+                ) : post.sharedOnDiscord && post.author ? (
+                  // No account to link yet: it becomes theirs when they sign in with Discord.
+                  t.rich("byDiscord", { author: post.author, name: (c) => <span className="text-ink">{c}</span> })
+                ) : (post.author ?? t("gameSet"))}
+              </span>
               {post.authorVerified && <BadgeCheck className="size-3.5 text-amber" strokeWidth={1.5} aria-label={t("verified")} />}
             </span>
             {/* Only what was recorded: a look with no date shows none. */}
@@ -127,7 +134,8 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
 
       {/*
         As a photo on a social app: the picture with the conversation beside it, and
-        everything about the look under the picture.
+        everything about the look under the picture. Until anyone has said something,
+        the look sits beside the picture instead and the conversation under it.
       */}
       <div className={`grid gap-x-8 gap-y-6 ${social ? "lg:grid-cols-[minmax(0,1fr)_24rem]" : ""}`}>
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
@@ -140,7 +148,7 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
           />
         </div>
 
-        <div className="flex min-w-0 flex-col gap-6 lg:col-start-1 lg:row-start-2">
+        <div className={`flex min-w-0 flex-col gap-6 ${social && !talk ? "lg:col-start-2 lg:row-span-2 lg:row-start-1" : "lg:col-start-1 lg:row-start-2"}`}>
           <div className="flex flex-wrap items-center gap-2 border-b border-line pb-5" aria-label={t("use")} role="group">
             <CopyButton code={post.code} look={post.id} className="h-[2.9rem] px-6 text-[0.95rem]" />
             {repository.live && <SendToGame id={post.id} />}
@@ -183,8 +191,13 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
         {social && (
           // Last on a phone, after the look. Beside the picture on a wide screen, and
           // exactly its height: the box fills the row the picture sets, never stretches it.
-          <aside className="relative order-last lg:order-none lg:col-start-2 lg:row-start-1 lg:min-h-[26rem]" aria-label={t("comments")}>
+          <aside
+            className={talk ? "relative order-last lg:order-none lg:col-start-2 lg:row-start-1 lg:min-h-[26rem]" : "order-last lg:col-start-1 lg:row-start-2"}
+            aria-label={t("comments")}
+          >
             <LookComments
+              comments={comments}
+              beside={talk}
               outfitId={post.id}
               lookAuthorId={post.authorId}
               caption={post.description

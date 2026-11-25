@@ -8,7 +8,6 @@ import { CommentForm } from "@/components/comment-form";
 import { CommentScroller } from "@/components/comment-scroller";
 import { ago } from "@/lib/ago";
 import { sizedAvatar } from "@/lib/avatar";
-import { repository } from "@/lib/data";
 import type { LookComment } from "@/lib/data/types";
 
 /** Who wrote it: their Discord picture, or their initial if they have none. */
@@ -90,14 +89,17 @@ function CaptionEntry({ caption, authorId, now }: { caption: Caption; authorId: 
  * What people said about a look, beside its picture: its own list scrolling oldest
  * first, and the place to write held at the bottom.
  */
-export async function LookComments({ outfitId, lookAuthorId, caption }: {
+export async function LookComments({ comments, beside, outfitId, lookAuthorId, caption }: {
+  /** Read once by the look's page, which places the conversation by whether there is one. */
+  comments: LookComment[];
+  /** Beside the picture, filling the height the picture sets; under it, as tall as it needs. */
+  beside: boolean;
   outfitId: string;
   /** Null on a look from the Discord showcase its player has not claimed. */
   lookAuthorId: string | null;
   /** The author's description, read first, as a post's caption is on a social app. */
   caption: Caption | null;
 }) {
-  const comments = await repository.listComments(outfitId);
   const t = await getTranslations("comments");
   const now = Date.now();
 
@@ -105,7 +107,7 @@ export async function LookComments({ outfitId, lookAuthorId, caption }: {
     <section
       id="comments"
       aria-labelledby="comments-heading"
-      className="flex max-h-[36rem] scroll-mt-24 flex-col rounded-lg border border-line bg-surface lg:absolute lg:inset-0 lg:max-h-none"
+      className={`flex max-h-[36rem] scroll-mt-24 flex-col rounded-lg border border-line bg-surface ${beside ? "lg:absolute lg:inset-0 lg:max-h-none" : ""}`}
     >
       <h2 id="comments-heading" className="flex items-baseline gap-2 border-b border-line px-4 py-3 font-sans text-sm font-medium text-ink">
         {t("title")}
