@@ -212,7 +212,8 @@
     }
   },
   "layout": {
-    "skip": "Skip to content"
+    "skip": "Skip to content",
+    "close": "Close"
   },
   "language": {
     "label": "Language",
@@ -431,6 +432,7 @@
     "loadoutsBlurb": "Import a code to see what it holds, and keep the loadouts saved in your game backed up here, private to you.",
     "dressingRoom": "Dressing room",
     "dressingRoomBlurb": "Choose a piece for each slot, copy the code, then use Import on the Loadout page in the game.",
+    "startedFrom": "Started from <look>{title}</look>. Its armor and race are on the rack; mounts, morphs and enchants stay with the original.",
     "mounts": "Mounts",
     "mountsBlurb": "Every mount in the current game, animated, in each of its colours. Open one to see it move, or put a rider on it.",
     "flying": "A flying mount.",
@@ -626,7 +628,9 @@
     "reportBody": "Moderators see every report and decide whether the look stays up.",
     "reason": "Reason",
     "sending": "Sending",
-    "send": "Send report"
+    "send": "Send report",
+    "report": "Report",
+    "remove": "Delete"
   },
   "copy": {
     "label": "Copy code",

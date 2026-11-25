@@ -100,7 +100,7 @@ export function ScreenshotViewer({ images, index, onIndex, title, open, onOpenCh
           }}
         >
           <DialogPrimitive.Title className="sr-only">
-            {count > 1 ? `${title}, screenshot ${index + 1} of ${count}` : `${title}, screenshot`}
+            {count > 1 ? t("nth", { title, index: index + 1, count }) : t("one", { title })}
           </DialogPrimitive.Title>
 
           <div

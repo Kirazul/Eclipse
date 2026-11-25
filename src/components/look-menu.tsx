@@ -122,12 +122,12 @@ export function LookMenu({ id, authorId, community, isPrivate, saved: initialSav
           {(canReport || canDelete) && (canSave || dressingRoom || canToggle) && <DropdownMenuSeparator />}
           {canReport && (
             <DropdownMenuItem onSelect={() => setOpen("report")}>
-              <Flag aria-hidden />Report
+              <Flag aria-hidden />{t("report")}
             </DropdownMenuItem>
           )}
           {canDelete && (
             <DropdownMenuItem onSelect={() => setOpen("delete")} className="text-bad focus:text-bad">
-              <Trash2 aria-hidden />Delete
+              <Trash2 aria-hidden />{t("remove")}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>

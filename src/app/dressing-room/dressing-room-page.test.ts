@@ -35,6 +35,11 @@ describe("a look opened from the Wardrobe", () => {
     expect(opened).toContain('aria-label="Copy code"');
   });
 
+  it("says where it started, from the messages, so the Russian site says it in Russian", async () => {
+    const opened = await render("shared");
+    expect(opened).toMatch(/Started from <a [^>]*href="\/community-gallery\/shared"[^>]*>A shared look<\/a>\. Its armor and race are on the rack/);
+  });
+
   it("opens empty for a look that is gone", async () => {
     expect(await render("missing")).toBe(html);
   });
