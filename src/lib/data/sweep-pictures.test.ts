@@ -30,6 +30,7 @@ const { sweepGamePictures } = await import("./admin");
 const USER = "33333333-3333-4333-8333-333333333333";
 const shot = (n: number) => `${USER}/44444444-4444-4444-8444-${String(n).padStart(12, "0")}.avif`;
 const thumb = (path: string) => path.replace(".avif", "-thumb.avif");
+const small = (path: string) => path.replace(".avif", "-small.avif");
 
 beforeEach(() => {
   waiting = [];
@@ -39,10 +40,10 @@ beforeEach(() => {
 });
 
 describe("sweeping replaced game pictures", () => {
-  it("removes each picture with its thumbnail, a batch at a time, until none wait", async () => {
+  it("removes each picture with its smaller copies, a batch at a time, until none wait", async () => {
     waiting = [[shot(1), shot(2)], [shot(3)]];
     expect(await sweepGamePictures()).toBe(3);
-    expect(removed).toEqual([shot(1), thumb(shot(1)), shot(2), thumb(shot(2)), shot(3), thumb(shot(3))]);
+    expect(removed).toEqual([1, 2, 3].flatMap((n) => [shot(n), thumb(shot(n)), small(shot(n))]));
     expect(swept).toEqual([shot(1), shot(2), shot(3)]);
   });
 

@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { compressScreenshot, SCREENSHOT_EXTENSION, SCREENSHOT_TYPE } from "@/lib/data/compress";
 import { bearerToken, hashSecret } from "@/lib/game-sync/secrets";
 import { formatShotAnswer, MAX_SHOT_BYTES, parseShotRequest, type ShotStatus } from "@/lib/game-sync/wire";
-import { SCREENSHOT_BUCKET, thumbOf } from "@/lib/screenshots";
+import { SCREENSHOT_BUCKET, smallOf, thumbOf } from "@/lib/screenshots";
 import { createAnonSupabase } from "@/lib/supabase/anon";
 
 // A picture from the game's Showcase studio, filed on one of the player's saved sets.
@@ -66,9 +66,10 @@ export async function POST(request: NextRequest) {
   if (!compressed) return reply("unreadable");
 
   const files = db.storage.from(SCREENSHOT_BUCKET);
-  // The thumbnail first, as the site's own uploads: a set only ever names the full file.
+  // The smaller copies first, as the site's own uploads: a set only ever names the full file.
   for (const [path, body] of [
     [thumbOf(ticket.path), compressed.thumb],
+    [smallOf(ticket.path), compressed.small],
     [ticket.path, compressed.full],
   ] as const) {
     const stored = await files.upload(path, body, { contentType: SCREENSHOT_TYPE });

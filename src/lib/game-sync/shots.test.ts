@@ -11,6 +11,8 @@ const SYNC = migration("20261101090000_game_sync.sql");
 const SHOTS = migration("20261108090000_game_set_shots.sql");
 const SHOT_OWNER = migration("20261108120000_game_shot_begin_owner.sql");
 const BUDGET = migration("20261122150000_game_picture_budget.sql");
+const CAP = migration("20261101054813_screenshot_cap.sql");
+const SMALL = migration("20261125110000_small_thumbnails.sql");
 
 const SUPABASE = `
   create role anon; create role authenticated; create role service_role;
@@ -48,6 +50,11 @@ const SUPABASE = `
   );
   alter table storage.objects enable row level security;
   grant all on storage.objects to anon, authenticated;
+  create function storage.foldername(name text) returns text[] language sql immutable
+    as $$ select (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1) - 1] $$;
+  -- The bucket's first upload policy, which the screenshot_cap migration replaces.
+  create policy "upload screenshots to your own folder" on storage.objects for insert
+    to authenticated with check (false);
 `;
 
 const ME = "00000000-0000-0000-0000-000000000001";
@@ -102,6 +109,7 @@ const attach = (path: string, token = TOKEN) =>
   call<Attach>("anon", null, "public.game_shot_attach($1, $2)", [token, path]);
 
 const thumb = (path: string) => path.replace(/\.avif$/, "-thumb.avif");
+const small = (path: string) => path.replace(/\.avif$/, "-small.avif");
 
 const store = (role: Role, user: string | null, name: string) =>
   as(role, user, () => db.query("insert into storage.objects (bucket_id, name) values ('showcase', $1)", [name]));
@@ -115,6 +123,7 @@ const fill = (n: number) => db.exec(`
 async function shoot(name = "Charnel") {
   const { path } = await begin(name);
   await store("anon", null, thumb(path!));
+  await store("anon", null, small(path!));
   await store("anon", null, path!);
   expect((await attach(path!)).status).toBe("ok");
   return path!;
@@ -133,10 +142,12 @@ const orphans = (user = ME) => call<string[]>("authenticated", user, "public.gam
 beforeEach(async () => {
   db = new PGlite();
   await db.exec(SUPABASE);
+  await db.exec(CAP);
   await db.exec(SYNC);
   await db.exec(SHOTS);
   await db.exec(SHOT_OWNER);
   await db.exec(BUDGET);
+  await db.exec(SMALL);
   await db.exec(`insert into public.profiles (id) values ('${ME}'), ('${STRANGER}');`);
   await link(ME, TOKEN);
   await link(STRANGER, STRANGER_TOKEN);
@@ -193,12 +204,14 @@ describe("sending a picture from the game", () => {
   });
 
   it("goes on when the site's own uploads are at their limit", async () => {
-    await fill(120);
+    await fill(180);
     expect((await begin("Charnel")).status).toBe("ok");
   });
 
+  // A picture is three files, so 450 is the old 300 at two files a picture.
   it("stops when everything the account stores, swept or not, is too much", async () => {
-    await fill(300);
+    await fill(447);
+    expect((await begin("Charnel")).status).toBe("ok");
     expect((await begin("Charnel")).status).toBe("account-full");
   });
 
@@ -208,9 +221,10 @@ describe("sending a picture from the game", () => {
 });
 
 describe("the upload ticket", () => {
-  it("lets a visitor's key store exactly the ticketed picture and its thumbnail", async () => {
+  it("lets a visitor's key store exactly the ticketed picture and its smaller copies", async () => {
     const { path } = await begin("Charnel");
     await store("anon", null, thumb(path!));
+    await store("anon", null, small(path!));
     await store("anon", null, path!);
     await expect(store("anon", null, `${ME}/00000000-0000-0000-0000-00000000dead.avif`)).rejects.toThrow(/policy/);
   });
@@ -310,10 +324,30 @@ describe("the site's own upload limit", () => {
     expect(await stored()).toBe(1);
   });
 
-  it("counts a picture once its look is published", async () => {
+  it("counts a picture once its look is published, as its three files", async () => {
     const path = await shoot();
     await db.query("insert into public.outfits (author_id, gallery) values ($1, $2)", [ME, [path]]);
-    expect(await stored()).toBe(2);
+    expect(await stored()).toBe(3);
+  });
+
+  it("still stops at sixty pictures, now that each is three files", async () => {
+    const upload = (user = ME) =>
+      as("authenticated", user, () =>
+        db.query("insert into storage.objects (bucket_id, name) values ('showcase', $1 || '/' || gen_random_uuid() || '.avif')", [user]),
+      );
+    await fill(179);
+    await upload();
+    await expect(upload()).rejects.toThrow(/policy/);
+    await expect(upload(STRANGER)).resolves.toBeDefined();
+    await expect(as("authenticated", ME, () => db.query("insert into storage.objects (bucket_id, name) values ('showcase', $1)", [`${STRANGER}/x.avif`]))).rejects.toThrow(/policy/);
+  });
+
+  it("leaves out a game's pictures there too, so a full set never stops an upload", async () => {
+    for (let i = 0; i < 6; i++) await shoot();
+    await fill(179);
+    await expect(
+      as("authenticated", ME, () => db.query("insert into storage.objects (bucket_id, name) values ('showcase', $1)", [`${ME}/last.avif`])),
+    ).resolves.toBeDefined();
   });
 
   it("counts only the account's own folder", async () => {

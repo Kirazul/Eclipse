@@ -44,7 +44,7 @@ vi.mock("@/lib/discord-bot", () => ({
   download: async () => Buffer.from("png"),
 }));
 vi.mock("@/lib/data/compress", () => ({
-  compressScreenshot: async () => ({ full: Buffer.from("full"), thumb: Buffer.from("thumb") }),
+  compressScreenshot: async () => ({ full: Buffer.from("full"), thumb: Buffer.from("thumb"), small: Buffer.from("small") }),
 }));
 const granted: string[] = [];
 vi.mock("@/lib/discord-roles", () => ({ grantCreator: async (id: string) => void granted.push(id) }));

@@ -3,7 +3,7 @@ import { LOOKS_PER_PAGE, type ArmorType, type Category, type ClassName } from "@
 import { hashSecret, newLinkCode } from "@/lib/game-sync/secrets";
 import { COMMENTS_PER_PAGE } from "@/lib/limits";
 import { cleanSetName } from "@/lib/game-sync/wire";
-import { SCREENSHOT_BUCKET, screenshotUrl, thumbOf } from "@/lib/screenshots";
+import { SCREENSHOT_BUCKET, screenshotFiles, screenshotUrl, smallOf, thumbOf } from "@/lib/screenshots";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { compressScreenshot, SCREENSHOT_EXTENSION, SCREENSHOT_TYPE } from "./compress";
 import type {
@@ -537,20 +537,26 @@ export const supabaseRepository: Repository = {
     // Keeps Storage's one-hour cache. The Free plan cannot purge the CDN, so a longer
     // one would keep serving an image a moderator had deleted.
     const store = (to: string, body: Buffer) => files.upload(to, body, { contentType: SCREENSHOT_TYPE });
-    // The thumbnail first: a post can only name the full file, so a failure here
+    // The smaller copies first: a post can only name the full file, so a failure here
     // can never leave a post pointing at half a screenshot.
-    const thumb = await store(thumbOf(path), compressed.thumb);
-    if (thumb.error) return uploadError(thumb.error.message);
-    const full = await store(path, compressed.full);
-    if (full.error) {
-      await files.remove([thumbOf(path)]);
-      return uploadError(full.error.message);
+    const written: string[] = [];
+    for (const [to, body] of [
+      [thumbOf(path), compressed.thumb],
+      [smallOf(path), compressed.small],
+      [path, compressed.full],
+    ] as const) {
+      const stored = await store(to, body);
+      if (stored.error) {
+        if (written.length) await files.remove(written);
+        return uploadError(stored.error.message);
+      }
+      written.push(to);
     }
     return { ok: true, value: path };
   },
   async removeScreenshot(path) {
     const db = await createServerSupabase();
-    const { error } = await db.storage.from(SCREENSHOT_BUCKET).remove([path, thumbOf(path)]);
+    const { error } = await db.storage.from(SCREENSHOT_BUCKET).remove(screenshotFiles(path));
     if (error) return { ok: false, error: "That screenshot could not be removed." };
     return { ok: true, value: path };
   },
@@ -563,7 +569,7 @@ export const supabaseRepository: Repository = {
     if (error) return { ok: false, error: "That look could not be deleted. Try again." };
     // RLS answers a delete it refuses with no rows, not with an error.
     if (!data.length) return { ok: false, error: "You can only delete your own looks." };
-    const paths = (data[0].gallery as string[]).flatMap((path) => [path, thumbOf(path)]);
+    const paths = (data[0].gallery as string[]).flatMap(screenshotFiles);
     if (paths.length) await db.storage.from(SCREENSHOT_BUCKET).remove(paths);
     return { ok: true, value: id };
   },
@@ -691,7 +697,7 @@ export const supabaseRepository: Repository = {
     const { data, error } = await db.rpc("game_shot_orphans");
     const paths = (data as string[] | null) ?? [];
     if (error || !paths.length) return;
-    const removed = await db.storage.from(SCREENSHOT_BUCKET).remove(paths.flatMap((p) => [p, thumbOf(p)]));
+    const removed = await db.storage.from(SCREENSHOT_BUCKET).remove(paths.flatMap(screenshotFiles));
     if (removed.error) {
       console.error("Clearing old set pictures failed:", removed.error.message);
       return;

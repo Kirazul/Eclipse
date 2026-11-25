@@ -37,6 +37,16 @@ describe("a Showcase poster", () => {
     expect(html).toContain('aria-label="Copy code"');
   });
 
+  it("lets a phone take the small copy of its capture and a wide screen the thumbnail", () => {
+    const html = render(POST);
+    expect(html).toMatch(/srcset="https:\/\/example\.test\/capture-small\.webp 480w, https:\/\/example\.test\/capture-thumb\.webp 960w"/i);
+    expect(html).toContain('sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"');
+    expect(html).toContain('src="https://example.test/capture-thumb.webp"');
+    expect(captureTag(render(POST, true))).toContain('loading="eager"');
+    expect(captureTag(render(POST, true))).toMatch(/srcset="[^"]*capture-small\.webp 480w/i);
+    expect(captureTag(html)).toContain("object-top");
+  });
+
   it("shows no count nobody could have recorded", () => {
     const html = render({ ...POST, upvotes: null });
     expect(html).not.toContain("Upvote");
@@ -66,6 +76,7 @@ describe("a Community Gallery card", () => {
 
   it("leads with the look's own capture when it has one", () => {
     expect(card(POST)).toContain("capture-thumb.webp");
+    expect(card(POST)).toContain("capture-small.webp 480w");
   });
 
   it("shows no picture for a look that has none", () => {

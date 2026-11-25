@@ -12,6 +12,8 @@ export const SCREENSHOT_EXTENSION = "avif";
 // edges that stay sharp at 2x. Supabase's own resizing is not on the Free plan.
 const FULL = { edge: 1600, quality: 55 };
 const THUMB = { edge: 960, quality: 50 };
+// What a phone's Gallery card needs: a card there is half the screen wide.
+const SMALL = { edge: 480, quality: 50 };
 
 // Just above 8K, which is 33 million: a small file can decode to a huge image.
 const MAX_INPUT_PIXELS = 40_000_000;
@@ -44,11 +46,24 @@ export async function socialCard(input: Buffer): Promise<Buffer | null> {
   }
 }
 
-/** A capture's two stored copies, or null when its bytes are not an image. */
+/**
+ * The small copy for a picture stored before there was one, made from its stored thumbnail
+ * (tools/backfill-small-thumbs.mts). Null when the bytes are not an image.
+ */
+export async function smallCopy(thumb: Buffer): Promise<Buffer | null> {
+  try {
+    return await encode(thumb, SMALL);
+  } catch (error) {
+    console.error("Small copy failed:", error);
+    return null;
+  }
+}
+
+/** A capture's three stored copies, or null when its bytes are not an image. */
 export async function compressScreenshot(input: Buffer) {
   try {
-    const [full, thumb] = await Promise.all([encode(input, FULL), encode(input, THUMB)]);
-    return { full, thumb };
+    const [full, thumb, small] = await Promise.all([encode(input, FULL), encode(input, THUMB), encode(input, SMALL)]);
+    return { full, thumb, small };
   } catch (error) {
     console.error("Screenshot compression failed:", error);
     return null;

@@ -7,7 +7,7 @@ vi.mock("server-only", () => ({}));
 // is 1), and one 1920x1080 noise capture takes about 7 s to encode as AVIF there.
 vi.setConfig({ testTimeout: 30_000 });
 
-const { compressScreenshot, socialCard } = await import("./compress");
+const { compressScreenshot, smallCopy, socialCard } = await import("./compress");
 
 const capture = (width: number, height: number) =>
   sharp({ create: { width, height, channels: 3, background: "#403020", noise: { type: "gaussian", mean: 120, sigma: 24 } } });
@@ -21,17 +21,20 @@ const compress = async (input: Buffer) => {
 describe("a stored screenshot", () => {
   it("is AVIF, far smaller than the capture it came from", async () => {
     const input = await capture(1920, 1080).png().toBuffer();
-    const { full, thumb } = await compress(input);
+    const { full, thumb, small } = await compress(input);
     expect((await sharp(full).metadata()).format).toBe("heif");
     expect((await sharp(thumb).metadata()).format).toBe("heif");
+    expect((await sharp(small).metadata()).format).toBe("heif");
     expect(full.length).toBeLessThan(input.length / 2);
     expect(thumb.length).toBeLessThan(full.length);
+    expect(small.length).toBeLessThan(thumb.length);
   });
 
   it("is sized to what the site can show", async () => {
-    const { full, thumb } = await compress(await capture(3840, 2160).png().toBuffer());
+    const { full, thumb, small } = await compress(await capture(3840, 2160).png().toBuffer());
     expect(await sharp(full).metadata()).toMatchObject({ width: 1600, height: 900 });
     expect(await sharp(thumb).metadata()).toMatchObject({ width: 960, height: 540 });
+    expect(await sharp(small).metadata()).toMatchObject({ width: 480, height: 270 });
   });
 
   it("limits a tall capture by its long edge", async () => {
@@ -40,18 +43,20 @@ describe("a stored screenshot", () => {
   });
 
   it("is never enlarged", async () => {
-    const { full, thumb } = await compress(await capture(320, 180).png().toBuffer());
+    const { full, thumb, small } = await compress(await capture(320, 180).png().toBuffer());
     expect((await sharp(full).metadata()).width).toBe(320);
     expect((await sharp(thumb).metadata()).width).toBe(320);
+    expect((await sharp(small).metadata()).width).toBe(320);
   });
 
   // A phone's photo can carry the GPS position it was taken at.
   it("drops what the file says about where and how it was taken", async () => {
     const input = await capture(400, 200).jpeg().withExif({ IFD0: { Copyright: "private", Software: "a camera" } }).toBuffer();
     expect((await sharp(input).metadata()).exif).toBeDefined();
-    const { full, thumb } = await compress(input);
+    const { full, thumb, small } = await compress(input);
     expect((await sharp(full).metadata()).exif).toBeUndefined();
     expect((await sharp(thumb).metadata()).exif).toBeUndefined();
+    expect((await sharp(small).metadata()).exif).toBeUndefined();
   });
 
   it("is turned the right way up before that note is dropped", async () => {
@@ -63,6 +68,20 @@ describe("a stored screenshot", () => {
   it("refuses bytes that are not an image", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     expect(await compressScreenshot(Buffer.from("not an image"))).toBeNull();
+  });
+});
+
+describe("the small copy of a picture stored before it existed", () => {
+  it("is made from the stored thumbnail, at the small copy's size", async () => {
+    const { thumb } = await compress(await capture(1920, 1080).png().toBuffer());
+    const small = await smallCopy(thumb);
+    expect(small).not.toBeNull();
+    expect(await sharp(small!).metadata()).toMatchObject({ format: "heif", width: 480, height: 270 });
+  });
+
+  it("is nothing for bytes that are not an image", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await smallCopy(Buffer.from("not an image"))).toBeNull();
   });
 });
 
