@@ -2,6 +2,7 @@ import "server-only";
 import { resolveOutfit } from "@/lib/catalog";
 import { decodeOutfit, type Outfit } from "@/lib/codec/outfit";
 import { RACE_LABEL } from "@/lib/domain";
+import { CODE_MAX } from "@/lib/limits";
 
 // How a post in the Discord showcase becomes a Wardrobe look. Shared by the bulk
 // import (tools/import-discord-showcase.mts) and the bot's "Add to Community Gallery" right-click,
@@ -121,7 +122,7 @@ export function lookWithCode(
 ): { ok: true; look: ShowcaseLook } | { ok: false; why: "code" | "picture" } {
   if (picture.author.bot || !images(picture).length) return { ok: false, why: "picture" };
   const code = codeIn(text);
-  const decoded = code ? decodeOutfit(code) : null;
+  const decoded = code && code.length <= CODE_MAX ? decodeOutfit(code) : null;
   if (!code || !decoded?.ok) return { ok: false, why: "code" };
   return {
     ok: true,
@@ -138,6 +139,7 @@ export function showcaseLook(
 ): { ok: true; look: ShowcaseLook } | { ok: false; reason: string } {
   const code = codeIn(m.content);
   if (!code || m.author.bot) return { ok: false, reason: "it holds no Eclipse code" };
+  if (code.length > CODE_MAX) return { ok: false, reason: `its code is longer than ${CODE_MAX} characters` };
   const decoded = decodeOutfit(code);
   if (!decoded.ok) return { ok: false, reason: `the code does not decode (${decoded.error})` };
   const picture = pictureFor(m, byId, messages);

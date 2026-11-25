@@ -1,6 +1,7 @@
 import "server-only";
 import { LOOKS_PER_PAGE, type ArmorType, type Category, type ClassName } from "@/lib/domain";
 import { hashSecret, newLinkCode } from "@/lib/game-sync/secrets";
+import { COMMENTS_PER_PAGE } from "@/lib/limits";
 import { cleanSetName } from "@/lib/game-sync/wire";
 import { SCREENSHOT_BUCKET, screenshotUrl, thumbOf } from "@/lib/screenshots";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -167,6 +168,10 @@ const uploadError = (message: string): WriteResult<string> => ({
     : "That screenshot could not be stored. Try again.",
 });
 const SEARCH_INDEX_SIZE = 200;
+/** Rows the sitemap reads per request: the most the database's API answers with at once. */
+const SITEMAP_PAGE = 1000;
+/** A sitemap holds 50,000 addresses; past that it would need splitting. */
+const SITEMAP_MAX = 49_000;
 /** How many public looks finding creators reads, the most upvoted first. Far more than exist today. */
 const CREATOR_SCAN = 2000;
 
@@ -310,6 +315,30 @@ export const supabaseRepository: Repository = {
     const { posts } = await listOutfits({ sort: "top", pageSize: SEARCH_INDEX_SIZE });
     return posts.map(({ id, title, author }) => ({ id, title, author }));
   },
+  async sitemapEntries() {
+    const db = await createServerSupabase();
+    const looks: string[] = [];
+    const creators = new Set<string>();
+    // Oldest first, ending at the id, so a look published while this reads moves no page.
+    for (let from = 0; from < SITEMAP_MAX; from += SITEMAP_PAGE) {
+      const { data, error } = await db
+        .from("outfits")
+        .select("id,author_id,profiles!outfits_author_id_fkey(display_name)")
+        .eq("is_private", false)
+        .order("created_at")
+        .order("id")
+        .range(from, from + SITEMAP_PAGE - 1);
+      if (error) throw new Error(error.message);
+      const rows = data as unknown as { id: string; author_id: string | null; profiles: { display_name: string | null } | null }[];
+      for (const r of rows) {
+        looks.push(r.id);
+        // A creator's page shows only for someone with a public name.
+        if (r.author_id && r.profiles?.display_name) creators.add(r.author_id);
+      }
+      if (rows.length < SITEMAP_PAGE) break;
+    }
+    return { looks, creators: [...creators] };
+  },
   async createOutfit(input) {
     const db = await createServerSupabase();
     const { data: auth } = await db.auth.getUser();
@@ -408,17 +437,30 @@ export const supabaseRepository: Repository = {
     if (error) return { ok: false, error: "Those reports could not be dismissed. Try again." };
     return { ok: true, value: id };
   },
-  async listComments(outfitId) {
-    if (!UUID.test(outfitId)) return [];
+  async listComments(outfitId, page = 1) {
+    if (!UUID.test(outfitId)) return { comments: [], total: 0 };
     const db = await createServerSupabase();
-    const { data, error } = await db
+    // Read newest first, so a new comment is always on the first page, then shown in order.
+    const from = (Math.max(1, page) - 1) * COMMENTS_PER_PAGE;
+    const { data, error, count } = await db
       .from("outfit_comments")
-      .select(COMMENT_COLUMNS)
+      .select(COMMENT_COLUMNS, { count: "exact" })
       .eq("outfit_id", outfitId)
-      .order("created_at")
-      .limit(200);
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, from + COMMENTS_PER_PAGE - 1);
+    if (error?.code === RANGE_NOT_SATISFIABLE) {
+      // A page past the oldest: the refusal holds no count.
+      const { count: rows, error: failed } = await db
+        .from("outfit_comments")
+        .select("id", { count: "exact", head: true })
+        .eq("outfit_id", outfitId);
+      if (failed) throw new Error(failed.message);
+      return { comments: [], total: rows ?? 0 };
+    }
     if (error) throw new Error(error.message);
-    return (data as unknown as CommentRow[]).map(toComment);
+    const rows = data as unknown as CommentRow[];
+    return { comments: rows.map(toComment).reverse(), total: count ?? rows.length };
   },
   async getComment(id) {
     if (!UUID.test(id)) return null;

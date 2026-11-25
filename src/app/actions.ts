@@ -7,7 +7,7 @@ import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { resolveOutfit, resolveWorld, type ResolvedOutfit, type ResolvedWorldPlace } from "@/lib/catalog";
 import { decodeOutfit, OUTFIT_TAG, type Outfit } from "@/lib/codec/outfit";
-import { displayNameSchema, submitOutfitSchema, type SubmitOutfit } from "@/lib/codec/schema";
+import { CODE_TOO_LONG, displayNameSchema, submitOutfitSchema, type SubmitOutfit } from "@/lib/codec/schema";
 import { decodeWorld, OUTFIT_WORLD_TAG } from "@/lib/codec/world";
 import { repository } from "@/lib/data";
 import { adminConfigured, recordCopy } from "@/lib/data/admin";
@@ -16,7 +16,7 @@ import {
 } from "@/lib/data/types";
 import { commentSchema } from "@/lib/comments";
 import { creatorOf, grantCreatorOfLook, recheckCreator } from "@/lib/discord-roles";
-import { MAX_SCREENSHOT_BYTES, SCREENSHOT_TYPES } from "@/lib/limits";
+import { CODE_MAX, MAX_SCREENSHOT_BYTES, SCREENSHOT_TYPES } from "@/lib/limits";
 import { announceLook } from "@/lib/look-feed";
 import { alertCommentReport, alertModerators } from "@/lib/moderation-alert";
 import { UPLOAD_PATH } from "@/lib/screenshots";
@@ -40,10 +40,13 @@ async function said<T>(answer: T | Promise<T>): Promise<T> {
 /** What a pasted code holds, with the names the code itself does not carry. */
 export async function inspectCode(text: string): Promise<InspectResult> {
   const head = text.trimStart().slice(0, 5).toUpperCase();
+  // A world code keeps the game's own limit, which decodeWorld checks first.
   if (head === OUTFIT_WORLD_TAG) {
     const r = decodeWorld(text);
     return said(r.ok ? { kind: "world", places: resolveWorld(r.places) } : { kind: "error", error: r.error });
   }
+  // Anyone may call this, so a long look code is refused before it costs a decode.
+  if (text.length > CODE_MAX) return said({ kind: "error", error: CODE_TOO_LONG });
   const r = decodeOutfit(text);
   if (!r.ok) {
     return said({
@@ -130,13 +133,11 @@ export async function saveDisplayName(name: string) {
   return said(r);
 }
 
-// A published code may be an old one, carrying a picture. A set holds the look alone.
-const MAX_SET_CODE = 32768;
-
 export async function sendLookToGame(id: string) {
   const post = await repository.getOutfit(id);
   if (!post) return said({ ok: false as const, error: "That look is gone." });
-  if (post.code.length > MAX_SET_CODE) {
+  // A look published before CODE_MAX may be an old code carrying a picture. A set holds the look alone.
+  if (post.code.length > CODE_MAX) {
     return said({ ok: false as const, error: "This look is too large to send. Copy its code instead." });
   }
   const r = await repository.sendToGame(post.title, post.code);

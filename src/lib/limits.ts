@@ -4,8 +4,18 @@
 /** The database's limit too (the look_comments migration). */
 export const COMMENT_MAX = 500;
 
+/** Comments a look's page shows at once: the newest, then older ones a page at a time. */
+export const COMMENTS_PER_PAGE = 200;
+
 /** The database's limit for a look's description too (the look_description migration). */
 export const DESCRIPTION_MAX = 500;
+
+/**
+ * The longest code a new look, a pasted code or a Discord post may have: a game set's limit
+ * (the game_sync migration), so a published look can always be sent to the game. Looks
+ * published before it keep their longer codes (the new_codes_capped migration).
+ */
+export const CODE_MAX = 32768;
 
 /** Pictures that may wait on an account's sets: the database's limit (the game_picture_budget migration). */
 export const GAME_PICTURES_MAX = 60;

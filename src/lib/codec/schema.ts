@@ -2,12 +2,19 @@ import { z } from "zod";
 import { NAME_MAX } from "@/lib/account";
 import { descriptionSchema } from "@/lib/comments";
 import { ARMOR_TYPES, CLASSES, RACE_LABEL } from "@/lib/domain";
-import { MAX_SCREENSHOTS } from "@/lib/limits";
+import { CODE_MAX, MAX_SCREENSHOTS } from "@/lib/limits";
 import { UPLOAD_PATH } from "@/lib/screenshots";
 import { decodeOutfit } from "./outfit";
 
+/** What a code past CODE_MAX is told. Its length alone refuses it, before it is read. */
+export const CODE_TOO_LONG = "That code is too long to be a look.";
+
 /** A loadout code the game would read, or the game's reason it would not. */
 export const outfitCodeSchema = z.string().superRefine((text, ctx) => {
+  if (text.length > CODE_MAX) {
+    ctx.addIssue({ code: "custom", message: CODE_TOO_LONG });
+    return;
+  }
   const r = decodeOutfit(text);
   if (!r.ok) ctx.addIssue({ code: "custom", message: r.error });
 });

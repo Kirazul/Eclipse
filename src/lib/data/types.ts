@@ -205,6 +205,8 @@ export interface Repository {
   /** A creator's public page. Null for an unknown id or someone with no public name. */
   getCreator(id: string): Promise<Creator | null>;
   searchIndex(): Promise<SearchEntry[]>;
+  /** Every public look's id, and every creator with a public look and a public name, for the sitemap. */
+  sitemapEntries(): Promise<{ looks: string[]; creators: string[] }>;
   /** People with public looks, the most prolific first; with `q`, only names that contain it. */
   listCreators(filter: { q?: string; limit: number }): Promise<CreatorEntry[]>;
   createOutfit(input: ParsedOutfit): Promise<WriteResult<OutfitPost>>;
@@ -224,8 +226,11 @@ export interface Repository {
   listReports(): Promise<ReportedLook[]>;
   /** Moderators only: keeps a reported look and marks its reports so far as read. */
   dismissReports(id: string): Promise<WriteResult<string>>;
-  /** A look's comments, oldest first. */
-  listComments(outfitId: string): Promise<LookComment[]>;
+  /**
+   * One page of a look's comments, oldest first, with how many it has. Page 1 is the
+   * newest COMMENTS_PER_PAGE; each page after it reaches further back.
+   */
+  listComments(outfitId: string, page?: number): Promise<{ comments: LookComment[]; total: number }>;
   getComment(id: string): Promise<LookComment | null>;
   addComment(outfitId: string, body: string): Promise<WriteResult<LookComment>>;
   /** The writer's own, any on the signed-in author's look, or any for a moderator. */

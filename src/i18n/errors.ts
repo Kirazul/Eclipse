@@ -83,6 +83,7 @@ const RU: Record<string, string> = {
 
   // Codes, the game and its sets
   "That game could not be unlinked. Try again.": "Не удалось отвязать игру. Попробуйте ещё раз.",
+  "That code is too long to be a look.": "Этот код слишком длинный для образа.",
   "That is not an Eclipse code. Codes start with ECA1: or ECW1:.": "Это не код Eclipse. Коды начинаются с ECA1: или ECW1:.",
   "That is not an Eclipse loadout code. Copy it again with Share in the game.": "Это не код комплекта Eclipse. Скопируйте его снова через «Поделиться» в игре.",
   "That is not an Eclipse world code. Copy it again with Share on Colors > World.": "Это не код мира Eclipse. Скопируйте его снова через «Поделиться» в разделе Colors > World.",

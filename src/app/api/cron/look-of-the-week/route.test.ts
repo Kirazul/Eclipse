@@ -3,6 +3,11 @@ import type { OutfitPost } from "@/lib/data/types";
 
 vi.mock("server-only", () => ({}));
 
+// The roles run after the answer, as next/server's after() runs them on Vercel.
+const later: Promise<unknown>[] = [];
+vi.mock("next/server", () => ({ after: (task: () => unknown) => void later.push(Promise.resolve().then(task)) }));
+const settle = () => Promise.all(later.splice(0));
+
 let pick: { post: OutfitPost; votes: number } | null = null;
 vi.mock("@/lib/data", () => ({ repository: { lookOfTheWeek: async () => pick } }));
 
@@ -10,8 +15,12 @@ vi.mock("@/lib/data", () => ({ repository: { lookOfTheWeek: async () => pick } }
 const crowned: (string | null)[] = [];
 let synced = 0;
 let rolesFail = false;
+let rolesHang = false;
+const order: string[] = [];
 vi.mock("@/lib/discord-roles", () => ({
   crownLookOfTheWeek: async (look: string | null) => {
+    order.push("roles");
+    if (rolesHang) await new Promise(() => {});
     if (rolesFail) throw new Error("Discord is down");
     crowned.push(look);
   },
@@ -49,9 +58,13 @@ beforeEach(() => {
   crowned.length = 0;
   synced = 0;
   rolesFail = false;
+  rolesHang = false;
+  order.length = 0;
+  later.length = 0;
   vi.stubEnv("CRON_SECRET", "cron-secret");
   vi.stubEnv("DISCORD_WEBHOOK_URL", HOOK);
   vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
+    order.push("post");
     sent.push({ url, body: JSON.parse(String(init.body)) });
     return new Response(null, { status: 204 });
   });
@@ -126,6 +139,7 @@ describe("the weekly Discord post", () => {
   it("hands the Look of the Week role to the winner, and keeps creators' roles current", async () => {
     pick = { post, votes: 4 };
     await call("Bearer cron-secret");
+    await settle();
     expect(crowned).toEqual([post.id]);
     expect(synced).toBe(1);
   });
@@ -133,11 +147,13 @@ describe("the weekly Discord post", () => {
   it("takes the role back in a quiet week, also with no webhook", async () => {
     vi.stubEnv("DISCORD_WEBHOOK_URL", "");
     await call("Bearer cron-secret");
+    await settle();
     expect(crowned).toEqual([null]);
   });
 
   it("touches no role for a caller without the secret", async () => {
     await call("Bearer wrong");
+    await settle();
     expect(crowned).toEqual([]);
     expect(synced).toBe(0);
   });
@@ -147,6 +163,24 @@ describe("the weekly Discord post", () => {
     rolesFail = true;
     pick = { post, votes: 4 };
     expect(await (await call("Bearer cron-secret")).json()).toEqual({ posted: true, id: post.id });
+    await settle();
+  });
+
+  it("keeps creators' roles current when the Look of the Week role fails, and logs it", async () => {
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    rolesFail = true;
+    pick = { post, votes: 4 };
+    await call("Bearer cron-secret");
+    await settle();
+    expect(synced).toBe(1);
+    expect(logged).toHaveBeenCalled();
+  });
+
+  it("posts before it touches a role, so a slow Discord cannot hold the post back", async () => {
+    rolesHang = true;
+    pick = { post, votes: 4 };
+    expect(await (await call("Bearer cron-secret")).json()).toEqual({ posted: true, id: post.id });
+    expect(order[0]).toBe("post");
   });
 
   it("reports a refused post as a failure, so the scheduler's log shows it", async () => {
