@@ -213,7 +213,8 @@
   },
   "layout": {
     "skip": "Skip to content",
-    "close": "Close"
+    "close": "Close",
+    "unreachable": "That did not go through. Check your connection and try again."
   },
   "language": {
     "label": "Language",

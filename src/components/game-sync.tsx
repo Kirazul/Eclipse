@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createGameLinkCode, removeGameSet, unlinkGame } from "@/app/actions";
+import { reach } from "@/lib/reach";
 import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +30,11 @@ export function LinkGame() {
   const t = useTranslations("gameSync");
   const [code, setCode] = useState<string | null>(null);
   const [creating, startCreating] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
 
   function create() {
     startCreating(async () => {
-      const r = await createGameLinkCode();
+      const r = await reach(createGameLinkCode, unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;
@@ -71,11 +73,12 @@ export function LinkGame() {
 export function UnlinkGame({ id }: { id: string }) {
   const t = useTranslations("gameSync");
   const [unlinking, startUnlinking] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
   const router = useRouter();
 
   function unlink() {
     startUnlinking(async () => {
-      const r = await unlinkGame(id);
+      const r = await reach(() => unlinkGame(id), unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;
@@ -143,11 +146,12 @@ function RemoveGameSetDialog({ id, name, after, open, onOpenChange }: {
 }) {
   const t = useTranslations("gameSync");
   const [removing, startRemoving] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
   const router = useRouter();
 
   function remove() {
     startRemoving(async () => {
-      const r = await removeGameSet(id);
+      const r = await reach(() => removeGameSet(id), unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;

@@ -5,6 +5,7 @@ import { Flag, MoreHorizontal, Trash2 } from "lucide-react";
 import { createContext, useContext, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { removeComment, reportComment } from "@/app/actions";
+import { reach } from "@/lib/reach";
 import {
   Dialog,
   DialogContent,
@@ -82,10 +83,11 @@ type DialogProps = { open: boolean; onOpenChange: (open: boolean) => void };
 function RemoveComment({ id, outfitId, open, onOpenChange }: { id: string; outfitId: string } & DialogProps) {
   const t = useTranslations("comments");
   const [removing, startRemoving] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
 
   function remove() {
     startRemoving(async () => {
-      const r = await removeComment(id, outfitId);
+      const r = await reach(() => removeComment(id, outfitId), unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;
@@ -116,11 +118,12 @@ function ReportComment({ id, open, onOpenChange }: { id: string } & DialogProps)
   const tr = useTranslations("commentReportReason");
   const [reason, setReason] = useState<CommentReportReason | null>(null);
   const [sending, startSending] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
 
   function send() {
     if (!reason) return;
     startSending(async () => {
-      const r = await reportComment(id, reason);
+      const r = await reach(() => reportComment(id, reason), unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;

@@ -4,6 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { saveDisplayName } from "@/app/actions";
+import { reach } from "@/lib/reach";
 import { Avatar } from "@/components/avatar";
 import {
   Dialog,
@@ -33,11 +34,12 @@ export function AccountDialog({ account, open, onOpenChange, onNamed }: AccountD
   const [name, setName] = useState(account.name ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saving, startSaving] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
 
   function save(event: FormEvent) {
     event.preventDefault();
     startSaving(async () => {
-      const r = await saveDisplayName(name);
+      const r = await reach(() => saveDisplayName(name), unreachable);
       if (!r.ok) {
         setError(r.error);
         return;

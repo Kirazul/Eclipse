@@ -4,6 +4,7 @@ import { Languages } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { toast } from "sonner";
 import { setLocale } from "@/i18n/actions";
 import { LOCALES, LOCALE_NAMES } from "@/i18n/locales";
 
@@ -16,6 +17,7 @@ export function LanguageSwitcher({ className = "icon-btn", withName = false }: {
   const locale = useLocale();
   const router = useRouter();
   const [pending, start] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
   const next = LOCALES.find((l) => l !== locale) ?? LOCALES[0];
 
   return (
@@ -27,7 +29,12 @@ export function LanguageSwitcher({ className = "icon-btn", withName = false }: {
       aria-label={t("switchTo", { language: LOCALE_NAMES[next] })}
       title={t("switchTo", { language: LOCALE_NAMES[next] })}
       onClick={() => start(async () => {
-        await setLocale(next);
+        try {
+          await setLocale(next);
+        } catch {
+          toast.error(unreachable);
+          return;
+        }
         router.refresh();
       })}
     >
