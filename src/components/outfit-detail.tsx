@@ -137,7 +137,8 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
         everything about the look under the picture. Until anyone has said something,
         the look sits beside the picture instead and the conversation under it.
       */}
-      <div className={`grid gap-x-8 gap-y-6 ${social ? "lg:grid-cols-[minmax(0,1fr)_24rem]" : ""}`}>
+      {/* With the look beside the picture, the picture's row keeps the picture's height and the row under it takes whatever more the taller column needs. */}
+      <div className={`grid gap-x-8 gap-y-6 ${social ? "lg:grid-cols-[minmax(0,1fr)_24rem]" : ""} ${social && !talk ? "lg:grid-rows-[auto_1fr]" : ""}`}>
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
           <LookModel
             pieces={resolved ? worn(resolved) : {}}
