@@ -1,7 +1,8 @@
 # Vendored from Eclipse-Viewer
 
 `engine/` and `format/` are copied from [Kirazul/Eclipse-Viewer](https://github.com/Kirazul/Eclipse-Viewer)
-at commit `c02fe3f` (2026-11-05), used with the author's permission. The viewer's bake
+at commit `c02fe3f` (2026-11-05), used with the author's permission. They are Kirazul's and are not
+covered by the MIT License at the root of this repository. The viewer's bake
 publishes the packs these read; this site only reads them (`src/lib/viewer/pack.ts`).
 
 Local changes, to carry over on every sync:

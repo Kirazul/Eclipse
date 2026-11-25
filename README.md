@@ -118,4 +118,4 @@ Eclipse was founded by [Kirazul](https://github.com/Kirazul) and is developed to
 
 **Takedown requests.** Rights holders who want something changed or removed can open an issue, and it will be handled promptly.
 
-**License.** No license has been granted yet. All rights in the original code are reserved by the author.
+**License.** The website's own code is © 2026 [seolyam](https://github.com/seolyam), released under the [MIT License](LICENSE). It does not cover `packages/`, which is Kirazul's Eclipse-Viewer engine used with permission, the Narcissus art (CC BY-NC-SA 4.0, above) or any Blizzard game content (above).
