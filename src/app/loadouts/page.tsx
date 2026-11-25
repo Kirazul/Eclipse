@@ -1,7 +1,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { after } from "next/server";
 import { CopyButton } from "@/components/copy-button";
@@ -10,6 +9,7 @@ import { GameSetMenu, LinkGame, UnlinkGame } from "@/components/game-sync";
 import { HubTitle } from "@/components/hub";
 import { ItemRing } from "@/components/item-icon";
 import { OutfitCard } from "@/components/outfit-card";
+import { ScreenshotThumb } from "@/components/screenshot-thumb";
 import { SignInOptions } from "@/components/sign-in-dialog";
 import { Button } from "@/components/ui/button";
 import { ago } from "@/lib/ago";
@@ -19,7 +19,7 @@ import { getOutfit, repository } from "@/lib/data";
 import type { GameLink, GameSet, OutfitList } from "@/lib/data/types";
 import { VISIBLE_SLOTS } from "@/lib/domain";
 import { GAME_PICTURES_MAX } from "@/lib/limits";
-import { screenshotUrl, thumbOf } from "@/lib/screenshots";
+import { screenshotUrl } from "@/lib/screenshots";
 import { localPageMetadata } from "@/lib/seo";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -84,11 +84,11 @@ function Linked({ link, now }: { link: GameLink; now: number }) {
   );
 }
 
-/** A game picture's small copy, which the site stores beside every picture. */
+/** A game picture's smaller copies, which the site stores beside every picture. */
 function Thumb({ path, alt, className }: { path: string; alt: string; className: string }) {
   return (
     <span className={`relative block overflow-hidden rounded-md border border-line ${className}`}>
-      <Image src={thumbOf(screenshotUrl(path))} alt={alt} fill unoptimized sizes="12rem" className="object-cover" />
+      <ScreenshotThumb src={screenshotUrl(path)} alt={alt} sizes="12rem" className="object-cover" />
     </span>
   );
 }

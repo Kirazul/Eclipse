@@ -5,6 +5,7 @@ import { CopyButton } from "@/components/copy-button";
 import { HoverLink } from "@/components/hover-link";
 import { ItemRing } from "@/components/item-icon";
 import { LookMenu } from "@/components/look-menu";
+import { ScreenshotThumb } from "@/components/screenshot-thumb";
 import { UpvoteButton } from "@/components/upvote-button";
 import { resolveOutfit, type ResolvedOutfit } from "@/lib/catalog";
 import { decodeOutfit } from "@/lib/codec/outfit";
@@ -12,7 +13,6 @@ import type { OutfitPost } from "@/lib/data/types";
 import { term } from "@/i18n/terms";
 import { posted } from "@/lib/ago";
 import { ARMOR_LABEL, RACE_LABEL, VISIBLE_SLOTS } from "@/lib/domain";
-import { thumbOf } from "@/lib/screenshots";
 import { cardBackdropFor, classArt, raceArt } from "@/lib/wow-assets";
 
 const resolve = (post: OutfitPost) => {
@@ -77,7 +77,7 @@ export function OutfitCard({ post, manage = false }: { post: OutfitPost; manage?
           {capture ? (
             // The capture stands alone at rest; only hover lays the caption over it.
             // Cropped from the top, where the head is.
-            <Image src={thumbOf(capture)} alt="" fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover object-top" />
+            <ScreenshotThumb src={capture} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover object-top" />
           ) : (
             <>
               {/* An image rather than a CSS background, so cards below the fold fetch theirs only when scrolled to. */}
@@ -178,7 +178,7 @@ export function OutfitPoster({ post, eager = false }: { post: OutfitPost; eager?
       <HoverLink href={`/community-gallery/${post.id}`} className="poster group" aria-label={t("card.open", { title: post.title })}>
         {capture ? (
           // Cropped from the top, where the head is. The Gallery's first row is its largest picture, so it loads at once.
-          <Image src={thumbOf(capture)} alt="" fill unoptimized priority={eager} fetchPriority={eager ? "high" : undefined} sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" className="poster__art object-top" />
+          <ScreenshotThumb src={capture} eager={eager} sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" className="poster__art object-top" />
         ) : (
           <>
             <Image src={cardBackdropFor(post.id)} alt="" aria-hidden fill unoptimized loading="lazy" sizes="25vw" className="poster__art opacity-40" />

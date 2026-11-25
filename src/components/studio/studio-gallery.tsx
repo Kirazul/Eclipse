@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { ScreenshotThumb } from "@/components/screenshot-thumb";
 import { ScreenshotViewer } from "@/components/studio/screenshot-viewer";
-import { thumbOf } from "@/lib/screenshots";
 
 const SIZES = "(min-width: 1024px) 40rem, 100vw";
 
@@ -87,7 +87,7 @@ export function StudioGallery({ images, title }: { images: string[]; title: stri
               aria-current={i === index}
               onClick={() => setIndex(i)}
             >
-              <Image src={thumbOf(image)} alt="" fill unoptimized sizes="4rem" className="object-cover" />
+              <ScreenshotThumb src={image} sizes="4rem" className="object-cover" />
             </button>
           ))}
         </div>

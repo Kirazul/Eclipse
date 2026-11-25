@@ -1,15 +1,15 @@
 import { getTranslations } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Decoder } from "@/components/decoder";
 import { RemoveGameSet } from "@/components/game-sync";
 import { HubTitle } from "@/components/hub";
+import { ScreenshotThumb } from "@/components/screenshot-thumb";
 import { SignInOptions } from "@/components/sign-in-dialog";
 import { repository } from "@/lib/data";
-import { screenshotUrl, thumbOf } from "@/lib/screenshots";
+import { screenshotUrl } from "@/lib/screenshots";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -58,7 +58,7 @@ export default async function SetPage({ params }: Props) {
           <ul className="flex flex-wrap gap-2">
             {set.gallery.map((path, i) => (
               <li key={path} className="relative aspect-video w-40 overflow-hidden rounded-md border border-line">
-                <Image src={thumbOf(screenshotUrl(path))} alt={ts("pictureAlt", { index: i + 1 })} fill unoptimized sizes="10rem" className="object-cover" />
+                <ScreenshotThumb src={screenshotUrl(path)} alt={ts("pictureAlt", { index: i + 1 })} sizes="10rem" className="object-cover" />
               </li>
             ))}
           </ul>

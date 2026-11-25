@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { ClipboardPaste, Loader2, X } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -10,6 +9,7 @@ import { inspectCode, publishOutfit, removeScreenshot, removeSetPicture, uploadS
 import { CopyButton } from "@/components/copy-button";
 import { term } from "@/i18n/terms";
 import { LoadoutFacts, SlotList } from "@/components/outfit-breakdown";
+import { ScreenshotThumb } from "@/components/screenshot-thumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,7 +18,7 @@ import { encodeOutfit } from "@/lib/codec/outfit";
 import { WORLD_MODES, WORLD_ROWS } from "@/lib/codec/world";
 import { ARMOR_LABEL, ARMOR_TYPES, CLASSES, RACE_LABEL, toCss, type ArmorType, type ClassName } from "@/lib/domain";
 import { DESCRIPTION_MAX, MAX_SCREENSHOT_BYTES, MAX_SCREENSHOTS, SCREENSHOT_TYPES } from "@/lib/limits";
-import { screenshotUrl, thumbOf } from "@/lib/screenshots";
+import { screenshotUrl } from "@/lib/screenshots";
 import { shrinkForUpload } from "@/lib/shrink-upload";
 
 type OutfitResult = Extract<InspectResult, { kind: "outfit" }>;
@@ -104,7 +104,7 @@ function Screenshots({
         <ul className="flex flex-wrap gap-2">
           {images.map((path, i) => (
             <li key={path} className="relative size-16 overflow-hidden rounded-md border border-line">
-              <Image src={thumbOf(screenshotUrl(path))} alt={t("shot", { index: i + 1 })} fill unoptimized sizes="4rem" className="object-cover" />
+              <ScreenshotThumb src={screenshotUrl(path)} alt={t("shot", { index: i + 1 })} sizes="4rem" className="object-cover" />
               <button
                 type="button"
                 aria-label={t("removeShot", { index: i + 1 })}
