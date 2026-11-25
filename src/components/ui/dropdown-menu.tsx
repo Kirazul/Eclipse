@@ -20,10 +20,15 @@ function DropdownMenuTrigger({
 function DropdownMenuContent({
   className,
   sideOffset = 6,
+  container,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Content> & {
+  /** Where the menu mounts. Inside a modal <dialog>, the dialog itself: the
+   *  top layer covers anything mounted on the body. */
+  container?: HTMLElement | null;
+}) {
   return (
-    <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Portal container={container}>
       <DropdownMenuPrimitive.Content
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}

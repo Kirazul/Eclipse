@@ -20,6 +20,8 @@ export const OPEN_GRAPH: NonNullable<Metadata["openGraph"]> = {
 };
 
 export const GITHUB_URL = "https://github.com/Kirazul/Eclipse";
+// The website's own repository; Star offers it beside the overlay's.
+export const WEB_GITHUB_URL = "https://github.com/seolyam/eclipse-web";
 
 // Eclipse.zip lives on Google Drive and is overridable. dinput8.dll is published on
 // the GitHub releases, and this always lands on the newest one (see the README).
