@@ -102,7 +102,14 @@ The 3D figures and mounts are drawn by the engine from [Eclipse-Viewer](https://
 
 ## Team
 
-Eclipse was founded by [Kirazul](https://github.com/Kirazul) and is developed together with [seolyam](https://github.com/seolyam). Come say hi, report a bug or share a look on [Discord](https://discord.gg/RvY5VjHgTA), and if Eclipse has earned a place in your game, you can [support it on Ko-fi](https://ko-fi.com/eclipsewow).
+Eclipse was founded by [Kirazul](https://github.com/Kirazul) and is co-maintained by [seolyam](https://github.com/seolyam), who also wrote this website. Come say hi, report a bug or share a look on [Discord](https://discord.gg/RvY5VjHgTA).
+
+If Eclipse has earned a place in your game, you can support the people behind it:
+
+- **Kirazul**, founder: [Ko-fi](https://ko-fi.com/eclipsewow), or crypto from the website's [Support](https://eclipsewow.vercel.app/#support) section.
+- **seolyam**, co-maintainer and website author: [Ko-fi](https://ko-fi.com/seolyam), or GCash with the code below (any InstaPay bank app in the Philippines works too).
+
+<img src="public/assets/img/qr-gcash.svg" alt="GCash QR code for seolyam" width="180">
 
 ## Legal and disclaimer
 

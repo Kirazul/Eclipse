@@ -80,7 +80,7 @@ export function SupportDialog() {
         <h2 id="modal-title">{t("title")}</h2>
         <p>{t("lead")}</p>
       </div>
-      <div className="modal__links"><SupportLinks dialog /></div>
+      <div className="modal__links"><SupportLinks set="dialog" /></div>
       <div className="modal__crypto"><WalletPicker title={t("orCrypto")} /></div>
       <div className="modal__foot">
         <button type="button" className="btn btn--primary btn--block" onClick={close}>{t("continue")}</button>
