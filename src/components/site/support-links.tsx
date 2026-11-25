@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Icon, type IconId } from "@/components/site/icons";
+import { StarMenu } from "@/components/site/star-menu";
 import { DISCORD_URL, GITHUB_URL, KOFI_URL, SEOLYAM_KOFI_URL } from "@/lib/site";
 
 interface Way {
@@ -33,21 +34,27 @@ export function SupportLinks({ set = "page" }: { set?: keyof typeof SETS }) {
   const t = useTranslations("support");
   // Brand names stay as they are; the rest are messages.
   const say = (key: string) => (t.has(key as never) ? t(key as never) : key);
-  return SETS[set].map((w) => (
-    <a key={w.href} className="slink" href={w.href} target="_blank" rel="noopener">
-      <span className={`slink__icon slink__icon--${w.tone}`}><Icon id={w.icon} /></span>
-      <span className="slink__text">
-        <strong>
-          {w.short ? (
-            <>
-              <span className="slink__full">{say(w.label)}</span>
-              <span className="slink__short">{w.short}</span>
-            </>
-          ) : say(w.label)}
-        </strong>
-        <span>{say(w.note)}</span>
-      </span>
-      <Icon id="i-arrow" className="slink__arrow" />
-    </a>
-  ));
+  return SETS[set].map((w) => {
+    const body = (
+      <>
+        <span className={`slink__icon slink__icon--${w.tone}`}><Icon id={w.icon} /></span>
+        <span className="slink__text">
+          <strong>
+            {w.short ? (
+              <>
+                <span className="slink__full">{say(w.label)}</span>
+                <span className="slink__short">{w.short}</span>
+              </>
+            ) : say(w.label)}
+          </strong>
+          <span>{say(w.note)}</span>
+        </span>
+        <Icon id="i-arrow" className="slink__arrow" />
+      </>
+    );
+    // Star asks which repository; the rest go straight there.
+    return w.icon === "i-star"
+      ? <StarMenu key={w.href}>{body}</StarMenu>
+      : <a key={w.href} className="slink" href={w.href} target="_blank" rel="noopener">{body}</a>;
+  });
 }
