@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { wardrobeParsers } from "@/lib/search-params";
+import { offered, wardrobeParsers } from "@/lib/search-params";
 
 describe("the Wardrobe's author filter", () => {
   it("takes an account id", () => {
@@ -9,5 +9,28 @@ describe("the Wardrobe's author filter", () => {
 
   it("drops anything else, because Postgres would reject it", () => {
     expect(wardrobeParsers.author.parse("not-a-uuid")).toBeNull();
+  });
+});
+
+describe("the Gallery's filter choices", () => {
+  const ALL = ["cloth", "leather", "mail", "plate"] as const;
+
+  it("are only the values some look has, in their usual order", () => {
+    expect(offered(ALL, ["plate", "cloth"], null)).toEqual(["cloth", "plate"]);
+  });
+
+  it("keep the value a link already chose, so old links still show what they filter by", () => {
+    expect(offered(ALL, ["plate"], "mail")).toEqual(["mail", "plate"]);
+  });
+
+  it("are none when no look has any", () => {
+    expect(offered(ALL, [], null)).toEqual([]);
+  });
+});
+
+describe("the body filter", () => {
+  it("takes male or female, and drops anything else", () => {
+    expect(wardrobeParsers.sex.parse("female")).toBe("female");
+    expect(wardrobeParsers.sex.parse("Female")).toBeNull();
   });
 });

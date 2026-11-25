@@ -706,6 +706,28 @@ describe("the Supabase adapter", () => {
     expect(requests[0].searchParams.get("categories")).toBe("cs.{Creature morph}");
   });
 
+  it("filters by race and body, as the database read them from the code", async () => {
+    await repo.listOutfits({ sort: "top", race: "bloodelf", sex: "female" });
+    expect(requests[0].searchParams.get("race")).toBe("eq.bloodelf");
+    expect(requests[0].searchParams.get("sex")).toBe("eq.female");
+  });
+
+  it("offers the filter choices some public look has", async () => {
+    const values = { classes: ["Mage"], armor: ["cloth"], races: ["bloodelf"], sexes: ["female"] };
+    reply = (url) => (url.pathname.endsWith("/rpc/gallery_filter_values") ? Response.json(values) : Response.json([]));
+    expect(await repo.filterValues()).toEqual(values);
+  });
+
+  it("offers every choice rather than none when the choices cannot be read", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    reply = failWith("XX000", 500);
+    const values = await repo.filterValues();
+    expect(values.classes).toHaveLength(10);
+    expect(values.armor).toEqual(["cloth", "leather", "mail", "plate"]);
+    expect(values.races.length).toBeGreaterThan(20);
+    expect(values.sexes).toEqual(["male", "female"]);
+  });
+
   it("filters to one author", async () => {
     await repo.listOutfits({ sort: "top", authorId: row.id });
     expect(requests[0].searchParams.get("author_id")).toBe(`eq.${row.id}`);

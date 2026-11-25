@@ -3,7 +3,7 @@ import setsJson from "@/data/catalog/sets.json";
 import { itemIcon } from "@/lib/catalog";
 import { lookCategories } from "@/lib/codec/categories";
 import { decodeOutfit, emptyOutfit, encodeOutfit } from "@/lib/codec/outfit";
-import { ARMOR_CLASSES, ARMOR_TYPES, LOOKS_PER_PAGE, type ArmorType } from "@/lib/domain";
+import { ARMOR_CLASSES, ARMOR_TYPES, CLASSES, LOOKS_PER_PAGE, type ArmorType } from "@/lib/domain";
 import type { OutfitFilters, OutfitPost, Repository } from "./types";
 
 // What the site can show with no database, and after every published look once
@@ -116,6 +116,8 @@ function matches(o: OutfitPost, f: OutfitFilters): boolean {
   if (f.excludeAuthorId && o.authorId === f.excludeAuthorId) return false;
   if (f.className && !wornBy(o, f.className)) return false;
   if (f.race && o.race !== f.race) return false;
+  // The game's sets wear no body of their own.
+  if (f.sex) return false;
   if (f.armor && o.armor !== f.armor) return false;
   if (f.category && !o.categories.includes(f.category)) return false;
   if (f.tag && !o.tags.includes(f.tag)) return false;
@@ -136,6 +138,16 @@ export const builtinRepository: Repository = {
     const size = f.pageSize ?? LOOKS_PER_PAGE;
     const start = (Math.max(1, f.page ?? 1) - 1) * size;
     return { posts: hits.slice(start, start + size), total: hits.length };
+  },
+  async filterValues() {
+    const armor = new Set(allLooks().map((o) => o.armor));
+    return {
+      // A set's armor says which classes wear it (wornBy).
+      classes: CLASSES.filter((c) => ARMOR_TYPES.some((a) => armor.has(a) && ARMOR_CLASSES[a].includes(c))),
+      armor: ARMOR_TYPES.filter((a) => armor.has(a)),
+      races: [],
+      sexes: [],
+    };
   },
   async getOutfit(id) {
     return allLooks().find((o) => o.id === id) ?? null;

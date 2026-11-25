@@ -108,6 +108,16 @@ describe("the built-in looks", () => {
     expect(none).toEqual([]);
   });
 
+  it("offers only the filters its looks can match", async () => {
+    const values = await repo.filterValues();
+    // Every class wears one of the armor types, and the sets have no race or body.
+    expect(values.classes).toHaveLength(10);
+    expect(values.armor).toEqual(["cloth", "leather", "mail", "plate"]);
+    expect(values.races).toEqual([]);
+    expect(values.sexes).toEqual([]);
+    expect((await repo.listOutfits({ sort: "top", sex: "male" })).total).toBe(0);
+  });
+
   it("derives its tags from the set and never makes one up", async () => {
     const { posts: pvp } = await repo.listOutfits({ tag: "pvp", sort: "top" });
     expect(pvp.length).toBeGreaterThan(0);

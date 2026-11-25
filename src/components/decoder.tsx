@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { encodeOutfit } from "@/lib/codec/outfit";
 import { WORLD_MODES, WORLD_ROWS } from "@/lib/codec/world";
-import { ARMOR_LABEL, ARMOR_TYPES, CLASSES, RACE_LABEL, toCss, type ArmorType, type ClassName } from "@/lib/domain";
+import { ARMOR_LABEL, ARMOR_TYPES, CLASSES, toCss, type ArmorType, type ClassName } from "@/lib/domain";
 import { DESCRIPTION_MAX, MAX_SCREENSHOT_BYTES, MAX_SCREENSHOTS, SCREENSHOT_TYPES } from "@/lib/limits";
 import { screenshotUrl } from "@/lib/screenshots";
 import { shrinkForUpload } from "@/lib/shrink-upload";
@@ -148,7 +148,6 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
   const [title, setTitle] = useState("");
   const [className, setClassName] = useState<ClassName | null>(null);
   const [armor, setArmor] = useState<ArmorType | null>(null);
-  const [race, setRace] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [gallery, setGallery] = useState<string[]>(fromSet?.gallery ?? []);
   // Which code was published, so pasting another one offers the form again.
@@ -166,7 +165,6 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
         code,
         className: className ?? undefined,
         armor: armor ?? undefined,
-        race: race ?? undefined,
         description,
         gallery,
         remixedFrom: credit && remixOf ? remixOf.id : undefined,
@@ -211,14 +209,6 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
       <div className="grid grid-cols-2 gap-3">
         <Choice id="outfit-class" label={t("class")} value={className} options={CLASSES} format={(c) => term(tw, "class", c)} onChange={setClassName} />
         <Choice id="outfit-armor" label={t("armor")} value={armor} options={ARMOR_TYPES} format={(a) => term(tw, "armor", a, ARMOR_LABEL[a])} onChange={setArmor} />
-        <Choice
-          id="outfit-race"
-          label={t("race")}
-          value={race}
-          options={Object.keys(RACE_LABEL)}
-          format={(k) => term(tw, "race", k, RACE_LABEL[k])}
-          onChange={setRace}
-        />
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="outfit-description" className="flex justify-between text-xs text-ink-dim">

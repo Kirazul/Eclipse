@@ -37,6 +37,7 @@ export async function listFromSearch(searchParams: Promise<SearchParams>) {
     q: f.q,
     className: f.class,
     race: f.race,
+    sex: f.sex,
     armor: f.armor,
     category: f.category,
     tag: f.tag,
