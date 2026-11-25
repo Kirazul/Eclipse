@@ -521,7 +521,7 @@
           "p1": "You do not need an account. The site has no ads and no tracking cookies.",
           "p2": "We count page views to see which pages are used: the page, the site that linked to it, roughly where in the world it was opened, and the kind of device and browser. Searches, codes and anything else after the page's address are left out. The count uses no cookies, and what tells one visitor from another is thrown away after a day.",
           "p3": "Our hosting provider handles each request, and that includes your IP address and browser details.",
-          "p4": "When you copy a look's code, we count it once per visitor. We keep only a scrambled fingerprint of your IP address, browser and that look, which cannot be turned back into your address.",
+          "p4": "When you copy a look's code, we count it once per visitor. We keep only a scrambled fingerprint of your IP address and that look, which cannot be turned back into your address.",
           "p5": "Your browser remembers that you have seen the support message, and which language you chose."
         }
       },
