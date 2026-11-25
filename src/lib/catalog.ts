@@ -5,7 +5,10 @@ import itemsJson from "@/data/catalog/items.json";
 import mountsJson from "@/data/catalog/mounts.json";
 import placesJson from "@/data/catalog/places.json";
 import qualityJson from "@/data/catalog/quality.json";
-import { COLOUR_AXES, RACE_BY_ID, RACE_LABEL, SLOT_INV_TYPES, SLOT_NAMES, VISIBLE_SLOTS, WORLD_GROUPS, type WorldGroup } from "@/lib/domain";
+import {
+  ARMOR_TYPES, COLOUR_AXES, RACE_BY_ID, RACE_LABEL, SLOT_INV_TYPES, SLOT_NAMES, VISIBLE_SLOTS, WORLD_GROUPS,
+  type ArmorType, type WorldGroup,
+} from "@/lib/domain";
 import { enchanted, type Outfit } from "@/lib/codec/outfit";
 import type { WorldPlace } from "@/lib/codec/world";
 
@@ -149,6 +152,8 @@ export interface ResolvedOutfit {
   race: string | null;
   /** The key of RACE_LABEL, for the race's art. Null for a stored race id the site has no key for. */
   raceKey: string | null;
+  /** The armor type most of its armor pieces share, or null when none has a majority. */
+  armor: ArmorType | null;
   sex: "Male" | "Female" | null;
   morph: number | null;
   morphName: string | null;
@@ -169,6 +174,24 @@ const mount = (id: number): ResolvedMount | null => {
   const row = mountById.get(id);
   return { id, name: row?.[1] ?? null, icon: row?.[2] || null };
 };
+
+// Head, shoulders, chest, waist, legs, feet, wrists and hands: the slots whose armor type
+// says who wears a look. A cloak's type is incidental, and the rest are never armor.
+const ARMOR_SLOTS = [0, 2, 4, 5, 6, 7, 8, 9];
+
+/** The majority vote tools/export_catalog.py takes for a named set, over a look's own pieces. */
+function armorOf(slots: Outfit["slots"]): ArmorType | null {
+  const votes = new Map<number, number>();
+  let total = 0;
+  for (const slot of ARMOR_SLOTS) {
+    const kind = itemById.get(slots[slot])?.[3] ?? 0;
+    if (kind < 1 || kind > ARMOR_TYPES.length) continue;
+    votes.set(kind, (votes.get(kind) ?? 0) + 1);
+    total++;
+  }
+  for (const [kind, count] of votes) if (count * 2 > total) return ARMOR_TYPES[kind - 1];
+  return null;
+}
 
 const hexColour = (v: number) => `#${v.toString(16).padStart(6, "0").toUpperCase()}`;
 const HANDS = ["Main Hand", "Off Hand"] as const;
@@ -208,6 +231,7 @@ export function resolveOutfit(o: Outfit): ResolvedOutfit {
     slots,
     race,
     raceKey,
+    armor: armorOf(o.slots),
     sex,
     morph: o.display || null,
     morphName: mountById.get(o.display)?.[1] ?? null,

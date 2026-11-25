@@ -65,7 +65,7 @@ export default async function SetPage({ params }: Props) {
           <a href="#publish" className="pill self-start">{ts("goToForm")}</a>
         </section>
       )}
-      <Decoder initial={set.code} canPublish={repository.live} fromSet={{ id: set.id, gallery: set.gallery }} />
+      <Decoder initial={set.code} canPublish={repository.live} fromSet={{ id: set.id, name: set.name, gallery: set.gallery }} />
     </main>
   );
 }
