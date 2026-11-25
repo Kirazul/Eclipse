@@ -20,13 +20,17 @@ const ModelStage = dynamic(() => import("@/components/model-stage").then((m) => 
   loading: () => <Loading3d />,
 });
 
+/** The share of a look's pieces the packs must hold before the 3D preview is offered. */
+export const SHOWN_SHARE = 0.7;
+
 const toggle = "inline-flex items-center gap-1.5 text-xs text-ink-dim underline-offset-4 transition-colors hover:text-ink hover:underline";
 
 /**
  * A look as the game drew it: its studio screenshots first. The 3D figure is one click away,
  * because it is slow to load and spends the viewer's pack host, and it only offers itself when
- * it would wear something: a bare stand-in for a code whose pieces are not baked would show a
- * look that is not there.
+ * it would show the look: at least {@link SHOWN_SHARE} of its pieces baked, or no pieces at all
+ * and the look's own body. A stand-in missing most of a code's pieces would show a look that is
+ * not there.
  */
 export function LookModel({ pieces, wearer, gallery, backdrop, title }: {
   pieces: Record<number, number | null>;
@@ -37,8 +41,10 @@ export function LookModel({ pieces, wearer, gallery, backdrop, title }: {
 }) {
   const t = useTranslations("shots");
   const [figure, setFigure] = useState(false);
-  const drawable = wearer !== null || Object.values(pieces).some(Boolean);
-  const incomplete = Object.values(pieces).some((display) => display === null);
+  const displays = Object.values(pieces);
+  const baked = displays.filter(Boolean).length;
+  const drawable = displays.length ? baked / displays.length >= SHOWN_SHARE : wearer !== null;
+  const incomplete = displays.some((display) => display === null);
 
   if (figure && drawable) {
     return (
