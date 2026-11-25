@@ -1,0 +1,38 @@
+# The four checks a change must pass (CLAUDE.md, Verify). main deploys itself, so they run
+# before a merge rather than after it.
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      # Pinned to a commit (v6.1.1): it is not GitHub's own, and tags can move.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115
+        with:
+          version: 10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      # The build writes the route types that tsc then reads.
+      - run: pnpm build
+        env:
+          NEXT_DIST_DIR: .next-build
+      - run: pnpm typecheck
+      - run: pnpm exec eslint src

@@ -1,0 +1,26 @@
+[
+  {
+    "type": 2,
+    "key": "looks",
+    "name": "Looks published",
+    "description": "Public looks in the Eclipse Community Gallery",
+    "name_localizations": {
+      "ru": "Опубликованные образы"
+    },
+    "description_localizations": {
+      "ru": "Публичные образы в Галерее сообщества Eclipse"
+    }
+  },
+  {
+    "type": 2,
+    "key": "upvotes",
+    "name": "Upvotes received",
+    "description": "Upvotes on their public looks",
+    "name_localizations": {
+      "ru": "Полученные голоса"
+    },
+    "description_localizations": {
+      "ru": "Голоса за их публичные образы"
+    }
+  }
+]

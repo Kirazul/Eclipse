@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["cdg1"],
+  "crons": [
+    { "path": "/api/cron/look-of-the-week", "schedule": "0 12 * * 1" },
+    { "path": "/api/cron/linked-roles", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/sweep-pictures", "schedule": "0 4 * * *" }
+  ]
+}

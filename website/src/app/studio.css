@@ -1,0 +1,322 @@
+/* ==========================================================================
+   The studio: Narcissus's hexagon rings and dark angled plates, laid out as
+   Eclipse's own Showcase studio lays out its "Narcissus" template.
+   ========================================================================== */
+
+/* The landing page's code and kbd, kept to the landing page. :where() holds the
+   weight at a bare element's, as upstream's was, so .wcard__addr still wins. */
+:where(.landing) code,
+:where(.landing) kbd {
+  font: 450 0.86em/1 var(--mono);
+  padding: 0.2em 0.42em;
+  border-radius: 0.35em;
+  background: rgba(250, 249, 245, 0.07);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+/* Upstream centres the dialog with the browser's own margin: auto for <dialog>,
+   which Tailwind's reset removes. */
+.modal { margin: auto; }
+
+.lost {
+  min-height: 70vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1.1rem;
+  padding: 2rem;
+  text-align: center;
+}
+.lost h1 { font: 400 clamp(2.2rem, 1.5rem + 2vw, 3.2rem)/1.1 var(--serif); letter-spacing: -0.02em; }
+.lost p { color: var(--ink-dim); max-width: 26rem; }
+
+/* Off the home page there is no hero to sit over: the bar takes its own room. */
+.bar--page {
+  position: sticky;
+  top: 0;
+}
+.bar__menu { display: none; }
+.bar__account { gap: 0.45rem; padding-inline-start: 0.4rem; }
+.bar__account-name { max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar__account-caret { width: 0.85rem; height: 0.85rem; color: var(--ink-faint); }
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--surface-high);
+  box-shadow: 0 0 0 1px var(--line-strong);
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+/* A phone's bar hides the text in its buttons, which must not take the picture too. */
+.bar .bar__account .avatar { display: inline-grid; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar svg { width: 60%; height: 60%; }
+@media (max-width: 900px) {
+  .bar__inner { grid-template-columns: 1fr auto; }
+  .bar__nav { display: none; }
+  .bar__menu { display: grid; }
+}
+/* A phone's bar has room for icons only: the menu carries the sign-in options. */
+@media (max-width: 560px) {
+  .bar .bar__sign-in { display: none; }
+  .bar__account-name, .bar__account-caret { display: none; }
+  .bar .bar__account { padding: 0.25rem; }
+}
+
+/* A linked feature keeps the official look: the title takes the whole card. */
+.features a { color: inherit; }
+.features a::after { content: ""; position: absolute; inset: 0; }
+
+.featured {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+.section__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+}
+.section__row .section__head { margin-bottom: 0; }
+.section__row { margin-bottom: clamp(2.5rem, 6vh, 3.75rem); }
+@media (max-width: 1100px) {
+  /* A row to swipe through, where four would be too thin to read. */
+  .featured {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 0 var(--gutter);
+  }
+  .featured::-webkit-scrollbar { display: none; }
+  .featured > * { flex: 0 0 min(17rem, 72vw); scroll-snap-align: center; }
+}
+
+/* A hexagon of the icon inside the ring. The ring's art leaves 71.9% of its
+   square for the icon (kIconHex in ShowcaseArt.h). */
+.hex {
+  position: relative;
+  display: inline-block;
+  flex: none;
+}
+.hex__icon {
+  position: absolute;
+  inset: 14.05%;
+  clip-path: polygon(50% 0, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%);
+  background: #0d0c0b;
+}
+.hex__icon img { width: 100%; height: 100%; object-fit: cover; }
+.hex__frame { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* The studio dims the plain ring a little, so it reads as "no quality known". */
+.hex--plain .hex__frame { opacity: 0.82; }
+.hex--empty .hex__icon img { opacity: 0.45; filter: saturate(0.3); }
+.hex--empty .hex__frame { opacity: 0.32; }
+/* A custom colour: a dot on the ring, toward the figure, as the studio marks it. */
+.hex__dot {
+  position: absolute;
+  bottom: 12%;
+  right: 12%;
+  width: 26%;
+  height: 26%;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.82);
+}
+
+.studio {
+  position: relative;
+  isolation: isolate;
+  container-type: inline-size;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--void);
+}
+.studio::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: var(--flow);
+  background-size: 200% 100%;
+  animation: flow 9s linear infinite;
+}
+.studio__scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.32;
+  filter: blur(2px) saturate(1.1);
+  transform: scale(1.04);
+}
+.studio__scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(20, 20, 19, 0.55), rgba(20, 20, 19, 0.9));
+}
+.studio__grid {
+  display: grid;
+  gap: 1.25rem;
+  padding: 0 1.25rem 1.25rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+/* Capped at every width: a 4:5 stage across a whole pane would bury the pieces. */
+.studio__stage { order: -1; justify-self: center; width: 100%; max-width: 22rem; }
+@container (min-width: 36rem) {
+  .studio__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .studio__stage { grid-column: 1 / -1; }
+}
+@container (min-width: 54rem) {
+  .studio__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 22rem) minmax(0, 1fr); align-items: center; }
+  .studio__stage { order: 0; grid-column: auto; }
+}
+
+/* One piece: a dark plate, cut at an angle on the side away from the ring. */
+.piece {
+  --cut: 0.9rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 3.6rem;
+  padding: 0.2rem calc(var(--cut) + 0.6rem) 0.2rem 0.2rem;
+  background: rgba(13, 12, 11, 0.62);
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%);
+  transition: background-color 0.2s var(--ease);
+}
+.piece:hover { background: rgba(13, 12, 11, 0.86); }
+.piece--right {
+  flex-direction: row-reverse;
+  text-align: right;
+  padding: 0.2rem 0.2rem 0.2rem calc(var(--cut) + 0.6rem);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, var(--cut) 100%);
+}
+.piece__name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.piece__slot { font-size: 0.72rem; color: var(--ink-faint); }
+
+/* The gallery: a portrait stage, or a square one for a square capture. */
+.gallery__frame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: #0d0c0b;
+  box-shadow: 0 0 0 1px var(--line-strong), 0 1.5rem 3.5rem -1.5rem rgba(0, 0, 0, 0.8);
+}
+/* A capture of any shape, shown whole: the same picture, blurred and dimmed, fills the frame behind it. */
+.gallery__fill { object-fit: cover; filter: blur(28px) brightness(0.45) saturate(1.2); transform: scale(1.15); }
+.gallery__nav {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: rgba(13, 12, 11, 0.66);
+  color: var(--ink);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background-color 0.2s var(--ease);
+}
+.gallery__nav:hover { background: rgba(13, 12, 11, 0.9); }
+.gallery__thumbs { display: flex; gap: 0.4rem; margin-top: 0.5rem; overflow-x: auto; scrollbar-width: none; }
+.gallery__thumb {
+  position: relative;
+  flex: none;
+  width: 4rem;
+  height: 3rem;
+  overflow: hidden;
+  border-radius: 0.4rem;
+  opacity: 0.6;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px var(--line);
+  transition: opacity 0.2s var(--ease);
+}
+.gallery__thumb:hover { opacity: 1; }
+.gallery__thumb[aria-current="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--amber); }
+
+/* A poster on the Showcase and the home page. */
+.poster {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: #0d0c0b;
+  box-shadow: 0 0 0 1px var(--line);
+  transition: box-shadow 0.3s var(--ease);
+}
+.poster:hover { box-shadow: 0 0 0 1px var(--line-strong), 0 1.5rem 3rem -1.5rem rgba(0, 0, 0, 0.8); }
+.poster__art { transition: transform 1.2s var(--ease); object-fit: cover; }
+.poster:hover .poster__art { transform: scale(1.03); }
+.poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(10, 8, 6, 0.92), rgba(10, 8, 6, 0.4) 38%, transparent 62%);
+}
+.poster__body { position: absolute; z-index: 1; inset: auto 0 0; padding: 0.9rem; }
+.poster__rings { display: flex; margin-bottom: 0.5rem; }
+.poster__rings > * + * { margin-left: -0.5rem; }
+
+/* The top stroke every card carries, from the feature grid. */
+.card-stroke { position: relative; }
+.card-stroke::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 1rem;
+  top: -1px;
+  width: 2rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--c, var(--gold));
+  transition: width 0.5s var(--ease);
+}
+.card-stroke:hover::before { width: calc(100% - 2rem); }
+.card-stroke:nth-child(even) { --c: var(--ember); }
+
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 0.82rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+.pill:hover { color: var(--ink); border-color: var(--line-strong); }
+.pill[aria-pressed="true"],
+.pill[aria-current="page"] { color: var(--void); background: var(--ink); border-color: var(--ink); }

@@ -1,0 +1,198 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./site.css" layer(components);
+@import "./studio.css" layer(components);
+
+@custom-variant dark (&:is(.dark *));
+
+/* Eclipse tokens (GOALS.md), under the names this app already used, so the
+   landing page and the Wardrobe are one product. Surfaces, ink and the emblem's
+   colours are the official page's values; the accent and status colours are the
+   overlay's (the overlay's UiTheme.cpp). The site has one theme, as the overlay does. */
+:root {
+  color-scheme: dark;
+
+  --void: #141413;
+  --surface: #1b1a18;
+  --surface-raised: #22211f;
+  --surface-high: #2a2926;
+  --line: rgba(250, 249, 245, 0.09);
+  --line-strong: rgba(250, 249, 245, 0.16);
+  --ink: #faf9f5;
+  --ink-dim: #b5b2a8;
+  --ink-faint: #8f8c87; /* kFaint */
+  --amber: #e8902e; /* kAccent */
+  --amber-ink: #1a1405;
+  /* The emblem's two warm colours. */
+  --gold: #f7c34a;
+  --ember: #ff8a2a;
+  --flow: linear-gradient(90deg, var(--gold), var(--ember), var(--gold), var(--ember), var(--gold));
+  --good: #5cb878; /* kGreen */
+  --bad: #db5754; /* kRed */
+  --info: #619eeb; /* kBlue */
+
+  --serif: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
+  --sans: var(--font-inter-cyrillic), var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --bar-h: 4rem;
+  --wrap: 72rem;
+  --gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --r-lg: 1.25rem;
+  --r-md: 0.85rem;
+
+  --radius: 0.85rem;
+
+  --background: var(--void);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--void);
+  --secondary: var(--surface-high);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-high);
+  --muted-foreground: var(--ink-dim);
+  --accent: var(--surface-high);
+  --accent-foreground: var(--ink);
+  --destructive: var(--bad);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--amber);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-void: var(--void);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-high: var(--surface-high);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-ink-faint: var(--ink-faint);
+  --color-amber: var(--amber);
+  --color-amber-ink: var(--amber-ink);
+  --color-gold: var(--gold);
+  --color-ember: var(--ember);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
+  --color-info: var(--info);
+
+  --font-sans: var(--sans);
+  --font-serif: var(--serif);
+  --font-mono: var(--mono);
+  --font-heading: var(--serif);
+
+  --radius-sm: 0.4rem;
+  --radius-md: 0.6rem;
+  --radius-lg: 0.85rem;
+  --radius-xl: 1.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    /* The root follows the viewport, so every rem holds from a laptop to 4K. */
+    font-size: clamp(15px, 0.42vw + 7.9px, 26px);
+    font-family: var(--sans);
+    background: var(--void);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-padding-top: var(--bar-h);
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 1rem;
+    line-height: 1.6;
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+  h1,
+  h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  h3 {
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+  ::selection {
+    background: rgba(232, 144, 46, 0.35);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 3px;
+    border-radius: 0.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+.corona-rim {
+  position: relative;
+}
+.corona-rim::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg, var(--gold), var(--ember));
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 120ms;
+  pointer-events: none;
+}
+.corona-rim:hover::after,
+.corona-rim:focus-within::after {
+  opacity: 1;
+}
+
+.nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
