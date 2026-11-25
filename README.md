@@ -37,7 +37,7 @@
   <a href="https://eclipsewow.vercel.app"><img src="website/.github/assets/readme/hero.webp" alt="The Eclipse website: A wardrobe for World of Warcraft" width="100%"></a>
 </p>
 
-> **The website's real repository is [seolyam/eclipse-web](https://github.com/seolyam/eclipse-web)**, where it is built and developed. [`website/`](website) here is an automatic copy of it. See [Website](#website).
+<p align="center"><sub>Website source: <a href="https://github.com/seolyam/eclipse-web">seolyam/eclipse-web</a></sub></p>
 
 ---
 
@@ -257,7 +257,7 @@ file.
 
 **[eclipsewow.vercel.app](https://eclipsewow.vercel.app)** is the official Eclipse website. Players publish their looks with screenshots from their game, browse what others have made in the Community Gallery, and dress a character in 3D before they try it in game.
 
-> **Source:** the website is built and developed by [seolyam](https://github.com/seolyam) in **[seolyam/eclipse-web](https://github.com/seolyam/eclipse-web)**, the real repository. [`website/`](website) is an automatic copy of it, updated with every change. Open website issues and pull requests there, not here.
+The website is developed by [seolyam](https://github.com/seolyam) in [seolyam/eclipse-web](https://github.com/seolyam/eclipse-web), and [`website/`](website) is a copy that stays in sync with it. Website issues and pull requests are welcome there.
 
 <table>
   <tr>
