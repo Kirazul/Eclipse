@@ -80,7 +80,8 @@ export default async function CommunityGalleryPage({ searchParams }: { searchPar
       {/* A search that found someone has not come up empty, so it does not ask for a first look. */}
       {!posts.length ? (people.length ? <p className="text-sm text-ink-dim">{t("gallery.noTitles")}</p> : <NoLooks bookmarks={filters.saved} />) : (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-          {posts.map((post) => <OutfitPoster key={post.id} post={post} />)}
+          {/* The first row is the page's largest picture on any screen, so it loads at once. */}
+          {posts.map((post, i) => <OutfitPoster key={post.id} post={post} eager={i < 4} />)}
         </div>
       )}
       <Pager base="/community-gallery" filters={filters} total={total} />

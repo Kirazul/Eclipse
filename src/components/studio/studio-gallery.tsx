@@ -10,6 +10,16 @@ import { thumbOf } from "@/lib/screenshots";
 const SIZES = "(min-width: 1024px) 40rem, 100vw";
 
 /**
+ * The step an arrow key asks of the gallery. The full-screen viewer is a portal: it sits
+ * outside the gallery in the page, but React still bubbles its key presses up here, so a
+ * press that did not start inside the gallery is the viewer's alone.
+ */
+export function arrowStep(e: Pick<React.KeyboardEvent<HTMLElement>, "key" | "target" | "currentTarget">) {
+  if (!e.currentTarget.contains(e.target as Node)) return 0;
+  return e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+}
+
+/**
  * The look's studio captures, one at a time and never cropped: captures come in any shape
  * (the game's studio is near square, a desktop screenshot is wide), so each is shown whole
  * over a blurred copy of itself.
@@ -29,9 +39,8 @@ export function StudioGallery({ images, title }: { images: string[]; title: stri
       aria-label={t("of", { title })}
       tabIndex={count > 1 ? 0 : undefined}
       onKeyDown={(e) => {
-        if (count < 2) return;
-        if (e.key === "ArrowRight") step(1);
-        if (e.key === "ArrowLeft") step(-1);
+        const by = arrowStep(e);
+        if (count > 1 && by) step(by);
       }}
     >
       <div className="gallery__frame">

@@ -21,12 +21,12 @@ export function LookPieces({ resolved }: { resolved: ResolvedOutfit }) {
   if (!worn.length) return null;
 
   return (
-    <section aria-labelledby="pieces-heading" className="flex flex-col gap-2">
+    <section aria-labelledby="pieces-heading" className="@container flex flex-col gap-2">
       <h2 id="pieces-heading" className="flex items-baseline gap-2 font-sans text-sm font-medium text-ink">
         {t("title")} <span className="nums text-xs font-normal text-ink-faint">{worn.length}</span>
       </h2>
-      {/* Two columns under the picture, where a single one would run long. */}
-      <ul className="grid sm:grid-cols-2 sm:gap-x-6">
+      {/* Two columns under the picture, where a single one would run long; one in the narrow column beside it. */}
+      <ul className="grid @lg:grid-cols-2 @lg:gap-x-6">
         {worn.map((s) => {
           const hidden = s.item === 0;
           const name = hidden ? t("hidden") : (s.name ?? t("item", { id: s.item }));
