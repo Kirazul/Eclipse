@@ -5,6 +5,7 @@
 //   request   eclipse-sync 1
 //             cursor <rev>
 //             label <b64>                            optional
+//             who <class id> <race id>               optional: the character syncing
 //             put <base> <b64 name> <b64 icon|-> <code>
 //             del <base> <b64 name>
 //
@@ -35,6 +36,12 @@
 // The migration's limits are repeated here so one bad set is refused alone. Left to
 // the database's checks, it would fail the batch and every set in it, on every retry.
 
+import { CLASS_BY_ID, RACE_BY_ID, type ClassName } from "@/lib/domain";
+
+// `who` names the character a round comes from by its ChrClasses and ChrRaces ids, so
+// the sets it saves can offer that class and race when they are published. An older
+// game leaves it out, and an id the site does not know is dropped, not refused.
+
 export const SYNC_HEADER = "eclipse-sync 1";
 
 const MAX_CHANGES = 100;
@@ -53,11 +60,18 @@ export interface SyncChange {
   base: number;
 }
 
+export interface SyncCharacter {
+  className: ClassName | null;
+  race: string | null;
+}
+
 export interface SyncRequest {
   cursor: number;
   label: string;
   changes: SyncChange[];
   rejected: string[];
+  /** Who is syncing, from `who`. Null when the game did not say. */
+  character: SyncCharacter | null;
 }
 
 export interface SyncedSet {
@@ -100,7 +114,7 @@ export function parseSyncRequest(body: string): SyncRequest | null {
   const [header, ...rest] = lines(body);
   if (header !== SYNC_HEADER) return null;
 
-  const request: SyncRequest = { cursor: -1, label: "", changes: [], rejected: [] };
+  const request: SyncRequest = { cursor: -1, label: "", changes: [], rejected: [], character: null };
   for (const line of rest) {
     const [verb, ...fields] = line.split(" ");
     if (verb === "cursor" && fields.length === 1) {
@@ -111,6 +125,9 @@ export function parseSyncRequest(body: string): SyncRequest | null {
       const label = decode(fields[0]);
       if (label === null) return null;
       request.label = label.replace(/[\u0000-\u001f\u007f]/g, "").slice(0, MAX_NAME);
+    } else if (verb === "who" && fields.length === 2 && fields.every((f) => /^\d{1,3}$/.test(f))) {
+      const [cls, race] = fields.map(Number);
+      request.character = { className: CLASS_BY_ID[cls] ?? null, race: RACE_BY_ID[race] ?? null };
     } else if (verb === "put" && fields.length === 4) {
       const base = revision(fields[0]);
       const name = decode(fields[1]);

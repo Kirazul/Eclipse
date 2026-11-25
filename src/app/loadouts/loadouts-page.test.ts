@@ -69,6 +69,8 @@ const SET: GameSet = {
   code: CODE,
   updatedAt: new Date().toISOString(),
   gallery: [],
+  className: null,
+  race: null,
 };
 const PICTURE = "00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-0000000000aa.avif";
 const LOOK: OutfitPost = {

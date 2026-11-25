@@ -29,6 +29,7 @@ describe("a sync request", () => {
         { name: "Town", icon: "", code: null, base: 4 },
       ],
       rejected: [],
+      character: null,
     });
   });
 
@@ -85,6 +86,29 @@ describe("a sync request", () => {
 
   it("clips a label rather than refusing a sync over it", () => {
     expect(parseSyncRequest(body("cursor 0", `label ${b64("x".repeat(200))}`))?.label).toHaveLength(80);
+  });
+});
+
+describe("the character a sync comes from", () => {
+  it("reads its class and race from the game's own ids", () => {
+    expect(parseSyncRequest(body("cursor 0", "who 8 7"))?.character).toEqual({ className: "Mage", race: "gnome" });
+    expect(parseSyncRequest(body("cursor 0", "who 6 10"))?.character).toEqual({ className: "Death Knight", race: "bloodelf" });
+  });
+
+  it("is unknown for an older game that does not send it", () => {
+    expect(parseSyncRequest(body("cursor 0"))?.character).toBeNull();
+  });
+
+  it("leaves out an id the site does not know rather than refusing the sync", () => {
+    expect(parseSyncRequest(body("cursor 0", "who 12 30"))?.character).toEqual({ className: null, race: null });
+  });
+
+  it.each([
+    ["names instead of ids", "who mage gnome"],
+    ["one number", "who 8"],
+    ["a number past a byte", "who 8 1234"],
+  ])("refuses %s", (_, line) => {
+    expect(parseSyncRequest(body("cursor 0", line))).toBeNull();
   });
 });
 
@@ -182,8 +206,8 @@ describe("the version check", () => {
     expect(parseVersionRequest(`${VERSION_HEADER}
 build 1.0.0
 `)).toBe("1.0.0");
-    expect(parseVersionRequest(`${VERSION_HEADER}
-build 1.2.3-beta
+    expect(parseVersionRequest(`${VERSION_HEADER}
+build 1.2.3-beta
 `)).toBe("1.2.3-beta");
   });
 
