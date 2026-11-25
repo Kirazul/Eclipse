@@ -3,7 +3,7 @@ import { CODE_MAX } from "@/lib/limits";
 import type { ShowcaseMessage } from "./showcase-post";
 
 vi.mock("server-only", () => ({}));
-const { codeAfter, codeIn, lookWithCode, pictureFor, said, showcaseLook, titleOf } = await import("./showcase-post");
+const { codeAfter, codeIn, lookWithCode, pictureFor, retitled, said, showcaseLook, titleOf } = await import("./showcase-post");
 
 const PLAYER = { id: "354266414397390858", username: "shadow", global_name: "Shadow" };
 const OTHER = { id: "708022303841058907", username: "kira", global_name: null };
@@ -69,6 +69,32 @@ describe("a showcase post's title", () => {
     expect(titleOf("bloodelf", "Here is my new look, hope you like it!")).toBe("Blood Elf transmog");
     expect(titleOf(null, "")).toBe("Transmog");
   });
+
+  it("is named for what the pieces share before the race", () => {
+    expect(titleOf("bloodelf", "", "Dark Ranger General")).toBe("Dark Ranger General");
+    expect(titleOf("bloodelf", "Sunwell guard", "Dark Ranger General")).toBe("Sunwell guard");
+    expect(titleOf("bloodelf", "", null)).toBe("Blood Elf transmog");
+  });
+});
+
+describe("renaming a look the import titled by its race", () => {
+  const code = (text: string) => "ECA1:" + Buffer.from(text).toString("base64");
+  const DRG = "slot 0 210741\nslot 2 210742\nslot 4 210745\n";
+
+  it("names it for what its pieces share", () => {
+    expect(retitled({ title: "Blood Elf transmog", code: code(`look 10 0 1 2 3 4 5\n${DRG}`) })).toBe("Dark Ranger General");
+    expect(retitled({ title: "Transmog", code: code(DRG) })).toBe("Dark Ranger General");
+  });
+
+  it("never touches a title a player typed, even one that names a race", () => {
+    expect(retitled({ title: "My dark ranger", code: code(DRG) })).toBeNull();
+    expect(retitled({ title: "Blood Elf transmog", code: code(`look 1 0 1 2 3 4 5\n${DRG}`) })).toBeNull();
+  });
+
+  it("leaves it alone when the pieces share no name", () => {
+    expect(retitled({ title: "Transmog", code: code("slot 0 69\nslot 2 410\n") })).toBeNull();
+    expect(retitled({ title: "Transmog", code: "ECA1:!!!" })).toBeNull();
+  });
 });
 
 describe("a picture's code, given later in the channel", () => {
@@ -113,6 +139,12 @@ describe("a look made from a picture and the code its player gave", () => {
     expect(lookWithCode(picture, long, null, AT)).toEqual({ ok: false, why: "code" });
     const post = message({ content: long, attachments: [IMAGE] });
     expect(showcaseLook(post, new Map([[post.id, post]]), [post])).toMatchObject({ ok: false });
+  });
+
+  it("is named for what its pieces share when the player wrote no title", () => {
+    const drg = "ECA1:" + Buffer.from("slot 0 210741\nslot 2 210742\nslot 4 210745\n").toString("base64");
+    const captionless = message({ attachments: [IMAGE] });
+    expect(lookWithCode(captionless, drg, null, AT)).toMatchObject({ ok: true, look: { title: "Dark Ranger General", description: null } });
   });
 
   it("is refused without a real code or a screenshot", () => {

@@ -4,15 +4,17 @@ import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { dismissCommentReports, removeComment } from "@/app/actions";
+import { reach } from "@/lib/reach";
 
 /** A moderator's two answers to a reported comment. Either takes it off the list. */
 export function CommentReportActions({ id, outfitId }: { id: string; outfitId: string }) {
   const t = useTranslations("comments");
   const [busy, start] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
 
   const act = (run: () => Promise<{ ok: boolean; error?: string }>, done: string) =>
     start(async () => {
-      const r = await run();
+      const r = await reach(run, unreachable);
       if (!r.ok) {
         toast.error(r.error ?? t("failed"));
         return;

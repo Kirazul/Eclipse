@@ -6,7 +6,10 @@ import { CommentReportActions } from "@/components/comment-report-actions";
 import { repository } from "@/lib/data";
 import { COMMENT_REPORT_REASONS, REPORT_REASONS } from "@/lib/data/types";
 
-export const metadata: Metadata = { title: "Reports", robots: { index: false, follow: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("moderation");
+  return { title: t("title"), robots: { index: false, follow: false } };
+}
 
 /**
  * Looks and comments with reports nobody has reviewed. A look opens on its page, where

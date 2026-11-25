@@ -11,8 +11,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { term } from "@/i18n/terms";
-import { ARMOR_LABEL, ARMOR_TYPES, CATEGORIES, CLASSES, RACE_LABEL, SORT_LABEL, SORTS } from "@/lib/domain";
-import { wardrobeParsers } from "@/lib/search-params";
+import type { FilterValues } from "@/lib/data/types";
+import { ARMOR_LABEL, ARMOR_TYPES, CATEGORIES, CLASSES, RACE_LABEL, SEXES, SORT_LABEL, SORTS } from "@/lib/domain";
+import { offered, wardrobeParsers } from "@/lib/search-params";
 import { classArt, raceArt } from "@/lib/wow-assets";
 
 const ALL = "__all";
@@ -29,6 +30,8 @@ function Filter<T extends string>({
   format?: (value: T) => string;
   art?: (value: T) => string;
 }) {
+  // No public look has any of these: a choice would only lead to an empty page.
+  if (!options.length) return null;
   return (
     <Select value={value ?? ALL} onValueChange={(v) => onChange(v === ALL ? null : (v as T))}>
       <SelectTrigger size="sm" aria-label={label} className="min-w-28 rounded-full bg-surface">
@@ -97,15 +100,19 @@ function TagMenu({
   );
 }
 
-/** Race, sort and category only mean something on posts people have published. */
-export function OutfitFilters({ count, live }: { count: number; live: boolean }) {
+/**
+ * Sort and category only mean something on posts people have published. Race and body
+ * lead: the code carries them, while class and armor are whatever an author chose, and
+ * most looks have neither. Each filter offers only what some public look has.
+ */
+export function OutfitFilters({ count, live, values }: { count: number; live: boolean; values: FilterValues }) {
   const t = useTranslations();
   const [pending, startTransition] = useTransition();
   const [f, setQuery] = useQueryStates(wardrobeParsers, { shallow: false, startTransition });
   // A new filter changes what the pages hold, so it starts from the first.
   const set: typeof setQuery = (values, options) =>
     setQuery(typeof values === "function" ? values : { ...values, page: null }, options);
-  const active = f.q || f.class || f.race || f.armor || f.category || f.tag || f.pictures;
+  const active = f.q || f.class || f.race || f.sex || f.armor || f.category || f.tag || f.pictures;
   const raceKeys = Object.keys(RACE_LABEL);
 
   return (
@@ -121,9 +128,10 @@ export function OutfitFilters({ count, live }: { count: number; live: boolean })
             className="h-9 rounded-full bg-surface pl-9"
           />
         </div>
-        <Filter label={t("filters.class")} any={t("filters.anyClass")} value={f.class} options={CLASSES} format={(k) => term(t, "class", k)} art={classArt} onChange={(v) => set({ class: v })} />
-        {live && <Filter label={t("filters.race")} any={t("filters.anyRace")} value={f.race} options={raceKeys} format={(k) => term(t, "race", k, RACE_LABEL[k])} art={(k) => raceArt(k)} onChange={(v) => set({ race: v })} />}
-        <Filter label={t("filters.armor")} any={t("filters.anyArmor")} value={f.armor} options={ARMOR_TYPES} format={(k) => term(t, "armor", k, ARMOR_LABEL[k])} onChange={(v) => set({ armor: v })} />
+        <Filter label={t("filters.race")} any={t("filters.anyRace")} value={f.race} options={offered(raceKeys, values.races, f.race)} format={(k) => term(t, "race", k, RACE_LABEL[k])} art={(k) => raceArt(k)} onChange={(v) => set({ race: v })} />
+        <Filter label={t("filters.sex")} any={t("filters.anySex")} value={f.sex} options={offered(SEXES, values.sexes, f.sex)} format={(k) => term(t, "sex", k === "male" ? "Male" : "Female", k)} onChange={(v) => set({ sex: v })} />
+        <Filter label={t("filters.class")} any={t("filters.anyClass")} value={f.class} options={offered(CLASSES, values.classes, f.class)} format={(k) => term(t, "class", k)} art={classArt} onChange={(v) => set({ class: v })} />
+        <Filter label={t("filters.armor")} any={t("filters.anyArmor")} value={f.armor} options={offered(ARMOR_TYPES, values.armor, f.armor)} format={(k) => term(t, "armor", k, ARMOR_LABEL[k])} onChange={(v) => set({ armor: v })} />
         {live && (
           <TagMenu
             category={f.category}
@@ -159,7 +167,7 @@ export function OutfitFilters({ count, live }: { count: number; live: boolean })
           {active && (
             <button
               type="button"
-              onClick={() => set({ q: "", class: null, race: null, armor: null, category: null, tag: null, pictures: false })}
+              onClick={() => set({ q: "", class: null, race: null, sex: null, armor: null, category: null, tag: null, pictures: false })}
               className="flex items-center gap-1 text-ink-dim hover:text-ink"
             >
               <X className="size-3" /> {t("filters.clear")}

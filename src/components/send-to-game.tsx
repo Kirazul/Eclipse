@@ -6,19 +6,21 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { sendLookToGame } from "@/app/actions";
+import { reach } from "@/lib/reach";
 import { Button } from "@/components/ui/button";
 
 /** Files a look with the visitor's sets, so their next sync brings it into the game. */
 export function SendToGame({ id }: { id: string }) {
   const t = useTranslations("sendToGame");
   const [sending, startSending] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
 
   function send(event: React.MouseEvent) {
     // Cards are links; a send must not open the drawer as well.
     event.preventDefault();
     event.stopPropagation();
     startSending(async () => {
-      const r = await sendLookToGame(id);
+      const r = await reach(() => sendLookToGame(id), unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;

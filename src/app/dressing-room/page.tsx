@@ -42,11 +42,14 @@ export default async function DressingRoomPage({ searchParams }: Props) {
       <PreviewNotice advice={tp("tryInGame")} className="max-w-2xl" />
       {opened && (
         <p className="text-sm text-ink-dim">
-          Started from{" "}
-          <Link href={`/community-gallery/${opened.id}`} className="underline underline-offset-2 hover:text-ink">
-            {opened.title}
-          </Link>
-          . Its armor and race are on the rack; mounts, morphs and enchants stay with the original.
+          {t.rich("startedFrom", {
+            title: opened.title,
+            look: (c) => (
+              <Link href={`/community-gallery/${opened.id}`} className="underline underline-offset-2 hover:text-ink">
+                {c}
+              </Link>
+            ),
+          })}
         </p>
       )}
       <DressingRoom

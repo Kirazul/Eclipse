@@ -22,10 +22,11 @@ const PEOPLE = 6;
 
 // Everyone's looks, yours among them. Your own are gathered on the Loadouts page.
 export default async function CommunityGalleryPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  const [{ posts, total, filters }, people] = await Promise.all([
+  const [{ posts, total, filters }, people, values] = await Promise.all([
     listFromSearch(searchParams),
     // A search also finds the people whose names match, as a social app's would.
     wardrobeCache.parse(searchParams).then((f) => (f.q.trim() && !f.saved ? repository.listCreators({ q: f.q, limit: PEOPLE }) : [])),
+    repository.filterValues(),
   ]);
   const t = await getTranslations();
 
@@ -59,7 +60,7 @@ export default async function CommunityGalleryPage({ searchParams }: { searchPar
           <Link href="/community-gallery" className="text-amber underline underline-offset-2">{t("gallery.back")}</Link>
         </p>
       )}
-      <OutfitFilters count={total} live={repository.live} />
+      <OutfitFilters count={total} live={repository.live} values={values} />
       {people.length > 0 && (
         <nav aria-label={t("gallery.creators")} className="flex flex-col gap-2">
           <h2 className="font-sans text-xs tracking-[0.08em] text-ink-faint uppercase">{t("gallery.creators")}</h2>

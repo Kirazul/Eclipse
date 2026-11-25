@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { REPORT_REASONS, type ReportReason } from "@/lib/data/types";
+import { reach } from "@/lib/reach";
 import { useAccount } from "@/lib/use-account";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +52,7 @@ export function LookMenu({ id, authorId, community, isPrivate, saved: initialSav
   const [open, setOpen] = useState<"delete" | "report" | null>(null);
   const [saved, setSaved] = useState(initialSaved ?? false);
   const [busy, startBusy] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
   const router = useRouter();
 
   const isAuthor = Boolean(account && authorId && account.id === authorId);
@@ -64,7 +66,7 @@ export function LookMenu({ id, authorId, community, isPrivate, saved: initialSav
   function save() {
     const next = !saved;
     startBusy(async () => {
-      const r = await bookmarkLook(id, next);
+      const r = await reach(() => bookmarkLook(id, next), unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;
@@ -76,7 +78,7 @@ export function LookMenu({ id, authorId, community, isPrivate, saved: initialSav
 
   function toggle() {
     startBusy(async () => {
-      const r = await setLookPrivate(id, !isPrivate);
+      const r = await reach(() => setLookPrivate(id, !isPrivate), unreachable);
       if (!r.ok) {
         const existing = "existing" in r ? r.existing : undefined;
         toast.error(r.error, existing ? { action: { label: t("openIt"), onClick: () => router.push(`/community-gallery/${existing}`) } } : undefined);
@@ -122,12 +124,12 @@ export function LookMenu({ id, authorId, community, isPrivate, saved: initialSav
           {(canReport || canDelete) && (canSave || dressingRoom || canToggle) && <DropdownMenuSeparator />}
           {canReport && (
             <DropdownMenuItem onSelect={() => setOpen("report")}>
-              <Flag aria-hidden />Report
+              <Flag aria-hidden />{t("report")}
             </DropdownMenuItem>
           )}
           {canDelete && (
             <DropdownMenuItem onSelect={() => setOpen("delete")} className="text-bad focus:text-bad">
-              <Trash2 aria-hidden />Delete
+              <Trash2 aria-hidden />{t("remove")}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -144,11 +146,12 @@ type DialogProps = { open: boolean; onOpenChange: (open: boolean) => void };
 function DeleteLook({ id, after, open, onOpenChange }: { id: string; after?: string } & DialogProps) {
   const t = useTranslations("lookMenu");
   const [deleting, startDeleting] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
   const router = useRouter();
 
   function remove() {
     startDeleting(async () => {
-      const r = await deleteLook(id);
+      const r = await reach(() => deleteLook(id), unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;
@@ -183,11 +186,12 @@ function ReportLook({ id, open, onOpenChange }: { id: string } & DialogProps) {
   const tr = useTranslations("reportReason");
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [sending, startSending] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
 
   function send() {
     if (!reason) return;
     startSending(async () => {
-      const r = await reportLook(id, reason);
+      const r = await reach(() => reportLook(id, reason), unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;

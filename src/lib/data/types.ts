@@ -1,4 +1,4 @@
-import type { ArmorType, Category, ClassName, Sort } from "@/lib/domain";
+import type { ArmorType, Category, ClassName, Sex, Sort } from "@/lib/domain";
 import type { ParsedOutfit } from "@/lib/codec/schema";
 
 export interface OutfitPost {
@@ -68,6 +68,8 @@ export interface OutfitFilters {
   q?: string;
   className?: ClassName | null;
   race?: string | null;
+  /** Read from the code by the database, like race. */
+  sex?: Sex | null;
   armor?: ArmorType | null;
   category?: Category | null;
   tag?: string | null;
@@ -91,6 +93,15 @@ export interface OutfitFilters {
   page?: number;
   /** LOOKS_PER_PAGE unless set. */
   pageSize?: number;
+}
+
+/** The choices the Gallery's filters offer: only values some public look has. */
+export interface FilterValues {
+  classes: ClassName[];
+  armor: ArmorType[];
+  /** RACE_LABEL keys. */
+  races: string[];
+  sexes: Sex[];
 }
 
 export interface OutfitList {
@@ -199,6 +210,7 @@ export interface Repository {
   /** False on the built-in looks: nothing can be published, voted on or stored. */
   readonly live: boolean;
   listOutfits(filters: OutfitFilters): Promise<OutfitList>;
+  filterValues(): Promise<FilterValues>;
   getOutfit(id: string): Promise<OutfitPost | null>;
   /** The most upvoted of the looks posted in the last seven days, once at least five were; otherwise null. */
   lookOfTheWeek(): Promise<{ post: OutfitPost; votes: number } | null>;

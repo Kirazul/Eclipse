@@ -13,10 +13,10 @@ import { screenshotUrl } from "@/lib/screenshots";
 
 type Props = { params: Promise<{ id: string }> };
 
-export const metadata: Metadata = {
-  title: "Your set",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("hub");
+  return { title: t("yourSet"), robots: { index: false, follow: false } };
+}
 
 // RLS answers: a set that is not the visitor's is a set that does not exist. The
 // Decoder brings the breakdown, editing and the publish form, and publishing from

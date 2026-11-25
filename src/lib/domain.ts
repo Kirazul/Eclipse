@@ -27,6 +27,10 @@ export type ClassName = (typeof CLASSES)[number];
 export const ARMOR_TYPES = ["cloth", "leather", "mail", "plate"] as const;
 export type ArmorType = (typeof ARMOR_TYPES)[number];
 
+/** A look's body, read from its code: the overlay's rlook m/f, or a classic look line's gender. */
+export const SEXES = ["male", "female"] as const;
+export type Sex = (typeof SEXES)[number];
+
 export const ARMOR_LABEL: Record<ArmorType, string> = {
   cloth: "Cloth", leather: "Leather", mail: "Mail", plate: "Plate",
 };

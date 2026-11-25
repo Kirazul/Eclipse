@@ -3,7 +3,10 @@ import { getTranslations } from "next-intl/server";
 import { Icon } from "@/components/site/icons";
 import { linkedRolesConfigured } from "@/lib/linked-roles";
 
-export const metadata: Metadata = { title: "Discord roles", robots: { index: false, follow: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("linkedRoles");
+  return { title: t("title"), robots: { index: false, follow: false } };
+}
 
 type Props = { searchParams: Promise<{ status?: string }> };
 

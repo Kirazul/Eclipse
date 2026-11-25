@@ -1,5 +1,7 @@
 import "server-only";
-import { LOOKS_PER_PAGE, type ArmorType, type Category, type ClassName } from "@/lib/domain";
+import {
+  ARMOR_TYPES, CLASSES, LOOKS_PER_PAGE, RACE_LABEL, SEXES, type ArmorType, type Category, type ClassName,
+} from "@/lib/domain";
 import { hashSecret, newLinkCode } from "@/lib/game-sync/secrets";
 import { COMMENTS_PER_PAGE } from "@/lib/limits";
 import { cleanSetName } from "@/lib/game-sync/wire";
@@ -7,8 +9,8 @@ import { SCREENSHOT_BUCKET, screenshotFiles, screenshotUrl, smallOf, thumbOf } f
 import { createServerSupabase } from "@/lib/supabase/server";
 import { compressScreenshot, SCREENSHOT_EXTENSION, SCREENSHOT_TYPE } from "./compress";
 import type {
-  CommentReportReason, CreatorEntry, GameLink, GameSet, LookComment, OutfitFilters, OutfitList, OutfitPost, ReportReason, Repository,
-  WriteResult,
+  CommentReportReason, CreatorEntry, FilterValues, GameLink, GameSet, LookComment, OutfitFilters, OutfitList, OutfitPost, ReportReason,
+  Repository, WriteResult,
 } from "./types";
 
 // The same seam as builtin.ts, over supabase/migrations. RLS is what protects the
@@ -197,7 +199,9 @@ const outfitRows = (
   // player signs in, and `null <> id` is unknown, which would leave it out.
   if (f.excludeAuthorId) query = query.filter("author_id", "isdistinct", f.excludeAuthorId);
   if (f.className) query = query.eq("class_name", f.className);
+  // race and sex are written by a trigger from the code (the look_body_from_code migration).
   if (f.race) query = query.eq("race", f.race);
+  if (f.sex) query = query.eq("sex", f.sex);
   if (f.armor) query = query.eq("armor", f.armor);
   // categories is written by a trigger from the code (the look_categories migration).
   if (f.category) query = query.contains("categories", [f.category]);
@@ -238,6 +242,17 @@ async function listOutfits(f: OutfitFilters): Promise<OutfitList> {
 export const supabaseRepository: Repository = {
   live: true,
   listOutfits,
+  async filterValues() {
+    const db = await createServerSupabase();
+    const { data, error } = await db.rpc("gallery_filter_values");
+    // A failure offers every choice, as before there were choices to read: the filters
+    // still work, some only find nothing.
+    if (error || !data) {
+      console.error("Filter choices failed:", error?.message);
+      return { classes: [...CLASSES], armor: [...ARMOR_TYPES], races: Object.keys(RACE_LABEL), sexes: [...SEXES] };
+    }
+    return data as FilterValues;
+  },
   async getOutfit(id) {
     // Every published look has a uuid. The game's own sets (set-1074) are no longer looks here.
     if (!UUID.test(id)) return null;

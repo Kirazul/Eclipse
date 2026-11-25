@@ -5,6 +5,7 @@ import { Loader2, SendHorizontal } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { postComment } from "@/app/actions";
+import { reach } from "@/lib/reach";
 import { SignInOptions } from "@/components/sign-in-dialog";
 import {
   Dialog,
@@ -30,6 +31,7 @@ export function CommentForm({ outfitId }: { outfitId: string }) {
   const ts = useTranslations("signIn");
   const [text, setText] = useState("");
   const [posting, startPosting] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
   const field = useRef<HTMLTextAreaElement>(null);
 
   // Holds the form's place until we know who is here, so nothing jumps.
@@ -58,7 +60,7 @@ export function CommentForm({ outfitId }: { outfitId: string }) {
   function send() {
     if (!text.trim() || left < 0) return;
     startPosting(async () => {
-      const r = await postComment(outfitId, text);
+      const r = await reach(() => postComment(outfitId, text), unreachable);
       if (!r.ok) {
         toast.error(r.error);
         return;

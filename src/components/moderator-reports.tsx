@@ -5,6 +5,7 @@ import { Flag } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { dismissLookReports, openReportsFor } from "@/app/actions";
+import { reach } from "@/lib/reach";
 import { REPORT_REASONS, type ReportedLook } from "@/lib/data/types";
 import { useAccount } from "@/lib/use-account";
 
@@ -17,6 +18,7 @@ export function ModeratorReports({ id }: { id: string }) {
   const [account] = useAccount();
   const [open, setOpen] = useState<ReportedLook | null>(null);
   const [dismissing, start] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
   const moderator = Boolean(account?.moderator);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export function ModeratorReports({ id }: { id: string }) {
         disabled={dismissing}
         onClick={() =>
           start(async () => {
-            const r = await dismissLookReports(id);
+            const r = await reach(() => dismissLookReports(id), unreachable);
             if (!r.ok) {
               toast.error(r.error);
               return;

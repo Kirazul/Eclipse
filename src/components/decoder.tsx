@@ -19,6 +19,7 @@ import { WORLD_MODES, WORLD_ROWS } from "@/lib/codec/world";
 import { ARMOR_LABEL, ARMOR_TYPES, CLASSES, RACE_LABEL, toCss, type ArmorType, type ClassName } from "@/lib/domain";
 import { DESCRIPTION_MAX, MAX_SCREENSHOT_BYTES, MAX_SCREENSHOTS, SCREENSHOT_TYPES } from "@/lib/limits";
 import { screenshotUrl } from "@/lib/screenshots";
+import { reach } from "@/lib/reach";
 import { shrinkForUpload } from "@/lib/shrink-upload";
 
 type OutfitResult = Extract<InspectResult, { kind: "outfit" }>;
@@ -68,6 +69,7 @@ function Screenshots({
 }) {
   const t = useTranslations("decoder");
   const [uploading, startUpload] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
   const full = images.length >= MAX_SCREENSHOTS;
 
   function remove(path: string) {
@@ -84,9 +86,11 @@ function Screenshots({
     startUpload(async () => {
       const added: string[] = [];
       for (const file of files) {
-        const form = new FormData();
-        form.set("file", await shrinkForUpload(file, MAX_SCREENSHOT_BYTES));
-        const r = await uploadScreenshot(form);
+        const r = await reach(async () => {
+          const form = new FormData();
+          form.set("file", await shrinkForUpload(file, MAX_SCREENSHOT_BYTES));
+          return uploadScreenshot(form);
+        }, unreachable);
         if (r.ok) added.push(r.value);
         else toast.error(r.error);
       }
@@ -155,13 +159,14 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
   const [published, setPublished] = useState<{ id: string; code: string } | null>(null);
   const [error, setError] = useState<{ text: string; existing?: string } | null>(null);
   const [pending, start] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!code || gallery.length === 0) return;
     setError(null);
     start(async () => {
-      const r = await publishOutfit({
+      const r = await reach(() => publishOutfit({
         title,
         code,
         className: className ?? undefined,
@@ -170,9 +175,9 @@ function PublishForm({ code, remixOf, fromSet }: { code: string | null; remixOf:
         description,
         gallery,
         remixedFrom: credit && remixOf ? remixOf.id : undefined,
-      });
+      }), unreachable);
       if (!r.ok) {
-        setError({ text: r.error, existing: r.existing });
+        setError({ text: r.error, existing: "existing" in r ? r.existing : undefined });
         return;
       }
       setPublished({ id: r.id, code });
@@ -344,6 +349,7 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
   // Slots handed back to the wearer's gear, as the game's own slot clear does. A new code starts with none.
   const [removed, setRemoved] = useState<number[]>([]);
   const [pending, start] = useTransition();
+  const unreachable = useTranslations("layout")("unreachable");
 
   function change(next: string) {
     setText(next);
@@ -366,9 +372,15 @@ export function Decoder({ initial = "", canPublish = false, remixOf = null, from
       setResult(null);
       return;
     }
-    const handle = setTimeout(() => start(async () => setResult(await inspectCode(text))), 150);
+    const handle = setTimeout(() => start(async () => {
+      try {
+        setResult(await inspectCode(text));
+      } catch {
+        setResult({ kind: "error", error: unreachable });
+      }
+    }), 150);
     return () => clearTimeout(handle);
-  }, [text]);
+  }, [text, unreachable]);
 
   async function paste() {
     try {
