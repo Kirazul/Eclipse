@@ -300,10 +300,12 @@ Eclipse is free and it will stay free. If it has earned a place in your game,
 any of these keeps it going:
 
 - **Star this repository** - it costs nothing and helps others find Eclipse.
-- **[Ko-fi](https://ko-fi.com/eclipsewow)** - support development directly.
+- **[Ko-fi](https://ko-fi.com/eclipsewow)** - support Kirazul, Eclipse's founder, directly.
 - **[Discord](https://discord.gg/RvY5VjHgTA)** - join the community, share your looks, report issues.
 
 ### Crypto
+
+These go to Kirazul.
 
 | Coin | Network | Address |
 | --- | --- | --- |
@@ -314,4 +316,14 @@ any of these keeps it going:
 
 Send each coin only on the network listed beside it. The website shows a QR
 code for every address.
+
+### seolyam
+
+[seolyam](https://github.com/seolyam) co-maintains Eclipse and wrote its
+[website](https://github.com/seolyam/eclipse-web).
+
+- **[Ko-fi](https://ko-fi.com/seolyam)** - support seolyam's work on Eclipse.
+- **GCash** - scan the code below with GCash or any InstaPay bank app in the Philippines.
+
+<img src="website/public/assets/img/qr-gcash.svg" alt="GCash QR code for seolyam" width="180">
 
