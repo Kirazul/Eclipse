@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commentSchema } from "./comments";
+import { commentPage, commentSchema } from "./comments";
 import { COMMENT_MAX } from "./limits";
 
 // What the database's check accepts (the look_comments migration): 1 to 500 characters,
@@ -59,5 +59,21 @@ describe("a look's description", () => {
   it("no longer needs typed tags", async () => {
     const { submitOutfitSchema } = await import("@/lib/codec/schema");
     expect(submitOutfitSchema.parse(base).tags).toEqual([]);
+  });
+});
+
+describe("which page of a look's comments a link asks for", () => {
+  it("is the newest page without one", () => {
+    expect(commentPage(undefined)).toBe(1);
+    expect(commentPage("")).toBe(1);
+  });
+
+  it("is the page a link names, counted back from the newest", () => {
+    expect(commentPage("2")).toBe(2);
+    expect(commentPage(["3", "4"])).toBe(3);
+  });
+
+  it("is the newest page for anything that is not a page", () => {
+    for (const bad of ["0", "-2", "1.5", "two", "1e3", "99999999999"]) expect(commentPage(bad), bad).toBe(1);
   });
 });

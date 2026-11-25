@@ -9,14 +9,15 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/app/actions", () => ({ voteOutfit: vi.fn(), votedLooks: vi.fn() }));
 
-const data = vi.hoisted(() => ({ comments: [] as LookComment[], reads: 0 }));
+const data = vi.hoisted(() => ({ comments: [] as LookComment[], total: null as number | null, reads: 0, pages: [] as (number | undefined)[] }));
 vi.mock("@/lib/data", () => ({
   repository: {
     live: true,
     isBookmarked: async () => false,
-    listComments: async () => {
+    listComments: async (_: string, page?: number) => {
       data.reads++;
-      return data.comments;
+      data.pages.push(page);
+      return { comments: data.comments, total: data.total ?? data.comments.length };
     },
   },
 }));
@@ -53,9 +54,9 @@ const COMMENT: LookComment = {
   createdAt: "2026-11-02T00:00:00.000Z",
 };
 
-async function render(post: OutfitPost) {
+async function render(post: OutfitPost, commentPage?: number) {
   // Its comments are an async server component of their own, which a static render waits for.
-  const { prelude } = await prerenderToNodeStream(await OutfitDetail({ post }));
+  const { prelude } = await prerenderToNodeStream(await OutfitDetail({ post, commentPage }));
   let html = "";
   for await (const chunk of prelude) html += String(chunk);
   return html;
@@ -70,7 +71,9 @@ const classesOf = (html: string, marker: string, parent = false) => {
 
 beforeEach(() => {
   data.comments = [];
+  data.total = null;
   data.reads = 0;
+  data.pages = [];
 });
 
 describe("a look's byline", () => {
@@ -119,5 +122,35 @@ describe("a look's page layout", () => {
   it("reads the comments once", async () => {
     await render(POST);
     expect(data.reads).toBe(1);
+  });
+});
+
+describe("a look with more comments than one page shows", () => {
+  it("opens on the newest, with a link back to older ones and the count of them all", async () => {
+    data.comments = [COMMENT];
+    data.total = 450;
+    const html = await render(POST);
+    expect(data.pages).toEqual([1]);
+    expect(html).toContain(`href="/community-gallery/${POST.id}?comments=2#comments"`);
+    expect(html).toContain("Show older comments");
+    expect(html).toContain(">450<");
+    expect(html).not.toContain("Show newer comments");
+  });
+
+  it("reaches back a page at a time, and forward again to the newest", async () => {
+    data.comments = [COMMENT];
+    data.total = 450;
+    const html = await render(POST, 3);
+    expect(data.pages).toEqual([3]);
+    expect(html).not.toContain("Show older comments");
+    expect(html).toContain(`href="/community-gallery/${POST.id}?comments=2#comments"`);
+    expect(html).toContain("Show newer comments");
+  });
+
+  it("shows no link when every comment fits", async () => {
+    data.comments = [COMMENT];
+    const html = await render(POST);
+    expect(html).not.toContain("Show older comments");
+    expect(html).not.toContain("Show newer comments");
   });
 });

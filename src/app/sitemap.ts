@@ -4,10 +4,11 @@ import { PAGES } from "@/lib/seo";
 import { siteUrl } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const looks = await repository.searchIndex();
+  const { looks, creators } = await repository.sitemapEntries();
   return [
     { url: `${siteUrl}/` },
     ...Object.keys(PAGES).map((path) => ({ url: `${siteUrl}${path}` })),
-    ...looks.map(({ id }) => ({ url: `${siteUrl}/community-gallery/${id}` })),
+    ...looks.map((id) => ({ url: `${siteUrl}/community-gallery/${id}` })),
+    ...creators.map((id) => ({ url: `${siteUrl}/creators/${id}` })),
   ];
 }

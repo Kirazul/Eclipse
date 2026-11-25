@@ -150,6 +150,9 @@ export const builtinRepository: Repository = {
     return allLooks().map(({ id, title, author }) => ({ id, title, author }));
   },
   // The game's own sets have no creators.
+  async sitemapEntries() {
+    return { looks: allLooks().map((o) => o.id), creators: [] };
+  },
   async listCreators() {
     return [];
   },
@@ -178,7 +181,7 @@ export const builtinRepository: Repository = {
     return { ok: false, error: NOT_LIVE };
   },
   async listComments() {
-    return [];
+    return { comments: [], total: 0 };
   },
   async getComment() {
     return null;

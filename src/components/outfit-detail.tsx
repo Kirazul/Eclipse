@@ -51,7 +51,11 @@ function Crest({ post, resolved }: { post: OutfitPost; resolved: ResolvedOutfit 
  * A look's page: who it is, the game's picture of it, what to do with it, and what it
  * wears. Everything else sits quietly underneath.
  */
-export async function OutfitDetail({ post }: { post: OutfitPost }) {
+export async function OutfitDetail({ post, commentPage = 1 }: {
+  post: OutfitPost;
+  /** Which page of its comments, counted back from the newest. */
+  commentPage?: number;
+}) {
   // A player's look, published here or shared on Discord, as against one of the game's
   // own sets. Only those can be bookmarked, reported or talked about.
   const community = Boolean(post.authorId) || Boolean(post.sharedOnDiscord);
@@ -70,10 +74,10 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
   const tags = [...post.categories.map((c) => term(tw, "category", c)), ...post.tags];
   // Only a player's look has someone to talk to, and only a live site stores what is said.
   const social = repository.live && community;
-  const comments = social ? await repository.listComments(post.id) : [];
+  const { comments, total } = social ? await repository.listComments(post.id, commentPage) : { comments: [], total: 0 };
   // With nothing said yet, what the look wears takes the place beside the picture, and the
   // place to write the first comment waits under it.
-  const talk = social && (comments.length > 0 || Boolean(post.description));
+  const talk = social && (total > 0 || Boolean(post.description));
 
   return (
     <article className="flex flex-col gap-8">
@@ -198,8 +202,10 @@ export async function OutfitDetail({ post }: { post: OutfitPost }) {
           >
             <LookComments
               comments={comments}
+              total={total}
               beside={talk}
               outfitId={post.id}
+              page={commentPage}
               lookAuthorId={post.authorId}
               caption={post.description
                 ? { body: post.description, author: post.author, avatar: post.authorAvatar ?? null, verified: post.authorVerified, createdAt: post.createdAt }

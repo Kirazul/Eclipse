@@ -9,6 +9,7 @@ import { CommentScroller } from "@/components/comment-scroller";
 import { ago } from "@/lib/ago";
 import { sizedAvatar } from "@/lib/avatar";
 import type { LookComment } from "@/lib/data/types";
+import { COMMENTS_PER_PAGE } from "@/lib/limits";
 
 /** Who wrote it: their Discord picture, or their initial if they have none. */
 function Face({ name, avatar }: { name: string | null; avatar: string | null }) {
@@ -89,12 +90,16 @@ function CaptionEntry({ caption, authorId, now }: { caption: Caption; authorId: 
  * What people said about a look, beside its picture: its own list scrolling oldest
  * first, and the place to write held at the bottom.
  */
-export async function LookComments({ comments, beside, outfitId, lookAuthorId, caption }: {
+export async function LookComments({ comments, total, beside, outfitId, page = 1, lookAuthorId, caption }: {
   /** Read once by the look's page, which places the conversation by whether there is one. */
   comments: LookComment[];
+  /** How many the look has in all, past this page's too. */
+  total: number;
   /** Beside the picture, filling the height the picture sets; under it, as tall as it needs. */
   beside: boolean;
   outfitId: string;
+  /** Which page of comments: 1 is the newest, each one after reaches further back. */
+  page?: number;
   /** Null on a look from the Discord showcase its player has not claimed. */
   lookAuthorId: string | null;
   /** The author's description, read first, as a post's caption is on a social app. */
@@ -102,6 +107,10 @@ export async function LookComments({ comments, beside, outfitId, lookAuthorId, c
 }) {
   const t = await getTranslations("comments");
   const now = Date.now();
+  // Plain links, as the Gallery's pages are, so they work without JavaScript.
+  const pageHref = (to: number) => `/community-gallery/${outfitId}${to > 1 ? `?comments=${to}` : ""}#comments`;
+  const older = total > page * COMMENTS_PER_PAGE;
+  const newer = page > 1;
 
   return (
     <section
@@ -111,22 +120,32 @@ export async function LookComments({ comments, beside, outfitId, lookAuthorId, c
     >
       <h2 id="comments-heading" className="flex items-baseline gap-2 border-b border-line px-4 py-3 font-sans text-sm font-medium text-ink">
         {t("title")}
-        {comments.length > 0 && <span className="nums text-xs font-normal text-ink-faint">{comments.length}</span>}
+        {total > 0 && <span className="nums text-xs font-normal text-ink-faint">{total}</span>}
       </h2>
       <CommentsViewer>
-        <CommentScroller count={comments.length}>
+        <CommentScroller count={total}>
           {caption && <CaptionEntry caption={caption} authorId={lookAuthorId} now={now} />}
+          {older && (
+            <div className="flex justify-center pt-4">
+              <Link href={pageHref(page + 1)} className="pill" rel="next">{t("older")}</Link>
+            </div>
+          )}
           {comments.length > 0 ? (
             <ol className="flex flex-col gap-4 py-4">
               {comments.map((c) => <Comment key={c.id} comment={c} lookAuthorId={lookAuthorId} now={now} />)}
             </ol>
-          ) : caption ? (
+          ) : newer ? null : caption ? (
             <p className="py-4 text-center text-xs text-ink-faint">{t("noneYetBeFirst")}</p>
           ) : (
             <div className="flex h-full min-h-40 flex-col items-center justify-center gap-2 py-8 text-center">
               <MessageCircle className="size-6 text-ink-faint" strokeWidth={1.5} aria-hidden />
               <p className="text-sm text-ink-dim">{t("noneYet")}</p>
               <p className="text-xs text-ink-faint">{t("beFirst")}</p>
+            </div>
+          )}
+          {newer && (
+            <div className="flex justify-center pb-4">
+              <Link href={pageHref(page - 1)} className="pill" rel="prev">{t("newer")}</Link>
             </div>
           )}
         </CommentScroller>

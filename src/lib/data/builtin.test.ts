@@ -133,6 +133,8 @@ describe("the built-in looks", () => {
   it("indexes every look for search, without names it does not have", async () => {
     const index = await repo.searchIndex();
     expect(index).toHaveLength((await everything()).length);
+    // The game's own sets have no creator pages.
+    expect(await repo.sitemapEntries()).toEqual({ looks: index.map((e) => e.id), creators: [] });
     expect(index.filter((e) => e.author).map((e) => e.id)).toEqual(["crystal-scholar"]);
   });
 

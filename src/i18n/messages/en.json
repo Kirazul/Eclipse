@@ -679,7 +679,9 @@
     "dismiss": "Dismiss",
     "failed": "That did not work. Try again.",
     "report": "Report",
-    "removeShort": "Remove"
+    "removeShort": "Remove",
+    "older": "Show older comments",
+    "newer": "Show newer comments"
   },
   "upvote": {
     "label": "Upvote, {count, plural, one {# vote} other {# votes}}",

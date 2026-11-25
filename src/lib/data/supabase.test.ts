@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LOOKS_PER_PAGE } from "@/lib/domain";
+import { COMMENTS_PER_PAGE } from "@/lib/limits";
 
 vi.mock("server-only", () => ({}));
 vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://stub.supabase.co");
@@ -650,6 +651,30 @@ describe("the Supabase adapter", () => {
     expect(index.map((e) => e.title)).toEqual(["A real post"]);
   });
 
+  it("lists every public look for the sitemap, a page of rows at a time, with their named creators", async () => {
+    const PAGE = 1000;
+    const author = (i: number) => `33333333-3333-4333-8333-${String(i % 3).padStart(12, "0")}`;
+    const rows = Array.from({ length: PAGE + 5 }, (_, i) => ({
+      id: `11111111-1111-4111-8111-${String(i).padStart(12, "0")}`,
+      author_id: i === 7 ? null : author(i),
+      profiles: i === 7 ? null : { display_name: i % 3 === 2 ? null : "Kira" },
+    }));
+    reply = (url) => {
+      const from = Number(url.searchParams.get("offset") ?? 0);
+      return Response.json(rows.slice(from, from + Number(url.searchParams.get("limit"))));
+    };
+    const { looks, creators } = await repo.sitemapEntries();
+    expect(looks).toHaveLength(PAGE + 5);
+    expect(new Set(looks).size).toBe(PAGE + 5);
+    // A look from the Discord showcase has no creator page; nor has someone with no public name.
+    expect(creators.sort()).toEqual([author(0), author(1)]);
+    expect(requests).toHaveLength(2);
+    for (const r of requests) {
+      expect(r.searchParams.get("is_private")).toBe("eq.false");
+      expect(r.searchParams.get("order")).toBe("created_at.asc,id.asc");
+    }
+  });
+
   it("filters the Showcase to posts with a capture", async () => {
     await repo.listOutfits({ sort: "top", captured: true });
     expect(requests[0].searchParams.get("gallery")).toBe("neq.{}");
@@ -725,21 +750,45 @@ describe("comments", () => {
 
   it("lists a look's comments oldest first, with the writer's public name", async () => {
     reply = () => Response.json([comment]);
-    expect(await repo.listComments(row.id)).toEqual([said]);
+    expect(await repo.listComments(row.id)).toEqual({ comments: [said], total: 1 });
     const q = requests[0].searchParams;
     expect(q.get("outfit_id")).toBe(`eq.${row.id}`);
-    expect(q.get("order")).toBe("created_at.asc");
     // Names the key: the reports table also joins comments to profiles.
     expect(q.get("select")).toContain("profiles!outfit_comments_author_id_fkey(display_name,verified,avatar_url)");
   });
 
+  it("reads the newest page, so a new comment always shows, and says how many there are", async () => {
+    const newer = { ...comment, id: "66666666-6666-4666-8666-666666666666", body: "Newer", created_at: "2026-11-02T00:00:00.000Z" };
+    reply = () => Response.json([newer, comment], { headers: { "Content-Range": "0-1/450" } });
+    const { comments, total } = await repo.listComments(row.id);
+    expect(comments.map((c) => c.body)).toEqual(["Love the cape.", "Newer"]);
+    expect(total).toBe(450);
+    const q = requests[0].searchParams;
+    expect(q.get("order")).toBe("created_at.desc,id.desc");
+    expect(q.get("offset")).toBe("0");
+    expect(q.get("limit")).toBe(String(COMMENTS_PER_PAGE));
+  });
+
+  it("reads older comments a page at a time, as far back as they go", async () => {
+    reply = () => Response.json([comment], { headers: { "Content-Range": "400-400/401" } });
+    expect(await repo.listComments(row.id, 3)).toEqual({ comments: [said], total: 401 });
+    expect(requests[0].searchParams.get("offset")).toBe(String(2 * COMMENTS_PER_PAGE));
+  });
+
+  it("answers a page past the oldest with none, and still how many there are", async () => {
+    reply = (_, init) => init?.method === "HEAD"
+      ? new Response(null, { headers: { "Content-Range": "*/12" } })
+      : Response.json({ code: "PGRST103", message: "Requested range not satisfiable" }, { status: 416 });
+    expect(await repo.listComments(row.id, 9)).toEqual({ comments: [], total: 12 });
+  });
+
   it("shows a writer with no picture by their initial", async () => {
     reply = () => Response.json([{ ...comment, profiles: { display_name: "Kira", verified: true, avatar_url: null } }]);
-    expect(await repo.listComments(row.id)).toEqual([{ ...said, authorAvatar: null }]);
+    expect((await repo.listComments(row.id)).comments).toEqual([{ ...said, authorAvatar: null }]);
   });
 
   it("has no comments for a built-in set, and asks the database nothing", async () => {
-    expect(await repo.listComments("set-1074")).toEqual([]);
+    expect(await repo.listComments("set-1074")).toEqual({ comments: [], total: 0 });
     expect(requests).toEqual([]);
   });
 
