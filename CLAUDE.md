@@ -38,6 +38,8 @@ Preview deployments sit behind protection, so test them with `vercel curl <path>
 
 Commit subjects are `feat:`, `fix:` or `perf:` plus a plain sentence about the visitor-facing result.
 
+`.github/workflows/mirror.yml` copies `main` into `Kirazul/Eclipse` under `website/` with every commit, once the `MIRROR_TOKEN` secret is set. Work, issues and PRs stay here. Nobody edits `website/` there, or the next sync conflicts.
+
 ## Ask seolyam first
 
 - Pushing or merging to `main`.

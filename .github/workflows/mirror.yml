@@ -1,0 +1,38 @@
+# Copies main into Kirazul/Eclipse under website/, keeping every commit and its author, so the
+# Eclipse repository carries the website while this one stays where work, deploys and PRs happen.
+# Needs MIRROR_TOKEN: a classic token of seolyam's with public_repo, the only kind that can push to
+# a repository another account owns. Until it is set, the job does nothing.
+name: mirror
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
+    steps:
+      - name: Skip until the token is set
+        if: env.MIRROR_TOKEN == ''
+        run: echo "::notice::MIRROR_TOKEN is not set, so nothing was mirrored."
+      - name: Pull main into website/ and push
+        if: env.MIRROR_TOKEN != ''
+        run: |
+          git clone --no-tags "https://x-access-token:${MIRROR_TOKEN}@github.com/Kirazul/Eclipse.git" eclipse
+          cd eclipse
+          git config user.name seolyam
+          git config user.email 142888081+seolyam@users.noreply.github.com
+          git subtree pull --prefix=website "https://github.com/${{ github.repository }}.git" main \
+            -m "Sync website from ${{ github.repository }}@${{ github.sha }}"
+          git push origin HEAD:main
