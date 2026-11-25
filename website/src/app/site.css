@@ -519,6 +519,16 @@
 .slink__text strong { font-weight: 600; }
 .slink__text > span { font-size: 0.85rem; color: var(--ink-dim); }
 .slink__short { display: none; }
+/* Star is a button that opens a menu of the two repositories. */
+button.slink { width: 100%; font: inherit; color: inherit; text-align: start; cursor: pointer; }
+.slink[data-state="open"] { background: var(--surface-raised); border-color: var(--line-strong); }
+.star-menu { min-width: 17rem; padding: 0.3rem; background: var(--surface-raised); border: 1px solid var(--line-strong); color: var(--ink); }
+.star-menu a { gap: 0.75rem; padding: 0.6rem 0.7rem; cursor: pointer; }
+.star-menu a:focus { background: #2a2926; color: var(--ink); }
+.star-menu a svg { color: var(--ink-dim); }
+.star-menu__text { display: grid; gap: 0.05rem; }
+.star-menu__text strong { font-weight: 600; font-size: 0.9rem; }
+.star-menu__text span { font-size: 0.8rem; color: var(--ink-dim); }
 
 /* seolyam's own ways, under Kirazul's: a Ko-fi and a GCash code. */
 .backer { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--line); }
