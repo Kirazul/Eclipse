@@ -80,6 +80,8 @@ Use the CLIs: `pnpm exec supabase` and the global `vercel`. Reach for an MCP onl
 
 `F:\projects\dev\Eclipse-DEV` is the reference for UI, UX and colour; check how the overlay does something before designing it here. Treat it as read-only, and keep its source and build output, including `dinput8.dll`, out of this repo. Downloads link to `Kirazul/Eclipse` releases.
 
+- **DLL releases:** each DLL is one release on `Kirazul/Eclipse`, its tag `vX.Y.Z` the version the DLL reports (`src/eclipse.rc` and `kBuildText` in `Multi.cpp`), its file named `dinput8.dll`, the Warden build rather than NoWarden, with its SHA-256 in the notes. The Download panel lists them (`src/lib/releases.ts`), `/dinput8.dll` redirects to the newest, and the newest tag is what `/api/game/version` tells the game, so never tag above what the build reports. The DLL itself is never committed here.
+
 - **Game sync wire:** `src/lib/game-sync/wire.ts` and the overlay's `SiteSyncCore.h` must change together.
 - **Merged is not released:** before assuming players have the game side, check for a public overlay release.
 
