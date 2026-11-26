@@ -24,11 +24,13 @@ export const GITHUB_URL = "https://github.com/Kirazul/Eclipse";
 export const WEB_GITHUB_URL = "https://github.com/seolyam/eclipse-web";
 
 // Eclipse.zip lives on Google Drive and is overridable. dinput8.dll is published on
-// the GitHub releases, and this always lands on the newest one (see the README).
+// the GitHub releases, one release per DLL version (tag vX.Y.Z, the DLL's own
+// version), and this always downloads the newest one. /dinput8.dll redirects here.
 export const downloadUrl =
   process.env.NEXT_PUBLIC_DOWNLOAD_URL || "https://drive.google.com/file/d/1UuOb9tl43sohg41_gV2z82WAgIKBLhXF/view?usp=sharing";
-// The Download panel shows it only while a release exists (src/lib/releases.ts).
-export const dllUrl = `${GITHUB_URL}/releases/latest`;
+// The Download panel lists the earlier versions too (src/lib/releases.ts).
+export const dllUrl = `${GITHUB_URL}/releases/latest/download/dinput8.dll`;
+export const releasesUrl = `${GITHUB_URL}/releases`;
 
 export const DISCORD_URL = "https://discord.gg/RvY5VjHgTA";
 export const KOFI_URL = "https://ko-fi.com/eclipsewow";

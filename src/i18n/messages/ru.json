@@ -347,6 +347,8 @@
     "downloadTitle": "Скачать Eclipse",
     "downloadLead": "Включает пакет ресурсов из современной версии игры: предметы, транспорт, шрифты, эффекты и заклинания.",
     "downloadZip": "Скачать Eclipse.zip",
+    "dllEarlier": "Прежние DLL:",
+    "dllAll": "Все версии",
     "extract": "Распакуйте",
     "extractBody": "Распакуйте <code>Eclipse.zip</code> в любое место.",
     "copy": "Скопируйте",

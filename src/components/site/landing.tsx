@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Fragment, Suspense } from "react";
 import { preload } from "react-dom";
 import { HeroStage } from "@/components/site/hero-stage";
 import { Icon } from "@/components/site/icons";
@@ -12,8 +12,8 @@ import { WalletSection } from "@/components/site/wallets";
 import { discordMembers } from "@/lib/discord-invite";
 import { FEATURES } from "@/lib/features";
 import { TALL_MEDIA, TALL_SIZES, WIDE_SIZES, tallArt, wideArt } from "@/lib/hero-art";
-import { latestRelease } from "@/lib/releases";
-import { DISCORD_URL, dllUrl, downloadUrl } from "@/lib/site";
+import { dllReleases } from "@/lib/releases";
+import { DISCORD_URL, dllUrl, downloadUrl, releasesUrl } from "@/lib/site";
 
 // The official page's sections, word for word: only the links are new. The hero is
 // the exception: Kira took the showcase video out on 2026-11-14 and asked for the
@@ -26,13 +26,35 @@ async function DiscordMembers() {
   return count ? <span className="btn__count">{t("members", { count })}</span> : null;
 }
 
-/** The DLL on its own, offered only once Kirazul/Eclipse has a release to land on. */
-async function DllButton() {
-  if (!(await latestRelease())) return null;
+/** The newest DLL on its own, from the Kirazul/Eclipse releases, with its version once GitHub says. */
+function DllLink({ href = dllUrl, version }: { href?: string; version?: string }) {
   return (
-    <a className="btn btn--ghost" href={dllUrl} target="_blank" rel="noopener">
+    <a className="btn btn--ghost" href={href} rel="noopener">
       <Icon id="i-download" /><span>dinput8.dll</span>
+      {version && <span className="btn__count">v{version}</span>}
     </a>
+  );
+}
+
+async function DllButton() {
+  const [latest] = await dllReleases();
+  return <DllLink href={latest?.url} version={latest?.version} />;
+}
+
+/** The earlier DLLs, each its own release, for players who want a previous version. */
+async function EarlierDlls() {
+  const earlier = (await dllReleases()).slice(1, 4);
+  if (!earlier.length) return null;
+  const t = await getTranslations("landing");
+  return (
+    <p className="fine">
+      {t("dllEarlier")}{" "}
+      {earlier.map((r, i) => (
+        <Fragment key={r.version}>{i > 0 && ", "}<a href={r.url} rel="noopener">v{r.version}</a></Fragment>
+      ))}
+      {" "}&middot;{" "}
+      <a href={releasesUrl} target="_blank" rel="noopener">{t("dllAll")}</a>
+    </p>
   );
 }
 
@@ -108,11 +130,12 @@ export function Download() {
               <a className="btn btn--primary" href={downloadUrl} target="_blank" rel="noopener">
                 <Icon id="i-download" /><span>{t("downloadZip")}</span>
               </a>
-              <Suspense fallback={null}><DllButton /></Suspense>
+              <Suspense fallback={<DllLink />}><DllButton /></Suspense>
             </div>
             <p className="fine">
               Google Drive &middot; Windows &middot; World of Warcraft 3.3.5a (12340)
             </p>
+            <Suspense fallback={null}><EarlierDlls /></Suspense>
           </div>
           <ol className="steps">
             <li><h3>{t("extract")}</h3><p>{t.rich("extractBody", { code })}</p></li>

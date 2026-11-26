@@ -347,6 +347,8 @@
     "downloadTitle": "Download Eclipse",
     "downloadLead": "Includes the retail asset pack: items, mounts, fonts, effects and spells.",
     "downloadZip": "Download Eclipse.zip",
+    "dllEarlier": "Earlier DLL:",
+    "dllAll": "All versions",
     "extract": "Extract",
     "extractBody": "Unzip <code>Eclipse.zip</code> anywhere.",
     "copy": "Copy",
