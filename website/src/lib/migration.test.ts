@@ -21,8 +21,13 @@ function sources(dir: string): string[] {
 
 describe("the site stands alone", () => {
   it("sends dinput8.dll to the public repo's latest release instead of hosting it", () => {
-    expect(dllUrl).toBe("https://github.com/Kirazul/Eclipse/releases/latest");
+    expect(dllUrl).toBe("https://github.com/Kirazul/Eclipse/releases/latest/download/dinput8.dll");
     expect(existsSync(join(process.cwd(), "public", "dinput8.dll"))).toBe(false);
+  });
+
+  it("answers the old site's /dinput8.dll link with the latest DLL", () => {
+    const config = readFileSync(join(process.cwd(), "next.config.ts"), "utf8");
+    expect(config).toContain(`{ source: "/dinput8.dll", destination: "${dllUrl}", permanent: false }`);
   });
 
   it("has no reference to the old host anywhere in the source", () => {

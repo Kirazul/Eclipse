@@ -457,6 +457,9 @@
 .download__intro p { margin-top: 0.9rem; color: var(--ink-dim); max-width: 26rem; }
 .download__btns { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.9rem; }
 .download__intro .fine { margin-top: 1rem; font-size: 0.8rem; color: var(--ink-faint); }
+.download__intro .fine + .fine { margin-top: 0.35rem; }
+.download__intro .fine a { color: var(--ink-dim); text-decoration: underline; text-underline-offset: 0.18em; text-decoration-color: var(--line-strong); }
+.download__intro .fine a:hover { color: var(--ink); text-decoration-color: currentColor; }
 .steps { counter-reset: step; align-self: center; }
 .steps li {
   counter-increment: step;

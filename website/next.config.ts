@@ -47,6 +47,9 @@ const nextConfig: NextConfig = {
       // The Wardrobe became the Community Gallery on 2026-11-14. Links to looks are
       // already in Discord and in players' bookmarks, so the old paths stay.
       { source: "/wardrobe", destination: "/community-gallery", permanent: true },
+      // The old Eclipse site's DLL link now lands here. Not permanent: it follows the
+      // newest release (dllUrl in src/lib/site.ts).
+      { source: "/dinput8.dll", destination: "https://github.com/Kirazul/Eclipse/releases/latest/download/dinput8.dll", permanent: false },
       { source: "/wardrobe/:id", destination: "/community-gallery/:id", permanent: true },
       { source: "/armory", destination: "/community-gallery", permanent: true },
       { source: "/armory/:id", destination: "/community-gallery/:id", permanent: true },
