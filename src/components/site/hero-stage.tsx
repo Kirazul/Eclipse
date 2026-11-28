@@ -253,11 +253,25 @@ export function HeroStage() {
 
   useEffect(() => {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const stopFx = startFx(bg.current!, ash.current!, fx.current!, plate.current!);
-    const stopLightning = startLightning(bg.current!);
+    // The art is the page's largest paint; the ash and lightning are decoration, so they
+    // wait until the browser is idle instead of competing with hydration for the main thread.
+    let stop: (() => void) | undefined;
+    const start = () => {
+      const stopFx = startFx(bg.current!, ash.current!, fx.current!, plate.current!);
+      const stopLightning = startLightning(bg.current!);
+      stop = () => {
+        stopFx();
+        stopLightning();
+      };
+    };
+    // Safari has no requestIdleCallback.
+    const cancel =
+      "requestIdleCallback" in window
+        ? ((id) => () => cancelIdleCallback(id))(requestIdleCallback(start, { timeout: 2500 }))
+        : ((id) => () => clearTimeout(id))(setTimeout(start, 1200));
     return () => {
-      stopFx();
-      stopLightning();
+      cancel();
+      stop?.();
     };
   }, []);
 
