@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CopyButton } from "@/components/copy-button";
 import { ItemRing } from "@/components/item-icon";
 import { ModelStage } from "@/components/model-stage";
+import { SetPicker } from "@/components/set-picker";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,7 +18,7 @@ import { AppearancePanel } from "@/components/viewer/appearance-panel";
 import { ClipPicker } from "@/components/viewer/clip-picker";
 import type { ItemHit } from "@/lib/catalog";
 import { RACE_LABEL, SLOT_NAMES, VISIBLE_SLOTS } from "@/lib/domain";
-import { dressedCode, type StartingRack } from "@/lib/dressing-room";
+import { dressedCode, wearSet, type StartingRack } from "@/lib/dressing-room";
 import { NARCISSUS_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { bodyOf } from "@/lib/viewer/figure";
@@ -82,8 +83,10 @@ const publishHref = (code: string, from: string | null) =>
   `/loadouts?${new URLSearchParams(from ? { code, from } : { code })}`;
 
 /** Pick pieces slot by slot, see them on a character, and take away a code. */
-export function DressingRoom({ itemCount, start, from = null, canPublish = false }: {
+export function DressingRoom({ itemCount, setCount, start, from = null, canPublish = false }: {
   itemCount: number;
+  /** The game's item sets on offer in the Sets tab. */
+  setCount: number;
   start: StartingRack | null;
   /** The published look on the rack, credited if this one is published. */
   from?: string | null;
@@ -207,7 +210,12 @@ export function DressingRoom({ itemCount, start, from = null, canPublish = false
         <TabsList aria-label={t("whatToChange")}>
           <TabsTrigger value="pieces">{t("pieces")}</TabsTrigger>
           <TabsTrigger value="appearance">{t("appearance")}</TabsTrigger>
+          <TabsTrigger value="sets">{t("sets")}</TabsTrigger>
         </TabsList>
+        {/* Mounted only while open, so the page opens without asking for any set. */}
+        <TabsContent value="sets">
+          <SetPicker setCount={setCount} onWear={(set) => setRack((r) => wearSet(r, set.pieces))} />
+        </TabsContent>
         <TabsContent value="appearance" className="rounded-md border border-line bg-surface/85 p-3">
           {race === OWN_RACE
             ? <p className="text-sm text-ink-dim">{t("chooseRace")}</p>
