@@ -203,6 +203,9 @@ export interface ReportedComment {
   lastReport: string;
 }
 
+/** What publishing answers once an account has published as many looks as an hour allows (the database's limit). */
+export const PUBLISHING_LIMIT_ERROR = "That is 20 looks this hour. Try again later.";
+
 export type WriteResult<T> =
   | { ok: true; value: T }
   /** `existing`: the public look that already has this code, when that is the refusal. */

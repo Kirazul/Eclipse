@@ -12,6 +12,7 @@ import type {
   CommentReportReason, CreatorEntry, FilterValues, GameLink, GameSet, LookComment, OutfitFilters, OutfitList, OutfitPost, ReportReason,
   Repository, WriteResult,
 } from "./types";
+import { PUBLISHING_LIMIT_ERROR } from "./types";
 
 // The same seam as builtin.ts, over supabase/migrations. RLS is what protects the
 // rows: this file holds no rule the database does not enforce.
@@ -379,7 +380,7 @@ export const supabaseRepository: Repository = {
       .select(OUTFIT_COLUMNS)
       .single();
     if (error?.code === REFUSED_BY_POLICY) return { ok: false, error: "Choose a public name first, from the account button." };
-    if (error?.code === PUBLISHING_LIMIT) return { ok: false, error: "That is 20 looks this hour. Try again later." };
+    if (error?.code === PUBLISHING_LIMIT) return { ok: false, error: PUBLISHING_LIMIT_ERROR };
     if (error?.code === ALREADY_PUBLIC) return { ok: false, error: ALREADY_PUBLISHED, existing: lookId(error.details) };
     if (error) return { ok: false, error: "That outfit could not be saved. Try again." };
     return { ok: true, value: toPost(data as unknown as OutfitRow) };
