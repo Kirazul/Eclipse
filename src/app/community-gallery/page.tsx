@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { SearchParams } from "nuqs/server";
 import { Avatar } from "@/components/avatar";
-import { BuiltinNotice, HubTitle, listFromSearch, NoLooks, Pager, PublishButton } from "@/components/hub";
+import { BuiltinNotice, HubTitle, listFromSearch, NoLooks, Pager, PublishButton, RandomLookButton } from "@/components/hub";
 import { OutfitPoster } from "@/components/outfit-card";
 import { OutfitFilters } from "@/components/outfit-filters";
 import { sizedAvatar } from "@/lib/avatar";
@@ -38,7 +38,10 @@ export default async function CommunityGalleryPage({ searchParams }: { searchPar
         <>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <HubTitle title={t("gallery.title")} blurb={t("gallery.blurb")} />
-            <PublishButton />
+            <div className="flex flex-wrap gap-2">
+              {total > 1 && <RandomLookButton />}
+              <PublishButton />
+            </div>
           </div>
           <BuiltinNotice />
         </>

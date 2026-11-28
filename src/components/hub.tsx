@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { createSerializer, type SearchParams } from "nuqs/server";
@@ -58,6 +58,19 @@ export function PublishButton() {
     <Link href="/loadouts" className="btn btn--ghost btn--sm">
       <span>{t("publish")}</span>
     </Link>
+  );
+}
+
+/** A plain link, not `Link`: prefetching it would pick a look before anyone asked for one. */
+export function RandomLookButton() {
+  const t = useTranslations("hub");
+  return (
+    // A full request: the route answers with a redirect, which the client router would cache.
+    // eslint-disable-next-line @next/next/no-html-link-for-pages
+    <a href="/community-gallery/random" className="btn btn--ghost btn--sm">
+      <Shuffle className="size-3.5" strokeWidth={1.75} aria-hidden />
+      <span>{t("random")}</span>
+    </a>
   );
 }
 

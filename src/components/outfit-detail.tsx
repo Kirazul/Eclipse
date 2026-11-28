@@ -2,6 +2,7 @@ import { BadgeCheck, ChevronDown, Code, EyeOff } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
+import { ClaimPrompt } from "@/components/claim-prompt";
 import { CopyButton } from "@/components/copy-button";
 import { term } from "@/i18n/terms";
 import { LookComments } from "@/components/look-comments";
@@ -122,6 +123,7 @@ export async function OutfitDetail({ post, commentPage = 1 }: {
               </>
             )}
           </p>
+          {!post.authorId && post.sharedOnDiscord && post.author && <ClaimPrompt author={post.author} />}
           {post.remixedFrom && (
             <p className="mt-0.5 text-sm text-ink-faint">
               {t.rich("basedOn", {
