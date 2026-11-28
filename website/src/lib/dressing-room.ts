@@ -48,6 +48,14 @@ export function dressedCode(slots: Record<number, number>, look: DressingLook | 
   return encodeOutfit(outfit);
 }
 
+/**
+ * A set on the rack: each slot it has wears its piece, the same as choosing it there;
+ * the other slots keep what they held, hidden or not.
+ */
+export function wearSet<T>(rack: Record<number, T | null>, pieces: Record<number, T>): Record<number, T | null> {
+  return { ...rack, ...pieces };
+}
+
 /** What a published look puts on the rack: slot -> item, where null hides the slot. */
 export interface StartingRack {
   pieces: Record<number, ItemHit | null>;

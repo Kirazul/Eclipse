@@ -14,6 +14,7 @@ vi.mock("@/lib/data", async () => {
 });
 
 import { GET } from "../api/items/route";
+import { GET as getSets } from "../api/sets/route";
 import DressingRoomPage from "./page";
 
 const render = async (look?: string) =>
@@ -52,6 +53,12 @@ describe("the dressing room page", () => {
     expect(html).not.toContain('aria-label="Choose Neck"');
   });
 
+  it("offers the game's sets, but opens with none on the rack", () => {
+    expect(html).toMatch(/role="tab"[^>]*>Sets</);
+    expect(html).not.toContain("Random set");
+    expect(html).not.toMatch(/in the 3D preview/);
+  });
+
   it("has no code to copy before anything is chosen", () => {
     expect(html).not.toContain('aria-label="Copy code"');
   });
@@ -80,5 +87,20 @@ describe("the items route", () => {
   it("answers nothing for a slot it cannot read", async () => {
     expect(await ask("?slot=abc")).toEqual([]);
     expect(await ask("")).toEqual([]);
+  });
+});
+
+describe("the sets route", () => {
+  const sets = async (query: string) =>
+    (await getSets(new NextRequest(`https://site.test/api/sets${query}`)).json()) as { id: number; name: string; pieces: Record<string, unknown> }[];
+
+  it("finds sets by name", async () => {
+    expect((await sets("?q=champion%27s%20battlegear")).map((s) => s.name)).toContain("Champion's Battlegear");
+  });
+
+  it("answers one set for any number, so a random pick is the visitor's own", async () => {
+    const [one] = await sets("?at=123456789");
+    expect(Object.keys(one!.pieces).length).toBeGreaterThan(0);
+    expect(await sets("?at=abc")).toEqual([]);
   });
 });
