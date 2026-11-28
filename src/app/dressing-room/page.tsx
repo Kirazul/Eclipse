@@ -7,6 +7,7 @@ import { PreviewNotice } from "@/components/preview-notice";
 import { catalogCounts, resolveOutfit } from "@/lib/catalog";
 import { decodeOutfit } from "@/lib/codec/outfit";
 import { getOutfit, repository } from "@/lib/data";
+import { setCount } from "@/lib/item-sets";
 import { startingRack, type StartingRack } from "@/lib/dressing-room";
 import { localPageMetadata } from "@/lib/seo";
 
@@ -55,6 +56,7 @@ export default async function DressingRoomPage({ searchParams }: Props) {
       <DressingRoom
         key={opened?.id ?? "empty"}
         itemCount={catalogCounts.items}
+        setCount={setCount}
         start={opened?.rack ?? null}
         from={opened?.published ? opened.id : null}
         canPublish={repository.live}

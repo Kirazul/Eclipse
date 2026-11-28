@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 import { decodeOutfit } from "@/lib/codec/outfit";
 import { resolveOutfit } from "@/lib/catalog";
-import { dressedCode, startingRack } from "./dressing-room";
+import { dressedCode, startingRack, wearSet } from "./dressing-room";
 
 const decode = (code: string | null) => {
   const r = decodeOutfit(code ?? "");
@@ -68,5 +68,26 @@ describe("a dressing room code", () => {
   it("opens a retail look with its appearance", () => {
     const outfit = decode(dressedCode({ 0: 1339122 }, { race: "vulpera", gender: 1, choices: [[10, 3]] }));
     expect(startingRack(outfit, resolveOutfit(outfit)).look).toEqual({ race: "vulpera", gender: 1, choices: [[10, 3]] });
+  });
+});
+
+describe("putting on a set", () => {
+  const hood = { id: 1, name: "Hood" };
+  const robe = { id: 2, name: "Robe" };
+  const sword = { id: 3, name: "Sword" };
+
+  it("fills the slots the set has and leaves the rest as they were, hidden ones too", () => {
+    const rack = { 0: { id: 9, name: "Old hood" }, 15: sword, 18: null };
+    expect(wearSet(rack, { 0: hood, 4: robe })).toEqual({ 0: hood, 4: robe, 15: sword, 18: null });
+    expect(rack[0].id).toBe(9);
+  });
+
+  it("gives the same code as choosing the pieces one by one", () => {
+    let byHand: Record<number, { id: number; name: string } | null> = { 15: sword };
+    byHand = { ...byHand, 0: hood };
+    byHand = { ...byHand, 4: robe };
+    const ids = (r: Record<number, { id: number } | null>) =>
+      Object.fromEntries(Object.entries(r).map(([slot, piece]) => [slot, piece?.id ?? 0]));
+    expect(dressedCode(ids(wearSet({ 15: sword }, { 0: hood, 4: robe })), null)).toBe(dressedCode(ids(byHand), null));
   });
 });
