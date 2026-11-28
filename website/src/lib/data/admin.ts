@@ -15,8 +15,10 @@ import { SCREENSHOT_TYPE } from "./compress";
 // functions in 20261120150000_discord_linked_roles.sql keep connected players' Discord
 // tokens for Linked Roles, and those in 20261122150000_game_picture_budget.sql let the
 // daily sweep remove pictures nothing shows. 20261122160000_code_asks.sql limits how often
-// the bot asks a player for a code. Keep it that narrow: anything added here runs
-// with full power over the database.
+// the bot asks a player for a code. 20261128120000_discord_look_buttons.sql upvotes and
+// sends looks to the game from the bot's look replies, as the site account of the Discord
+// account that clicked. Keep it that narrow: anything added here runs with full power
+// over the database.
 
 const secretKey = () => process.env.SUPABASE_SECRET_KEY ?? "";
 
@@ -53,6 +55,22 @@ export const swapRoleHolder = (which: "look_of_the_week", holder: string | null)
  * request's own headers (visitorOf), never from anything the visitor sent.
  */
 export const recordCopy = (look: string, visitor: string) => call<null>("record_copy", { look, visitor });
+
+/**
+ * Upvotes (or takes back) a look as the site account the clicking Discord account signed
+ * in with. Null when that Discord account has no site account. `player` must be the id
+ * Discord signed with the click, never anything typed.
+ */
+export const discordVote = (player: string, look: string, up: boolean) =>
+  call<number | null>("discord_set_outfit_vote", { player, target: look, up });
+
+export type DiscordSend =
+  | { account: false }
+  | { account: true; sent: { name: string; linked: boolean } | null };
+
+/** Sends a look to the clicking player's sets, as Send to game on the site does. */
+export const discordSendToGame = (player: string, name: string, code: string) =>
+  call<DiscordSend>("discord_game_set_send", { player, p_name: name, p_code: code });
 
 /** The look a showcase message already became, if it did. */
 export async function lookOfMessage(message: string): Promise<string | null> {
