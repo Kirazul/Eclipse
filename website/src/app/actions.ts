@@ -16,9 +16,10 @@ import {
 } from "@/lib/data/types";
 import { commentSchema } from "@/lib/comments";
 import { creatorOf, grantCreatorOfLook, recheckCreator } from "@/lib/discord-roles";
-import { CODE_MAX, MAX_SCREENSHOT_BYTES, SCREENSHOT_TYPES } from "@/lib/limits";
+import { CODE_MAX, GAME_PICTURES_MAX, MAX_SCREENSHOT_BYTES, SCREENSHOT_TYPES } from "@/lib/limits";
 import { announceLook } from "@/lib/look-feed";
 import { alertCommentReport, alertModerators } from "@/lib/moderation-alert";
+import { publishSetsInTurn, type Published, type PublishedSets } from "@/lib/publish-sets";
 import { UPLOAD_PATH } from "@/lib/screenshots";
 import { visitorOf } from "@/lib/visitor";
 import { errorIn } from "@/i18n/errors";
@@ -57,18 +58,51 @@ export async function inspectCode(text: string): Promise<InspectResult> {
   return { kind: "outfit", outfit: r.outfit, resolved: resolveOutfit(r.outfit), warnings: r.warnings };
 }
 
-export async function publishOutfit(
-  input: SubmitOutfit,
-): Promise<{ ok: true; id: string } | { ok: false; error: string; existing?: string }> {
+export async function publishOutfit(input: SubmitOutfit): Promise<Published> {
+  return said(publish(input));
+}
+
+/**
+ * The one way a look is published, from the form or a ready set: the schema, then the
+ * database (sign-in, public name, the hourly limit, one public look per code, and the
+ * trigger that takes the set's pictures), then the Discord feed and the Creator role.
+ */
+async function publish(input: SubmitOutfit): Promise<Published> {
   const parsed = submitOutfitSchema.safeParse(input);
-  if (!parsed.success) return said({ ok: false, error: parsed.error.issues[0].message });
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
   const r = await repository.createOutfit(parsed.data);
-  if (!r.ok) return said(r);
+  if (!r.ok) return r;
   revalidateHub();
   const post = r.value;
   after(() => announceLook(post));
   after(() => grantCreatorOfLook(post.id));
   return { ok: true, id: post.id };
+}
+
+// No more sets can hold pictures than pictures can wait on them.
+const setIdsSchema = z.array(z.uuid()).min(1).max(GAME_PICTURES_MAX);
+
+/**
+ * Ready sets published as they are, with what the form would have filled in, one at a time
+ * down the form's own path. Each answer says what became of every set, and when the hourly
+ * limit stopped the batch, how many were never tried and why.
+ */
+export async function publishGameSets(ids: string[]): Promise<{ ok: true; value: PublishedSets } | { ok: false; error: string }> {
+  const parsed = setIdsSchema.safeParse(ids);
+  if (!parsed.success) return said({ ok: false as const, error: "Choose the loadouts to publish." });
+  if (!(await repository.getAccount())) return said({ ok: false as const, error: "Sign in to publish." });
+  const done = await publishSetsInTurn(parsed.data, { getSet: (id) => repository.getGameSet(id), publish });
+  if (done.outcomes.some((o) => o.ok)) revalidatePath("/loadouts");
+  const locale = await getLocale();
+  const tell = (error: string) => errorIn(isLocale(locale) ? locale : "en", error);
+  return {
+    ok: true,
+    value: {
+      ...done,
+      outcomes: done.outcomes.map((o) => (o.ok ? o : { ...o, error: tell(o.error) })),
+      stoppedBy: done.stoppedBy && tell(done.stoppedBy),
+    },
+  };
 }
 
 function revalidateHub() {

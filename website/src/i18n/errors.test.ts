@@ -8,6 +8,8 @@ const SOURCES = [
   "src/lib/data/supabase.ts",
   "src/lib/data/builtin.ts",
   "src/lib/comments.ts",
+  "src/lib/data/types.ts",
+  "src/lib/publish-sets.ts",
   ...readdirSync("src/lib/codec").filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts")).map((f) => `src/lib/codec/${f}`),
 ];
 

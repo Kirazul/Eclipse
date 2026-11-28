@@ -5,13 +5,12 @@ import Link from "next/link";
 import { after } from "next/server";
 import { CopyButton } from "@/components/copy-button";
 import { Decoder, type RemixOf } from "@/components/decoder";
-import { GameSetMenu, LinkGame, UnlinkGame } from "@/components/game-sync";
+import { GameSetMenu, LinkGame, PublishReadySets, UnlinkGame } from "@/components/game-sync";
 import { HubTitle } from "@/components/hub";
 import { ItemRing } from "@/components/item-icon";
 import { OutfitCard } from "@/components/outfit-card";
 import { ScreenshotThumb } from "@/components/screenshot-thumb";
 import { SignInOptions } from "@/components/sign-in-dialog";
-import { Button } from "@/components/ui/button";
 import { ago } from "@/lib/ago";
 import { resolveOutfit } from "@/lib/catalog";
 import { decodeOutfit } from "@/lib/codec/outfit";
@@ -104,26 +103,28 @@ function ReadyToPublish({ sets }: { sets: GameSet[] }) {
       <div>
         <h2 id="ready-heading" className="text-sm font-medium text-ink">{t("ready")}</h2>
         <p className="text-xs text-ink-dim">{t("readyLead")}</p>
+        <p className="text-xs text-ink-dim">{t("readyHow")}</p>
         {full && <p className="mt-1 text-xs text-amber">{t("picturesFull", { max: GAME_PICTURES_MAX })}</p>}
       </div>
-      <ul className="flex flex-col gap-3">
-        {sets.map((set) => (
-          <li key={set.id} className="flex flex-wrap items-center gap-3">
-            <div className="flex gap-1.5">
-              {set.gallery.slice(0, 3).map((path, i) => (
-                <Thumb key={path} path={path} alt={t("pictureAlt", { name: set.name, index: i + 1 })} className="aspect-video w-24" />
-              ))}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm text-ink">{set.name}</p>
-              <p className="text-xs text-ink-faint">{t("pictures", { count: set.gallery.length })}</p>
-            </div>
-            <Button asChild size="sm">
-              <Link href={`/sets/${set.id}`}>{t("publish")}</Link>
-            </Button>
-          </li>
-        ))}
-      </ul>
+      <PublishReadySets
+        rows={sets.map((set) => ({
+          id: set.id,
+          name: set.name,
+          preview: (
+            <>
+              <div className="flex gap-1.5">
+                {set.gallery.slice(0, 3).map((path, i) => (
+                  <Thumb key={path} path={path} alt={t("pictureAlt", { name: set.name, index: i + 1 })} className="aspect-video w-24" />
+                ))}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-ink">{set.name}</p>
+                <p className="text-xs text-ink-faint">{t("pictures", { count: set.gallery.length })}</p>
+              </div>
+            </>
+          ),
+        }))}
+      />
     </section>
   );
 }

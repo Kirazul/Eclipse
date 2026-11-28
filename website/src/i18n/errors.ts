@@ -34,6 +34,8 @@ const RU: Record<string, string> = {
   "That look could not be deleted. Try again.": "Не удалось удалить образ. Попробуйте ещё раз.",
   "That look is gone.": "Этого образа больше нет.",
   "That outfit could not be saved. Try again.": "Не удалось сохранить образ. Попробуйте ещё раз.",
+  "That loadout is gone, or has no pictures to publish.": "Этого комплекта больше нет, или у него нет снимков для публикации.",
+  "Choose the loadouts to publish.": "Выберите комплекты для публикации.",
   "This look is already in the Community Gallery.": "Этот образ уже есть в Галерее сообщества.",
   "You can only change your own looks.": "Изменять можно только свои образы.",
   "You can only delete your own looks.": "Удалять можно только свои образы.",
