@@ -354,9 +354,9 @@ describe("/item", () => {
 
   it("lists the pieces a typed name fits, each with its id", async () => {
     const [embed] = (await answered(command("item", { name: "dreadnaught" }))).embeds as { description: string }[];
-    expect(embed.description).toContain("Dreadnaught Chestguard");
-    expect(embed.description).toContain("1522416");
-    expect(embed.description).toContain("Dreadnaught Belt");
+    expect(embed.description).toContain("Dreadnaught Breastplate");
+    expect(embed.description).toContain("22416");
+    expect(embed.description).toContain("Dreadnaught Waistguard");
   });
 
   it("says so when no piece has that name or id", async () => {

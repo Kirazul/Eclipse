@@ -7,7 +7,7 @@ import { SLOT_INV_TYPES as SLOT_INV } from "@/lib/domain";
 
 vi.mock("server-only", () => ({}));
 
-import { resolveOutfit, searchItems } from "./catalog";
+import { findWearable, itemName, resolveOutfit, searchItems } from "./catalog";
 
 type Row = [id: number, name: string, invType: number, armor: number, icon: string];
 const rows = itemsJson as Row[];
@@ -54,6 +54,25 @@ describe("searching the items", () => {
     const [, name] = firstOf(1);
     expect(searchItems(name.toUpperCase(), SLOT.head).some((h) => h.name === name)).toBe(true);
     expect(searchItems("", SLOT.head, 5)).toHaveLength(5);
+  });
+
+  it("finds the legendaries by the names the game gives them", () => {
+    const names = (query: string) => searchItems(query, SLOT.mainHand, 200).map((h) => h.name);
+    expect(names("shadowmourne")).toContain("Shadowmourne");
+    expect(names("ashbringer")).toEqual(expect.arrayContaining(["Ashbringer", "Corrupted Ashbringer"]));
+    expect(names("atiesh")).toContain("Atiesh, Greatstaff of the Guardian");
+    expect(findWearable("shadowmourne", 5).map((w) => w.id)).toContain(49623);
+  });
+
+  it("names items as the realm's own server did", () => {
+    expect(itemName(10294)).toBe("Girdle of Prophecy");
+    expect(itemName(22984)).toBe("Dawnblade");
+    expect(itemName(160694)).toBe("Re-Origination Pulse Rifle");
+  });
+
+  it("lists each item once, in id order, with no stray spaces in its name", () => {
+    expect(rows.every((r, i) => i === 0 || r[0] > rows[i - 1][0])).toBe(true);
+    expect(rows.filter((r) => r[1] !== r[1].trim() || /\s{2}/.test(r[1])).map((r) => r[0])).toEqual([]);
   });
 
   it("finds nothing for a name no item has", () => {
