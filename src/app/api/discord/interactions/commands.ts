@@ -9,6 +9,7 @@ import { addToWardrobe } from "./add-to-wardrobe";
 import { askForCode } from "./ask-code";
 import { decodeReply } from "./decode";
 import { itemAnswer, suggestItems } from "./item";
+import { lookButtons } from "./look-buttons";
 import { MESSAGE_COMMAND, say, type CommandData, type Interaction, type Reply } from "./reply";
 import { translator, type T } from "./t";
 
@@ -49,7 +50,7 @@ function lookReply(post: OutfitPost, t: T): Reply {
       ...(post.gallery.length ? { image: { url: `${url}/cover` } } : {}),
       footer: { text: t("bot.wearIt") },
     }],
-    components: [{ type: 1, components: [{ type: 2, style: 5, label: t("bot.look.open"), url }] }],
+    components: [{ type: 1, components: [{ type: 2, style: 5, label: t("bot.look.open"), url }, ...lookButtons(post.id, t)] }],
     allowed_mentions: NO_MENTIONS,
   };
 }

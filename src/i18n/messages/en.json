@@ -129,7 +129,17 @@
       "by": "by {author}",
       "upvotes": "{count, plural, one {# upvote} other {# upvotes}}",
       "copyOnSite": "Copy its code from the Community Gallery.",
-      "open": "Open in the Community Gallery"
+      "open": "Open in the Community Gallery",
+      "upvote": "Upvote",
+      "send": "Send to game",
+      "undo": "Take it back",
+      "upvoted": "Upvoted. {count, plural, one {It has # upvote now.} other {It has # upvotes now.}}",
+      "unvoted": "Upvote taken back. {count, plural, one {It has # upvote.} other {It has # upvotes.}}",
+      "sent": "Sent to your game as {name}. It appears in your Loadouts the next time the game syncs.",
+      "sentNoGame": "Saved to your sets on the site as {name}. Link your game on the Loadouts page to get it in game.",
+      "full": "Your sets are full. Remove one on the Loadouts page to make room.",
+      "needAccount": "Sign in once at {site} with this Discord account, then this button works for you.",
+      "serverOnly": "This button works only in the Eclipse server."
     },
     "search": {
       "empty": "Type a few words from a look's title or its creator's name.",

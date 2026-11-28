@@ -1,6 +1,7 @@
 import { after } from "next/server";
 import { codeForm, isCodeForm, opensCodeForm, saveCode } from "./ask-code";
 import { EPHEMERAL, answer, isQuiet, quickReply, suggest, timing, type Interaction, type Reply } from "./commands";
+import { isLookButton, lookButton } from "./look-buttons";
 import { isModeration, moderate, opensMessage } from "./moderate";
 import { MESSAGE, type ClickAnswer } from "./reply";
 import { translator } from "./t";
@@ -66,7 +67,9 @@ async function click(interaction: Interaction): Promise<Response> {
   // A form is only ever a click's first answer.
   if (interaction.type === CLICK && opensCodeForm(id)) return Response.json(codeForm(interaction));
   const broke: ClickAnswer = { type: MESSAGE, data: { ...failed(interaction), flags: EPHEMERAL } };
-  const act = interaction.type === SUBMIT ? (isCodeForm(id) ? saveCode : null) : isModeration(id) ? moderate : null;
+  const act = interaction.type === SUBMIT
+    ? (isCodeForm(id) ? saveCode : null)
+    : isModeration(id) ? moderate : isLookButton(id) ? lookButton : null;
   const work = act
     ? act(interaction).catch((error) => {
       console.error("A Discord button failed:", error);
