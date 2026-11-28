@@ -14,6 +14,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/app/actions", () => ({
   createGameLinkCode: vi.fn(),
   inspectCode: vi.fn(async () => ({ kind: "error", error: "" })),
+  publishGameSets: vi.fn(),
   publishOutfit: vi.fn(),
   removeGameSet: vi.fn(),
   removeScreenshot: vi.fn(),
@@ -172,7 +173,24 @@ describe("Loadouts", () => {
     expect(ready).toContain("Nightmare");
     expect(ready).not.toContain("Raid night");
     expect(ready).toContain(PICTURE.replace(".avif", "-thumb.avif"));
-    expect(ready).toMatch(new RegExp(`href="/sets/${SENT.id}"[^>]*>Publish<`));
+    // One press publishes it as it is; the form stays a link away for anyone who wants to edit first.
+    expect(ready).toMatch(/<button[^>]*type="button"[^>]*>Publish<\/button>/);
+    expect(ready).toMatch(new RegExp(`href="/sets/${SENT.id}"[^>]*>Edit first<`));
+    // With one set there is nothing to choose between.
+    expect(ready).not.toContain('type="checkbox"');
+    expect(ready).not.toContain("Publish selected");
+  });
+
+  it("lets you choose several ready sets and publish them together, none chosen to begin with", async () => {
+    const one = { ...SET, name: "Nightmare", gallery: [PICTURE] };
+    const two = { ...SET, id: "22222222-2222-4222-8222-222222222222", name: "Dawn", gallery: [PICTURE.replace("aa.avif", "bb.avif")] };
+    data.sets = [one, two];
+    const page = await html(SetsPage({}));
+    const ready = page.slice(page.indexOf("Ready to publish"), page.indexOf("<h1"));
+    expect(ready.match(/type="checkbox"/g)).toHaveLength(2);
+    expect(ready).not.toContain("checked");
+    expect(ready).toContain('aria-label="Choose Nightmare"');
+    expect(ready).toMatch(/<button[^>]*disabled=""[^>]*>Publish selected<\/button>/);
   });
 
   it("leads with what the game sent, above the page's title", async () => {
