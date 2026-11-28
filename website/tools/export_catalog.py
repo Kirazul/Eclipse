@@ -30,6 +30,9 @@ Writes:
     public/icons/<name>.webp      only with --icons
 
 Nothing is rebuilt when its output is newer than every source. --force overrides.
+
+names.edb is the older name table. After this, run tools/export_item_names.py, which
+names items from the table the overlay ships inside its DLL.
 """
 from __future__ import annotations
 
